@@ -10,6 +10,20 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 
 function two_init {
   mount -o remount,rw /system
+  # font installer
+  if [ -f /EON ]; then
+    if [ ! -f /system/fonts/NotoSansCJKtc-Regular.otf ]; then
+      rm -fr /system/fonts/NotoSansTC*.otf
+      rm -fr /system/fonts/NotoSansSC*.otf
+      rm -fr /system/fonts/NotoSansKR*.otf
+      rm -fr /system/fonts/NotoSansJP*.otf
+      cp -rf /data/openpilot/selfdrive/assets/fonts/NotoSansCJKtc-* /system/fonts/
+      cp -rf /data/openpilot/selfdrive/assets/fonts/fonts.xml /system/etc/fonts.xml
+      chmod 644 /system/etc/fonts.xml
+      chmod 644 /system/fonts/NotoSansCJKtc-*
+    fi
+  fi
+
   if [ ! -f /ONEPLUS ] && ! $(grep -q "letv" /proc/cmdline); then
     sed -i -e 's#/dev/input/event1#/dev/input/event2#g' ~/.bash_profile
     touch /ONEPLUS
