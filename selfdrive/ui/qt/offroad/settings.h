@@ -36,6 +36,15 @@ private:
   QStackedWidget *panel_widget;
 };
 
+class CarSelectionPanel : public QWidget {
+  Q_OBJECT
+public:
+  explicit CarSelectionPanel(SettingsWindow *parent);
+signals:
+  void carSelected();
+};
+
+
 class C2NetworkPanel: public QWidget {
   Q_OBJECT
 

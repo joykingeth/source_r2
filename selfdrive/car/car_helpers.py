@@ -82,6 +82,11 @@ def fingerprint(logcan, sendcan, num_pandas):
   ecu_rx_addrs = set()
   params = Params()
 
+  dp_car_assigned = Params().get('dp_car_assigned', encoding='utf8')
+  if not fixed_fingerprint and dp_car_assigned is not None:
+    fixed_fingerprint = dp_car_assigned.strip()
+    skip_fw_query = True
+
   if not skip_fw_query:
     # Vin query only reliably works through OBDII
     bus = 1

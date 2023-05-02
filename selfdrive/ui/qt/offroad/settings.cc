@@ -28,6 +28,47 @@
 #include "selfdrive/ui/qt/qt_window.h"
 #include "selfdrive/ui/qt/widgets/input.h"
 
+// car selection panel
+#include <QJsonObject>
+#include <QJsonDocument>
+#include <QJsonArray>
+#include <QListWidget>
+CarSelectionPanel::CarSelectionPanel(SettingsWindow *parent) : QWidget(parent) {
+  Params params;
+
+  QVBoxLayout *layout = new QVBoxLayout;
+  layout->setContentsMargins(QMargins());
+  QString list = QString::fromStdString((params.get("dp_car_list")).c_str());
+  QJsonDocument document = QJsonDocument::fromJson(list.toUtf8());
+  QJsonObject object = document.object();
+  QJsonArray models = object.value("cars").toArray();
+
+  QListWidget* car_list = new QListWidget(this);
+  car_list->setStyleSheet(R"(
+    QScrollBar:vertical {
+      width: 150px;
+    }
+  )");
+  car_list->setFixedHeight(750);
+  car_list->addItem("-");
+  int model_size = models.size();
+  for (int i = 0; i < model_size; i++) {
+    car_list->addItem(models.at(i).toString());
+  }
+
+  QObject::connect(car_list, QOverload<QListWidgetItem*>::of(&QListWidget::itemClicked), [=](QListWidgetItem* item) {
+    QString text = item->text();
+    Params().put("dp_car_assigned", text == "-"? "" : text.toStdString());
+    item->setSelected(false);
+    emit carSelected();
+    parent->closeSettings();
+  });
+
+  layout->addWidget(car_list);
+  setLayout(layout);
+}
+
+
 TogglesPanel::TogglesPanel(SettingsWindow *parent) : ListWidget(parent) {
   // param, title, desc, icon, confirm
   std::vector<std::tuple<QString, QString, QString, QString>> toggle_defs{
@@ -430,6 +471,17 @@ SettingsWindow::SettingsWindow(QWidget *parent) : QFrame(parent) {
     {tr("Software"), new SoftwarePanel(this)},
   };
 
+  // car selection panel
+  // we do not want to translate the panel name!
+  QString car_selected = QString::fromUtf8((Params().get("dp_car_assigned")).c_str());
+  QPushButton* car_selection_btn = new QPushButton(car_selected == ""? "-" : car_selected);
+  car_selection_btn->setObjectName("carSelectionBtn");
+  car_selection_btn->setStyleSheet("margin-right: 30px; background-color: #364DEF;");
+  car_selection_btn->setFixedSize(1250, 80);
+
+  auto carSelectionPanel = new CarSelectionPanel(this);
+  panels.push_back({"CarSelection", carSelectionPanel});
+
 #ifdef ENABLE_MAPS
   auto map_panel = new MapPanel(this);
   panels.push_back({tr("Navigation"), map_panel});
@@ -461,19 +513,28 @@ SettingsWindow::SettingsWindow(QWidget *parent) : QFrame(parent) {
       }
     )").arg(padding));
 
+    if (name != "CarSelection") {
     nav_btns->addButton(btn);
     sidebar_layout->addWidget(btn, 0, Qt::AlignRight);
 
     const int lr_margin = name != tr("Network") ? 50 : 0;  // Network panel handles its own margins
     panel->setContentsMargins(lr_margin, 25, lr_margin, 25);
+    }
 
     ScrollView *panel_frame = new ScrollView(panel, this);
     panel_widget->addWidget(panel_frame);
 
+    if (name != "CarSelection") {
     QObject::connect(btn, &QPushButton::clicked, [=, w = panel_frame]() {
       btn->setChecked(true);
       panel_widget->setCurrentWidget(w);
     });
+    } else {
+      QObject::connect(car_selection_btn, &QPushButton::clicked, [=, w = panel_frame]() {
+        btn->setChecked(true);
+        panel_widget->setCurrentWidget(w);
+      });
+    }
   }
   sidebar_layout->setContentsMargins(50, 50, 100, 50);
 
@@ -482,7 +543,23 @@ SettingsWindow::SettingsWindow(QWidget *parent) : QFrame(parent) {
 
   sidebar_widget->setFixedWidth(500);
   main_layout->addWidget(sidebar_widget);
-  main_layout->addWidget(panel_widget);
+//  main_layout->addWidget(panel_widget);
+
+  QWidget *dp_panel_widget = new QWidget;
+  QVBoxLayout *dp_panel_widget_layout = new QVBoxLayout;
+  dp_panel_widget->setContentsMargins(QMargins());
+  dp_panel_widget_layout->addSpacing(10);
+  dp_panel_widget_layout->addWidget(car_selection_btn, 0, Qt::AlignCenter);
+  dp_panel_widget_layout->addSpacing(10);
+  dp_panel_widget_layout->addWidget(panel_widget);
+  dp_panel_widget->setLayout(dp_panel_widget_layout);
+
+  main_layout->addWidget(dp_panel_widget);
+
+  connect(carSelectionPanel, &CarSelectionPanel::carSelected, [=]() {
+      QString selectedCarModel = QString::fromStdString(Params().get("dp_car_assigned"));
+      car_selection_btn->setText(selectedCarModel.length() ? selectedCarModel : "");
+  });
 
   setStyleSheet(R"(
     * {

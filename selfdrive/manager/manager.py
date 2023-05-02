@@ -22,7 +22,7 @@ from system.swaglog import cloudlog, add_file_handler
 from system.version import is_dirty, get_commit, get_version, get_origin, get_short_branch, \
                            get_normalized_origin, terms_version, training_version, \
                            is_tested_branch, is_release_branch
-
+import json
 
 
 def manager_init() -> None:
@@ -45,6 +45,8 @@ def manager_init() -> None:
   ]
   if not PC:
     default_params.append(("LastUpdateTime", datetime.datetime.utcnow().isoformat().encode('utf8')))
+
+  params.put("dp_car_list", get_support_car_list())
 
   if params.get_bool("RecordFrontLock"):
     params.put_bool("RecordFront", True)
@@ -201,6 +203,31 @@ def main() -> None:
   elif params.get_bool("DoShutdown"):
     cloudlog.warning("shutdown")
     HARDWARE.shutdown()
+
+
+def get_support_car_list():
+  attrs = ['FINGERPRINTS', 'FW_VERSIONS']
+  cars = dict({"cars": []})
+  models = []
+  for car_folder in [x[0] for x in os.walk('/data/openpilot/selfdrive/car')]:
+    try:
+      car_name = car_folder.split('/')[-1]
+      if car_name not in ("mock", "body", "torque_data", "tests"):
+        for attr in attrs:
+          values = __import__('selfdrive.car.%s.values' % car_name, fromlist=[attr])
+          if hasattr(values, attr):
+            attr_values = getattr(values, attr)
+          else:
+            continue
+          if isinstance(attr_values, dict):
+            for f, v in attr_values.items():
+              if f not in models:
+                models.append(f)
+    except (ImportError, IOError, ValueError):
+      pass
+  models.sort()
+  cars["cars"] = models
+  return json.dumps(cars)
 
 
 if __name__ == "__main__":
