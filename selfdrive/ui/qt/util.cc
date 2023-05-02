@@ -264,3 +264,13 @@ QPixmap bootstrapPixmap(const QString &id) {
   return pixmap;
 }
 #endif
+
+QPixmap loadBased64Image(const QByteArray txt, const QSize &size, Qt::AspectRatioMode aspectRatioMode) {
+  QPixmap image;
+  image.loadFromData(QByteArray::fromBase64(txt));
+  if (size.isEmpty()) {
+    return image;
+  } else {
+    return image.scaled(size, aspectRatioMode, Qt::SmoothTransformation);
+  }
+}

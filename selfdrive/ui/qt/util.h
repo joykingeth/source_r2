@@ -27,3 +27,4 @@ QPixmap bootstrapPixmap(const QString &id);
 QRect getTextRect(QPainter &p, int flags, const QString &text);
 void drawRoundedRect(QPainter &painter, const QRectF &rect, qreal xRadiusTop, qreal yRadiusTop, qreal xRadiusBottom, qreal yRadiusBottom);
 QColor interpColor(float xv, std::vector<float> xp, std::vector<QColor> fp);
+QPixmap loadBased64Image(const QByteArray txt, const QSize &size = {}, Qt::AspectRatioMode aspectRatioMode = Qt::KeepAspectRatio);
