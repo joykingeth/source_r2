@@ -511,41 +511,41 @@ EVENTS: Dict[int, Dict[str, Union[Alert, AlertCallbackType]]] = {
   },
 
   EventName.preLaneChangeLeft: {
-    ET.WARNING: Alert(
-      "Steer Left to Start Lane Change Once Safe",
+    ET.PERMANENT: Alert(
+      _("Steer Left to Start Lane Change Once Safe"),
       "",
       AlertStatus.normal, AlertSize.small,
       Priority.LOW, VisualAlert.none, AudibleAlert.none, .1, alert_rate=0.75),
   },
 
   EventName.preLaneChangeRight: {
-    ET.WARNING: Alert(
-      "Steer Right to Start Lane Change Once Safe",
+    ET.PERMANENT: Alert(
+      _("Steer Right to Start Lane Change Once Safe"),
       "",
       AlertStatus.normal, AlertSize.small,
       Priority.LOW, VisualAlert.none, AudibleAlert.none, .1, alert_rate=0.75),
   },
 
   EventName.laneChangeBlocked: {
-    ET.WARNING: Alert(
-      "Car Detected in Blindspot",
+    ET.PERMANENT: Alert(
+      _("Car Detected in Blindspot"),
       "",
       AlertStatus.userPrompt, AlertSize.small,
       Priority.LOW, VisualAlert.none, AudibleAlert.prompt, .1),
   },
 
   EventName.laneChange: {
-    ET.WARNING: Alert(
-      "Changing Lanes",
+    ET.PERMANENT: Alert(
+      _("Changing Lanes"),
       "",
       AlertStatus.normal, AlertSize.small,
       Priority.LOW, VisualAlert.none, AudibleAlert.none, .1),
   },
 
   EventName.steerSaturated: {
-    ET.WARNING: Alert(
-      "Take Control",
-      "Turn Exceeds Steering Limit",
+    ET.PERMANENT: Alert(
+      _("Take Control"),
+      _("Turn Exceeds Steering Limit"),
       AlertStatus.userPrompt, AlertSize.mid,
       Priority.LOW, VisualAlert.steerRequired, AudibleAlert.promptRepeat, 1.),
   },

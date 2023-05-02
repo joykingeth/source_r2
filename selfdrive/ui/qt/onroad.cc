@@ -51,7 +51,7 @@ OnroadWindow::OnroadWindow(QWidget *parent) : QWidget(parent) {
 }
 
 void OnroadWindow::updateState(const UIState &s) {
-  QColor bgColor = bg_colors[s.status];
+  QColor bgColor = bg_colors[s.status == STATUS_DISENGAGED? STATUS_ALKA : s.status];
   Alert alert = Alert::get(*(s.sm), s.scene.started_frame);
   if (s.sm->updated("controlsState") || !alert.equal({})) {
     if (alert.type == "controlsUnresponsive") {

@@ -112,6 +112,8 @@ class Controls:
     if not self.disengage_on_accelerator:
       self.CP.alternativeExperience |= ALTERNATIVE_EXPERIENCE.DISABLE_DISENGAGE_ON_GAS
 
+    self.CP.alternativeExperience |= ALTERNATIVE_EXPERIENCE.ALKA
+
     # read params
     self.is_metric = self.params.get_bool("IsMetric")
     self.is_ldw_enabled = self.params.get_bool("IsLdwEnabled")
@@ -577,6 +579,16 @@ class Controls:
     CC.latActive = self.active and not CS.steerFaultTemporary and not CS.steerFaultPermanent and \
                    (not standstill or self.joystick_mode)
     CC.longActive = self.enabled and not self.events.any(ET.OVERRIDE_LONGITUDINAL) and self.CP.openpilotLongitudinalControl
+
+    if not standstill and CS.cruiseState.available:
+      if self.sm['liveCalibration'].calStatus != Calibration.CALIBRATED:
+        pass
+      elif CS.steerFaultTemporary or CS.steerFaultPermanent:
+        pass
+      elif CS.gearShifter == car.CarState.GearShifter.reverse:
+        pass
+      else:
+        CC.latActive = True
 
     actuators = CC.actuators
     actuators.longControlState = self.LoC.long_control_state
