@@ -40,6 +40,8 @@ class PowerMonitoring:
     self.car_voltage_instant_mV = 12e3          # Last value of peripheralState voltage
     self.integration_lock = threading.Lock()
     self.is_oneplus = os.path.isfile('/ONEPLUS')
+    self.dp_auto_shutdown = True
+    self.dp_auto_shutdown_in = 300
 
     car_battery_capacity_uWh = self.params.get("CarBatteryCapacity")
     if car_battery_capacity_uWh is None:
@@ -207,6 +209,11 @@ class PowerMonitoring:
     now = sec_since_boot()
     panda_charging = (peripheralState.usbPowerMode != log.PeripheralState.UsbPowerMode.client)
     # BATT_PERC_OFF = 3 if self.is_oneplus else 10
+
+    if started_seen and self.dp_auto_shutdown and (now - offroad_timestamp) > self.dp_auto_shutdown_in:
+      self.params.put_bool("ForcePowerDown", True)
+      if not panda_charging:
+        return True
 
     should_shutdown = False
     # Wait until we have shut down charging before powering down
