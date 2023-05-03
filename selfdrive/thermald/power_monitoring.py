@@ -42,6 +42,7 @@ class PowerMonitoring:
     self.is_oneplus = os.path.isfile('/ONEPLUS')
     self.dp_auto_shutdown = True
     self.dp_auto_shutdown_in = 300
+    self.dp_auto_shutdown_voltage_prev = 0
 
     car_battery_capacity_uWh = self.params.get("CarBatteryCapacity")
     if car_battery_capacity_uWh is None:
@@ -214,6 +215,10 @@ class PowerMonitoring:
       self.params.put_bool("ForcePowerDown", True)
       if not panda_charging:
         return True
+      # rick - if voltage is not updating, assuming the panda is disconnected (e.g. white panda or black w/o comma power)
+      if peripheralState.voltage == self.dp_auto_shutdown_voltage_prev:
+        return True
+      self.dp_auto_shutdown_voltage_prev = peripheralState.voltage
 
     should_shutdown = False
     # Wait until we have shut down charging before powering down
