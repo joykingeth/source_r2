@@ -5,6 +5,8 @@ from common.params import Params
 from system.hardware import PC, TICI, EON
 from selfdrive.manager.process import PythonProcess, NativeProcess, DaemonProcess
 
+NO_IR_DEVICE = os.path.isfile('/NO_IR_DEVICE')
+
 WEBCAM = os.getenv("USE_WEBCAM") is not None
 
 def driverview(started: bool, params: Params, CP: car.CarParams) -> bool:
@@ -36,12 +38,12 @@ procs = [
   NativeProcess("clocksd", "system/clocksd", ["./clocksd"]),
   # NativeProcess("logcatd", "system/logcatd", ["./logcatd"]),
   # NativeProcess("proclogd", "system/proclogd", ["./proclogd"]),
-  PythonProcess("logmessaged", "system.logmessaged", offroad=True),
+  # PythonProcess("logmessaged", "system.logmessaged", offroad=True),
   # PythonProcess("micd", "system.micd"),
   # PythonProcess("timezoned", "system.timezoned", enabled=not PC, offroad=True),
 
   DaemonProcess("manage_athenad", "selfdrive.athena.manage_athenad", "AthenadPid"),
-  NativeProcess("dmonitoringmodeld", "selfdrive/legacy_modeld", ["./dmonitoringmodeld"], enabled=(not PC or WEBCAM), callback=driverview),
+  NativeProcess("dmonitoringmodeld", "selfdrive/legacy_modeld", ["./dmonitoringmodeld"], enabled=(not PC or WEBCAM) and not NO_IR_DEVICE, callback=driverview),
   # NativeProcess("encoderd", "system/loggerd", ["./encoderd"]),
   # NativeProcess("loggerd", "selfdrive/loggerd", ["./loggerd"], onroad=False, callback=logging),
   NativeProcess("modeld", "selfdrive/legacy_modeld", ["./modeld"]),
@@ -56,7 +58,7 @@ procs = [
   PythonProcess("torqued", "selfdrive.locationd.torqued"),
   PythonProcess("controlsd", "selfdrive.controls.controlsd"),
   # PythonProcess("deleter", "system.loggerd.deleter", offroad=True),
-  PythonProcess("dmonitoringd", "selfdrive.legacy_monitoring.dmonitoringd", enabled=(not PC or WEBCAM), callback=driverview),
+  PythonProcess("dmonitoringd", "selfdrive.legacy_monitoring.dmonitoringd", enabled=(not PC or WEBCAM) and not NO_IR_DEVICE, callback=driverview),
   # PythonProcess("laikad", "selfdrive.locationd.laikad"),
   # PythonProcess("rawgpsd", "system.sensord.rawgps.rawgpsd", enabled=TICI, onroad=False, callback=qcomgps),
   # PythonProcess("navd", "selfdrive.navd.navd"),
