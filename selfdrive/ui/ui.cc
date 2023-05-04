@@ -243,6 +243,7 @@ static void update_state(UIState *s) {
   }
   #endif
   scene.started = sm["deviceState"].getDeviceState().getStarted() && scene.ignition;
+  scene.lat_active = sm["carControl"].getCarControl().getLatActive();
 }
 
 void ui_update_params(UIState *s) {
@@ -292,6 +293,8 @@ UIState::UIState(QObject *parent) : QObject(parent) {
     "wideRoadCameraState", "managerState", "navInstruction", "navRoute", "uiPlan",
     // legacy - eon/c2, for touch
     "sensorEvents",
+    // dp - for alka detection
+    "carControl",
   });
 
   Params params;

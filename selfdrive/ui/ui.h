@@ -107,7 +107,7 @@ const QColor bg_colors [] = {
   [STATUS_ENGAGED] = QColor(0x17, 0x86, 0x44, 0xf1),
   [STATUS_WARNING] = QColor(0xDA, 0x6F, 0x25, 0xf1),
   [STATUS_ALERT] = QColor(0xC9, 0x22, 0x31, 0xf1),
-  [STATUS_ALKA] = QColor(0x22, 0xa0, 0xdc, 0x01),
+  [STATUS_ALKA] = QColor(0x22, 0xa0, 0xdc, 0xf1),
 };
 
 typedef struct UIScene {
@@ -146,6 +146,8 @@ typedef struct UIScene {
   float light_sensor;
   bool started, ignition, is_metric, map_on_left, longitudinal_control;
   uint64_t started_frame;
+
+  bool lat_active = false;
 } UIScene;
 
 class UIState : public QObject {
