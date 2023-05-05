@@ -5,7 +5,7 @@ from common.params import Params
 from system.hardware import PC, TICI, EON
 from selfdrive.manager.process import PythonProcess, NativeProcess, DaemonProcess
 
-NO_IR_DEVICE = os.path.isfile('/NO_IR_DEVICE')
+NO_IR_CTRL = os.path.isfile('/data/media/0/no_ir_ctrl')
 
 WEBCAM = os.getenv("USE_WEBCAM") is not None
 
@@ -43,7 +43,7 @@ procs = [
   # PythonProcess("timezoned", "system.timezoned", enabled=not PC, offroad=True),
 
   DaemonProcess("manage_athenad", "selfdrive.athena.manage_athenad", "AthenadPid"),
-  NativeProcess("dmonitoringmodeld", "selfdrive/legacy_modeld", ["./dmonitoringmodeld"], enabled=(not PC or WEBCAM) and not NO_IR_DEVICE, callback=driverview),
+  NativeProcess("dmonitoringmodeld", "selfdrive/legacy_modeld", ["./dmonitoringmodeld"], enabled=(not PC or WEBCAM) and not NO_IR_CTRL, callback=driverview),
   # NativeProcess("encoderd", "system/loggerd", ["./encoderd"]),
   # NativeProcess("loggerd", "selfdrive/loggerd", ["./loggerd"], onroad=False, callback=logging),
   NativeProcess("modeld", "selfdrive/legacy_modeld", ["./modeld"]),
@@ -58,7 +58,7 @@ procs = [
   PythonProcess("torqued", "selfdrive.locationd.torqued"),
   PythonProcess("controlsd", "selfdrive.controls.controlsd"),
   # PythonProcess("deleter", "system.loggerd.deleter", offroad=True),
-  PythonProcess("dmonitoringd", "selfdrive.legacy_monitoring.dmonitoringd", enabled=(not PC or WEBCAM) and not NO_IR_DEVICE, callback=driverview),
+  PythonProcess("dmonitoringd", "selfdrive.legacy_monitoring.dmonitoringd", enabled=(not PC or WEBCAM) and not NO_IR_CTRL, callback=driverview),
   # PythonProcess("laikad", "selfdrive.locationd.laikad"),
   # PythonProcess("rawgpsd", "system.sensord.rawgps.rawgpsd", enabled=TICI, onroad=False, callback=qcomgps),
   # PythonProcess("navd", "selfdrive.navd.navd"),

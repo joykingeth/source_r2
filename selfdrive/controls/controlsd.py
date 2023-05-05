@@ -41,10 +41,10 @@ IGNORE_PROCESSES = {"uploader", "deleter", "loggerd", "logmessaged", "tombstoned
                     "logcatd", "proclogd", "clocksd", "updated", "timezoned", "manage_athenad"} | \
                    {k for k, v in managed_processes.items() if not v.enabled}
 
-NO_IR_DEVICE = os.path.isfile('/NO_IR_DEVICE')
-if NO_IR_DEVICE:
+NO_IR_CTRL = os.path.isfile('/data/media/0/no_ir_ctrl')
+if NO_IR_CTRL:
   IGNORE_PROCESSES |= {'driverCameraState', 'driverMonitoringState'}
-NO_FAN_CTRL = os.path.isfile('/NO_FAN_CTRL')
+NO_FAN_CTRL = os.path.isfile('/data/media/0/no_fan_ctrl')
 
 ThermalStatus = log.DeviceState.ThermalStatus
 State = log.ControlsState.OpenpilotState
@@ -67,7 +67,7 @@ class Controls:
   def __init__(self, sm=None, pm=None, can_sock=None, CI=None):
     config_realtime_process(4 if TICI else 3, Priority.CTRL_HIGH)
 
-    self.dp_no_ir_device = NO_IR_DEVICE
+    self.dp_no_ir_ctrl = NO_IR_CTRL
 
     # Ensure the current branch is cached, otherwise the first iteration of controlsd lags
     self.branch = get_short_branch("")
@@ -78,7 +78,7 @@ class Controls:
       self.pm = messaging.PubMaster(['sendcan', 'controlsState', 'carState',
                                      'carControl', 'carEvents', 'carParams'])
 
-    if self.dp_no_ir_device:
+    if self.dp_no_ir_ctrl:
       self.camera_packets = ["roadCameraState"]
     else:
       self.camera_packets = ["roadCameraState", "driverCameraState"]
@@ -96,7 +96,7 @@ class Controls:
       ignore = ['testJoystick']
       if SIMULATION:
         ignore += ['driverCameraState', 'managerState']
-      if self.dp_no_ir_device:
+      if self.dp_no_ir_ctrl:
         ignore += ['driverCameraState', 'driverMonitoringState']
       # if self.params.get_bool('WideCameraOnly'):
       #   ignore += ['roadCameraState']
@@ -267,7 +267,7 @@ class Controls:
     if CS.gasPressed:
       self.events.add(EventName.gasPressedOverride)
 
-    if not self.CP.notCar and not self.dp_no_ir_device:
+    if not self.CP.notCar and not self.dp_no_ir_ctrl:
       self.events.add_from_msg(self.sm['driverMonitoringState'].events)
 
     # Add car events, ignore if CAN isn't valid
@@ -768,7 +768,7 @@ class Controls:
       else:
         self.steer_limited = abs(CC.actuators.steer - CC.actuatorsOutput.steer) > 1e-2
 
-    if self.dp_no_ir_device:
+    if self.dp_no_ir_ctrl:
       self.sm['driverMonitoringState'].awarenessStatus = 1.
 
     force_decel = (self.sm['driverMonitoringState'].awarenessStatus < 0.) or \
