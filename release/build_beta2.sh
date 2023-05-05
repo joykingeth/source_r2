@@ -118,6 +118,13 @@ rm -fr release/
 rm -fr selfdrive/legacy_modeld/models/*.onnx
 rm -fr tinygrad/
 rm -fr tinygrad_repo/
+rm -fr laika/
+rm -fr system/loggerd/
+rm -fr third_party/acados/larch64/
+rm -fr third_party/acados/x86_64/
+rm -fr selfdrive/assets/training/
+rm -fr system/hardware/tici/updater
+rm -fr selfdrive/legacy_modeld/thneed/compile
 find . -name '*.c' -delete
 find . -name '*.cpp' -delete
 

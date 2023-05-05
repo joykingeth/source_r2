@@ -16,7 +16,6 @@ third_party/android_hardware_libhardware/**
 third_party/android_system_core/**
 
 third_party/libgralloc/**
-third_party/zlib/**
 third_party/bzip2/**
 third_party/openmax/**
 
@@ -25,33 +24,22 @@ third_party/acados/aarch64/**
 selfdrive/boardd/pigeon.cc
 selfdrive/boardd/pigeon.h
 
-selfdrive/camerad/cameras/camera_common.cc
-selfdrive/camerad/cameras/camera_qcom.h
-selfdrive/camerad/cameras/camera_qcom.cc
-selfdrive/camerad/cameras/sensor_i2c.h
-selfdrive/camerad/cameras/debayer.cl
-selfdrive/camerad/transforms/**
+selfdrive/camerad/**
 
 selfdrive/ui/translations/*.qm
 
 scripts/oneplus_update_neos.sh
 
 
-selfdrive/legacy_modeld/thneed/thneed.cc
-selfdrive/legacy_modeld/thneed/compile.cc
-selfdrive/legacy_modeld/thneed/optimizer.cc
-selfdrive/legacy_modeld/thneed/kernels/**
-selfdrive/legacy_modeld/models/supercombo.dlc
+selfdrive/legacy_modeld/**
 
 system/sensord/sensors_qcom.cc
 
 selfdrive/assets/fonts/*
 selfdrive/assets/training_legacy/**
 
-selfdrive/controls/lib/legacy_lateral_mpc_lib/.gitignore
-selfdrive/controls/lib/legacy_longitudinal_mpc_lib/.gitignore
-selfdrive/controls/lib/legacy_lateral_mpc_lib/*
-selfdrive/controls/lib/legacy_longitudinal_mpc_lib/*
+selfdrive/controls/lib/legacy_lateral_mpc_lib/**
+selfdrive/controls/lib/legacy_longitudinal_mpc_lib/**
 
 selfdrive/legacy_monitoring/**
 
@@ -59,3 +47,7 @@ selfdrive/ui/qt/spinner_aarch64
 selfdrive/ui/qt/text_aarch64
 
 system/hardware/eon/**
+
+selfdrive/loggerd/**
+
+system/logcatd/logcatd_android.cc
