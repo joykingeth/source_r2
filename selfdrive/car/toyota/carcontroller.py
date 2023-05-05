@@ -8,6 +8,7 @@ from selfdrive.car.toyota.values import CAR, STATIC_DSU_MSGS, NO_STOP_TIMER_CAR,
                                         MIN_ACC_SPEED, PEDAL_TRANSITION, CarControllerParams, \
                                         UNSUPPORTED_DSU_CAR
 from opendbc.can.packer import CANPacker
+from common.conversions import Conversions as CV
 
 VisualAlert = car.CarControl.HUDControl.VisualAlert
 
@@ -18,6 +19,11 @@ MAX_STEER_RATE_FRAMES = 18  # tx control frames needed before torque can be cut
 # EPS allows user torque above threshold for 50 frames before permanently faulting
 MAX_USER_TORQUE = 500
 
+# rick - toyota auto lock / unlock
+GearShifter = car.CarState.GearShifter
+UNLOCK_CMD = b'\x40\x05\x30\x11\x00\x40\x00\x00'
+LOCK_CMD = b'\x40\x05\x30\x11\x00\x80\x00\x00'
+LOCK_AT_SPEED = 10 * CV.KPH_TO_MS
 
 class CarController:
   def __init__(self, dbc_name, CP, VM):
@@ -33,6 +39,10 @@ class CarController:
     self.packer = CANPacker(dbc_name)
     self.gas = 0
     self.accel = 0
+
+    self.dp_auto_lock_gear_prev = GearShifter.park
+    self.dp_auto_lock_once = False
+
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
@@ -97,6 +107,19 @@ class CarController:
     self.last_standstill = CS.out.standstill
 
     can_sends = []
+
+    # dp - door auto lock / unlock logic
+    # thanks to AlexandreSato & cydia2020
+    # https://github.com/AlexandreSato/animalpilot/blob/personal/doors.py
+    if not CS.out.doorOpen:
+      gear = CS.out.gearShifter
+      if gear == GearShifter.park and self.dp_auto_lock_gear_prev != gear:
+          can_sends.append(make_can_msg(0x750, UNLOCK_CMD, 0))
+          self.dp_auto_lock_once = False
+      elif gear == GearShifter.drive and not self.dp_auto_lock_once and CS.out.vEgo >= LOCK_AT_SPEED:
+        can_sends.append(make_can_msg(0x750, LOCK_CMD, 0))
+        self.dp_auto_lock_once = True
+      self.dp_auto_lock_gear_prev = gear
 
     # *** control msgs ***
     # print("steer {0} {1} {2} {3}".format(apply_steer, min_lim, max_lim, CS.steer_torque_motor)
