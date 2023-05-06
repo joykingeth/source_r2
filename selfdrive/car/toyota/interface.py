@@ -229,9 +229,8 @@ class CarInterface(CarInterfaceBase):
     ret.minEnableSpeed = -1. if (stop_and_go or ret.enableGasInterceptor) else MIN_ACC_SPEED
 
     tune = ret.longitudinalTuning
-    # rick - from https://github.com/rockerrock137/openpilot/commit/3d2b332bc964f385f89b8e88bf04c0c7982933b8
-    tune.deadzoneBP = [0., 9., 26.]
-    tune.deadzoneV = [.0, .20, .25]
+    tune.deadzoneBP = [0., 9.]
+    tune.deadzoneV = [.0, .15]
     if candidate in TSS2_CAR or ret.enableGasInterceptor:
       tune.kpBP = [0., 5., 20.]
       tune.kpV = [1.3, 1.0, 0.7]
