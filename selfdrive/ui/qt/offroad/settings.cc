@@ -227,6 +227,25 @@ void TogglesPanel::updateToggles() {
 
 DevicePanel::DevicePanel(SettingsWindow *parent) : ListWidget(parent) {
   setSpacing(50);
+  auto tmuxBtn = new ButtonControl(tr("Debug Console"), tr("VIEW"), "");
+  connect(tmuxBtn, &ButtonControl::clicked, [=]() {
+    FILE* pipe = popen("tmux capture-pane -p -t 0 -S -500", "r");
+    if (pipe) {
+      char buffer[128];
+      std::string result = "";
+      while (!feof(pipe)) {
+        if (fgets(buffer, 128, pipe) != nullptr) {
+          result += buffer;
+        }
+      }
+      pclose(pipe);
+      ConfirmationDialog::rich(QString::fromStdString(result), this);
+    } else {
+      ConfirmationDialog::rich(tr("Error displaying tmux output."), this);
+    }
+  });
+  addItem(tmuxBtn);
+
   addItem(new LabelControl(tr("Dongle ID"), getDongleId().value_or(tr("N/A"))));
   addItem(new LabelControl(tr("Serial"), params.get("HardwareSerial").c_str()));
 
