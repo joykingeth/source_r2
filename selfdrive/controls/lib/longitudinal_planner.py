@@ -13,6 +13,7 @@ from selfdrive.controls.lib.longitudinal_mpc_lib.long_mpc import LongitudinalMpc
 from selfdrive.controls.lib.longitudinal_mpc_lib.long_mpc import T_IDXS as T_IDXS_MPC
 from selfdrive.controls.lib.drive_helpers import V_CRUISE_MAX, CONTROL_N
 from system.swaglog import cloudlog
+from selfdrive.controls.lib.vision_turn_controller import VisionTurnController
 
 LON_MPC_STEP = 0.2  # first step is 0.2s
 A_CRUISE_MIN = -1.2
@@ -59,6 +60,7 @@ def limit_accel_in_turns(v_ego, angle_steers, a_target, CP):
 
 class LongitudinalPlanner:
   def __init__(self, CP, init_v=0.0, init_a=0.0):
+    self.vision_turn_controller = VisionTurnController(CP)
     # conditional e2e
     self.dp_e2e_has_lead = False
     self.dp_e2e_lead_last = False
@@ -217,6 +219,14 @@ class LongitudinalPlanner:
     # Compute model v_ego error
     if len(sm['modelV2'].temporalPose.trans):
       self.v_model_error = sm['modelV2'].temporalPose.trans[0] - v_ego
+
+    # rick - vision turn controller from move-fast team
+    # https://github.com/move-fast/openpilot/blob/develop/selfdrive/controls/lib/vision_turn_controller.py
+    self.vision_turn_controller.update(not reset_state, self.v_desired_filter.x, self.a_desired, v_cruise, sm)
+    if self.vision_turn_controller.is_active:
+      if min(v_cruise, self.vision_turn_controller.v_turn) == self.vision_turn_controller.v_turn:
+        self.a_desired = self.vision_turn_controller.a_target
+        v_cruise = self.vision_turn_controller.v_turn
 
     if force_slow_decel:
       v_cruise = 0.0
