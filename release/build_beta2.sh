@@ -8,7 +8,7 @@ BUILD_DIR=/data/openpilot
 SOURCE_DIR="$(git rev-parse --show-toplevel)"
 
 FILES_SRC="release/files_eon"
-DEVEL_BRANCH="lp-dp-beta"
+DEVEL_BRANCH="lp-dp-beta2"
 
 # set git identity
 source $DIR/identity.sh
