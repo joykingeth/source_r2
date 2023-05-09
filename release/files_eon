@@ -51,3 +51,7 @@ system/hardware/eon/**
 selfdrive/loggerd/**
 
 system/logcatd/logcatd_android.cc
+
+selfdrive/controls/lib/vision_turn_controller.py
+selfdrive/controls/lib/lane_planner.py
+selfdrive/controls/lib/legacy*.py

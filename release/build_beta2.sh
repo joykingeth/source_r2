@@ -125,6 +125,10 @@ rm -fr third_party/acados/x86_64/
 rm -fr selfdrive/assets/training/
 rm -fr system/hardware/tici/updater
 rm -fr selfdrive/legacy_modeld/thneed/compile
+rm -fr third_party/snpe/aarch64-ubuntu-gcc7.5/
+rm -fr third_party/snpe/larch64/
+rm -fr third_party/snpe/x86*
+rm -fr third_party/snpe/dsp/libsnpe_dsp_v68_domains_v3_skel.so
 find . -name '*.c' -delete
 find . -name '*.cpp' -delete
 
