@@ -82,6 +82,9 @@ procs = [
   PythonProcess("rtshield", "selfdrive.rtshield", enabled=EON),
   PythonProcess("shutdownd", "system.hardware.eon.shutdownd", enabled=EON),
   PythonProcess("androidd", "system.hardware.eon.androidd", enabled=EON, offroad=True),
+
+  # mapd
+  PythonProcess("mapd", "selfdrive.mapd.mapd"),
 ]
 
 managed_processes = {p.name: p for p in procs}
