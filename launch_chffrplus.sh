@@ -139,6 +139,17 @@ function two_init {
   LIB_PATH="/data/openpilot/system/hardware/eon/libs"
   PY_LIB_DEST="/system/comma/usr/lib/python3.8/site-packages"
   mount -o remount,rw /system
+  # mapd
+  MODULE="opspline"
+  if [ ! -d "$PY_LIB_DEST/$MODULE" ]; then
+    echo "Installing $MODULE..."
+    tar -zxvf "$LIB_PATH/$MODULE.tar.gz" -C "$PY_LIB_DEST/"
+  fi
+  MODULE="overpy"
+  if [ ! -d "$PY_LIB_DEST/$MODULE" ]; then
+    echo "Installing $MODULE..."
+    tar -zxvf "$LIB_PATH/$MODULE.tar.gz" -C "$PY_LIB_DEST/"
+  fi
   # laika
   MODULE="hatanaka"
   if [ ! -d "$PY_LIB_DEST/$MODULE" ]; then
