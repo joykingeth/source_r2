@@ -28,7 +28,6 @@ import datetime
 import signal
 import threading
 from common.realtime import set_core_affinity, set_realtime_priority
-from cereal import log
 from system.swaglog import cloudlog
 from pathlib import Path
 
@@ -73,30 +72,26 @@ class GpxD():
     self.lost_signal_count = 0
     self.wait_helper = WaitTimeHelper()
     self.started_time = datetime.datetime.utcnow().isoformat()
-    self.v_ego_prev = 0.
     self.pause = True
 
   def log(self, sm):
-    location = sm['liveLocationKalman']
     gps = sm['gpsLocationExternal']
-    v_ego = sm['carState'].vEgo
 
     if abs(v_ego) > 0.01:
       self.pause = False
 
-    location_valid = (location.status == log.LiveLocationKalman.Status.valid) and location.positionGeodetic.valid
-    _debug("gpxd: location_valid - %s" % location_valid)
-    if not location_valid or self.pause:
+    location_not_valid = gps.flags % 2 == 0
+    if location_not_valid or self.pause:
       if self.log_count > 0:
         self.lost_signal_count += 1
     else:
-      lat = location.positionGeodetic.value[0]
-      lon = location.positionGeodetic.value[1]
+      lat = gps.latitude
+      lon = gps.longitude
       alt = gps.altitude
 
-      timestamp = datetime.datetime.utcfromtimestamp(location.unixTimestampMillis*0.001).isoformat()
-      _debug("gpxd: logged - %s %s %s %s" % (timestamp, str(lat), str(lon), str(alt)))
-      self.logs.append([timestamp, str(lat), str(lon), str(alt)])
+      timestamp = gps.unixTimestampMillis*0.001
+      _debug("gpxd: logged - %s %s %s %s" % (timestamp, lat, lon, alt))
+      self.logs.append([timestamp, lat, lon, alt])
       self.log_count += 1
       self.lost_signal_count = 0
 
@@ -104,7 +99,6 @@ class GpxD():
       _debug("gpxd: paused")
       self.pause = True
 
-    self.v_ego_prev = v_ego
 
   def write_log(self, force=False):
     if self.log_count == 0:
@@ -150,7 +144,7 @@ def gpxd_thread(sm=None, pm=None):
   set_core_affinity([1,])
   set_realtime_priority(1)
   if sm is None:
-    sm = messaging.SubMaster(['liveLocationKalman', 'gpsLocationExternal', 'carState'])
+    sm = messaging.SubMaster(['gpsLocationExternal'])
 
   wait_helper = WaitTimeHelper()
   gpxd = GpxD()
