@@ -290,9 +290,12 @@ void AnnotatedCameraWidget::updateState(const UIState &s) {
     setProperty("rightHandDM", sm["driverMonitoringState"].getDriverMonitoringState().getIsRHD());
   }
 
-  if (sm.frame % (UI_FREQ / 2) == 0) {
-    auto lmd = sm["liveMapData"].getLiveMapData();
-    setProperty("roadName", QString::fromStdString(lmd.getCurrentRoadName()));
+  auto lmd = sm["liveMapData"].getLiveMapData();
+  setProperty("roadName", QString::fromStdString(lmd.getCurrentRoadName()));
+  if (!nav_alive && lmd.getSpeedLimitValid()) {
+    speed_limit = lmd.getSpeedLimit() * (s.scene.is_metric ? MS_TO_KPH : MS_TO_MPH);
+    setProperty("speedLimit", speed_limit);
+    setProperty("has_us_speed_limit", speed_limit > 1);
   }
 
   // DM icon transition
