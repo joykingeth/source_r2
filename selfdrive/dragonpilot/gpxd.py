@@ -25,8 +25,6 @@
 import cereal.messaging as messaging
 import os
 import datetime
-import signal
-import threading
 from common.realtime import set_core_affinity, set_realtime_priority
 from system.swaglog import cloudlog
 from pathlib import Path
@@ -51,26 +49,11 @@ def _debug(msg, log_to_cloud=True):
   if _DEBUG:
     print(msg)
 
-class WaitTimeHelper:
-
-  def __init__(self):
-    self.shutdown = False
-    self.ready_event = threading.Event()
-    signal.signal(signal.SIGUSR1, self.graceful_shutdown)
-    signal.signal(signal.SIGTERM, self.graceful_shutdown)
-    signal.signal(signal.SIGINT, self.graceful_shutdown)
-    signal.signal(signal.SIGHUP, self.graceful_shutdown)
-
-  def graceful_shutdown(self, signum, frame):
-    self.shutdown = True
-    self.ready_event.set()
-
 class GpxD():
   def __init__(self):
     self.log_count = 0
     self.logs = list()
     self.lost_signal_count = 0
-    self.wait_helper = WaitTimeHelper()
     self.started_time = datetime.datetime.utcnow().isoformat()
     self.pause = True
 
@@ -146,16 +129,12 @@ def gpxd_thread(sm=None, pm=None):
   if sm is None:
     sm = messaging.SubMaster(['gpsLocationExternal'])
 
-  wait_helper = WaitTimeHelper()
   gpxd = GpxD()
 
   while True:
     sm.update(1000)
     gpxd.log(sm)
     gpxd.write_log()
-    if wait_helper.shutdown:
-      gpxd.write_log(True)
-      break
 
 def main(sm=None, pm=None):
   gpxd_thread(sm, pm)
