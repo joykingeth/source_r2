@@ -290,6 +290,11 @@ void AnnotatedCameraWidget::updateState(const UIState &s) {
     setProperty("rightHandDM", sm["driverMonitoringState"].getDriverMonitoringState().getIsRHD());
   }
 
+  if (sm.frame % (UI_FREQ / 2) == 0) {
+    auto lmd = sm["liveMapData"].getLiveMapData();
+    setProperty("roadName", QString::fromStdString(lmd.getCurrentRoadName()));
+  }
+
   // DM icon transition
   dm_fade_state = fmax(0.0, fmin(1.0, dm_fade_state+0.2*(0.5-(float)(dmActive))));
 }
@@ -653,6 +658,11 @@ void AnnotatedCameraWidget::drawLead(QPainter &painter, const cereal::RadarState
   painter.restore();
 }
 
+void AnnotatedCameraWidget::drawRoadName(QPainter &p) {
+  configFont(p, "Inter", 55, "Bold");
+  drawText(p, rect().center().x(), rect().bottom() - 20, roadName, 200);
+}
+
 #ifndef QCOM
 void AnnotatedCameraWidget::paintGL() {
   UIState *s = uiState();
@@ -796,6 +806,7 @@ void AnnotatedCameraWidget::paintGL() {
   }
 
   drawHud(painter);
+  drawRoadName(painter);
 
   double cur_draw_t = millis_since_boot();
   double dt = cur_draw_t - prev_draw_t;
