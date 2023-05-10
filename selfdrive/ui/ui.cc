@@ -295,6 +295,8 @@ UIState::UIState(QObject *parent) : QObject(parent) {
     "sensorEvents",
     // dp - for alka detection
     "carControl",
+    // dp - for mapd
+    "liveMapData",
   });
 
   Params params;
