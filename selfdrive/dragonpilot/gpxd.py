@@ -27,7 +27,7 @@ import os
 import datetime
 import signal
 import threading
-from common.realtime import Ratekeeper, config_realtime_process
+from common.realtime import set_core_affinity, set_realtime_priority
 from cereal import log
 from system.swaglog import cloudlog
 from pathlib import Path
@@ -147,6 +147,8 @@ class GpxD():
            f'</trkpt>\n'
 
 def gpxd_thread(sm=None, pm=None):
+  set_core_affinity([1,])
+  set_realtime_priority(1)
   if sm is None:
     sm = messaging.SubMaster(['liveLocationKalman', 'gpsLocationExternal', 'carState'])
 
