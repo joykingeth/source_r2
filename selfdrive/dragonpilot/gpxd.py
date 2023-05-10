@@ -77,7 +77,7 @@ class GpxD():
   def log(self, sm):
     gps = sm['gpsLocationExternal']
 
-    if abs(v_ego) > 0.01:
+    if gps.speed >= 0.1:
       self.pause = False
 
     location_not_valid = gps.flags % 2 == 0
@@ -95,7 +95,7 @@ class GpxD():
       self.log_count += 1
       self.lost_signal_count = 0
 
-    if not self.pause and abs(v_ego) < 0.01:
+    if not self.pause and gps.speed < 0.1:
       _debug("gpxd: paused")
       self.pause = True
 
