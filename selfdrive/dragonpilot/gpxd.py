@@ -148,8 +148,6 @@ def gpxd_thread(sm=None, pm=None):
 
   wait_helper = WaitTimeHelper()
   gpxd = GpxD()
-  rk = Ratekeeper(LOG_HERTZ, print_delay_threshold=None)
-  config_realtime_process([2], 5)
 
   while True:
     sm.update(0)
@@ -158,7 +156,6 @@ def gpxd_thread(sm=None, pm=None):
     if wait_helper.shutdown:
       gpxd.write_log(True)
       break
-    rk.keep_time()
 
 def main(sm=None, pm=None):
   gpxd_thread(sm, pm)
