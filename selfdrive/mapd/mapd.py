@@ -46,19 +46,19 @@ class MapD():
     self.last_fetch_location = None
     self.last_route_update_fix_timestamp = 0
     self.last_publish_fix_timestamp = 0
-    self._op_enabled = False
-    self._disengaging = False
+    # self._op_enabled = False
+    # self._disengaging = False
     self._query_thread = None
     self._lock = threading.RLock()
 
-  def udpate_state(self, sm):
-    sock = 'controlsState'
-    if not sm.updated[sock] or not sm.valid[sock]:
-      return
-
-    controls_state = sm[sock]
-    self._disengaging = not controls_state.enabled and self._op_enabled
-    self._op_enabled = controls_state.enabled
+  # def udpate_state(self, sm):
+  #   sock = 'controlsState'
+  #   if not sm.updated[sock] or not sm.valid[sock]:
+  #     return
+  #
+  #   controls_state = sm[sock]
+  #   self._disengaging = not controls_state.enabled and self._op_enabled
+  #   self._op_enabled = controls_state.enabled
 
   def update_gps(self, sm):
     sock = 'gpsLocationExternal'
@@ -136,9 +136,9 @@ class MapD():
     def update_proc():
       # Ensure we clear the route on op disengage, this way we can correct possible incorrect map data due
       # to wrongly locating or picking up the wrong route.
-      if self._disengaging:
-        self.route = None
-        _debug('Mapd *****: Clearing Route as system is disengaging. ********')
+      # if self._disengaging:
+      #   self.route = None
+      #   _debug('Mapd *****: Clearing Route as system is disengaging. ********')
 
       if self.way_collection is None or self.location_rad is None or self.bearing_rad is None:
         _debug('Mapd *****: Can not update route. Missing WayCollection, location or bearing ********')
@@ -246,13 +246,13 @@ def mapd_thread(sm=None, pm=None):
 
   # *** setup messaging
   if sm is None:
-    sm = messaging.SubMaster(['gpsLocationExternal', 'controlsState'])
+    sm = messaging.SubMaster(['gpsLocationExternal']) #, 'controlsState'])
   if pm is None:
     pm = messaging.PubMaster(['liveMapData'])
 
   while True:
     sm.update()
-    mapd.udpate_state(sm)
+    # mapd.udpate_state(sm)
     mapd.update_gps(sm)
     mapd.updated_osm_data()
     mapd.update_route()
