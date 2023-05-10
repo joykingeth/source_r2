@@ -125,7 +125,7 @@ class GpxD():
         '<trkseg>',
       ]
       for trkpt in self.logs:
-        lines.append(self._trkpt_template(trkpt[1], trkpt[2], trkpt[3], trkpt[0]))
+        lines.append(self._trkpt_template(trkpt[0], trkpt[1], trkpt[2], trkpt[3]))
       lines.extend([
         '</trkseg>',
         '</trk>',
@@ -134,10 +134,10 @@ class GpxD():
       with open(Path(GPX_LOG_PATH) / filename, 'w') as f:
         f.write('\n'.join(lines))
 
-  def _trkpt_template(self, lat, lon, ele, time):
+  def _trkpt_template(self, time, lat, lon, alt):
     return f'<trkpt lat="{lat}" lon="{lon}">\n' \
-           f'<ele>{ele}</ele>\n' \
-           f'<time>{time}</time>\n' \
+           f'<time>{datetime.datetime.utcfromtimestamp(time).isoformat()}</time>\n' \
+           f'<ele>{alt}</ele>\n' \
            f'</trkpt>\n'
 
 def gpxd_thread(sm=None, pm=None):
@@ -150,7 +150,7 @@ def gpxd_thread(sm=None, pm=None):
   gpxd = GpxD()
 
   while True:
-    sm.update(0)
+    sm.update(1000)
     gpxd.log(sm)
     gpxd.write_log()
     if wait_helper.shutdown:
