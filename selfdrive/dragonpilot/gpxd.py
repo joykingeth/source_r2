@@ -34,8 +34,8 @@ from pathlib import Path
 
 # customisable values
 GPX_LOG_PATH = '/data/media/0/gpx_logs/'
-LOG_HERTZ = 10 # 10 hz = 0.1 sec, higher for higher accuracy, 10hz seems fine
-LOG_LENGTH = 10 # mins, higher means it keeps more data in the memory, will take more time to write into a file too.
+LOG_HERTZ = 5 # 5 hz = 0.2 sec, higher for higher accuracy, 10hz seems fine
+LOG_LENGTH = 5 # mins, higher means it keeps more data in the memory, will take more time to write into a file too.
 LOST_SIGNAL_COUNT_LENGTH = 10 # secs, output log file if we lost signal for this long
 
 # do not change
