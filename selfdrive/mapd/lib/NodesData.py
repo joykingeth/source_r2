@@ -2,7 +2,8 @@ import numpy as np
 from enum import Enum
 from selfdrive.mapd.lib.geo import DIRECTION, R, vectors
 
-from scipy.interpolate import splev, splprep  
+# from scipy.interpolate import splev, splprep
+from opspline import splev, splprep  # pylint: disable=E0401
 
 
 _TURN_CURVATURE_THRESHOLD = 0.002  # 1/mts. A curvature over this value will generate a speed limit section.
@@ -205,7 +206,7 @@ def is_wr_a_valid_divertion_from_node(wr, node_id, wr_ids):
   """
   Evaluates if the way relation `wr` is a valid divertion from node with id `node_id`.
   A valid divertion is a way relation with an edge node with the given `node_id` that is not already included
-  in the list of way relations in the route (`wr_ids`) and that can be travaled in the direction as if starting 
+  in the list of way relations in the route (`wr_ids`) and that can be travaled in the direction as if starting
   from node with id `node_id`
   """
   if wr.id in wr_ids:
