@@ -11,7 +11,7 @@ from selfdrive.legacy_modeld.constants import T_IDXS
 from selfdrive.controls.lib.longcontrol import LongCtrlState
 from selfdrive.controls.lib.longitudinal_mpc_lib.long_mpc import LongitudinalMpc, MIN_ACCEL, MAX_ACCEL, T_FOLLOW
 from selfdrive.controls.lib.longitudinal_mpc_lib.long_mpc import T_IDXS as T_IDXS_MPC
-from selfdrive.controls.lib.drive_helpers import V_CRUISE_MAX, CONTROL_N
+from selfdrive.controls.lib.drive_helpers import V_CRUISE_MAX, CONTROL_N, get_speed_error
 from system.swaglog import cloudlog
 from selfdrive.controls.lib.vision_turn_controller import VisionTurnController
 
@@ -217,8 +217,7 @@ class LongitudinalPlanner:
     # Prevent divergence, smooth in current v_ego
     self.v_desired_filter.x = max(0.0, self.v_desired_filter.update(v_ego))
     # Compute model v_ego error
-    if len(sm['modelV2'].temporalPose.trans):
-      self.v_model_error = sm['modelV2'].temporalPose.trans[0] - v_ego
+    self.v_model_error = get_speed_error(sm['modelV2'], v_ego)
 
     # rick - vision turn controller from move-fast team
     # https://github.com/move-fast/openpilot/blob/develop/selfdrive/controls/lib/vision_turn_controller.py
