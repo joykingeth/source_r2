@@ -94,19 +94,19 @@
     <name>C2NetworkPanel</name>
     <message>
         <source>Wi-Fi Settings</source>
-        <translation type="unfinished"></translation>
+        <translation>無線網路設置</translation>
     </message>
     <message>
         <source>OPEN</source>
-        <translation type="unfinished"></translation>
+        <translation>開啟</translation>
     </message>
     <message>
         <source>Tethering Settings</source>
-        <translation type="unfinished"></translation>
+        <translation>熱點設置</translation>
     </message>
     <message>
         <source>IP Address</source>
-        <translation type="unfinished">IP 地址</translation>
+        <translation>IP 地址</translation>
     </message>
 </context>
 <context>
@@ -264,6 +264,14 @@
     <message>
         <source>Review</source>
         <translation>回顧</translation>
+    </message>
+    <message>
+        <source>Debug Console</source>
+        <translation>除錯視窗</translation>
+    </message>
+    <message>
+        <source>Error displaying tmux output.</source>
+        <translation>顯示 tmux 輸出時發生錯誤。</translation>
     </message>
 </context>
 <context>

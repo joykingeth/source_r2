@@ -265,6 +265,14 @@
         <source>Review</source>
         <translation>다시보기</translation>
     </message>
+    <message>
+        <source>Debug Console</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Error displaying tmux output.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>DriveStats</name>

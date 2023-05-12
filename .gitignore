@@ -32,7 +32,7 @@ a.out
 *.class
 *.pyxbldc
 *.vcd
-*.qm
+
 config.json
 clcache
 compile_commands.json
@@ -93,3 +93,4 @@ selfdrive/legacy_modeld/models/supercombo.thneed
 selfdrive/legacy_modeld/models/supercombo_badweights.thneed
 selfdrive/legacy_modeld/thneed/compile
 selfdrive/loggerd/bootlog
+*.po~
