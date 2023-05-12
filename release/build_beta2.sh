@@ -24,7 +24,7 @@ if [ -d $BUILD_DIR ]; then
 else
   rm -rf $BUILD_DIR
   cd /data/
-  git clone https://github.com/dragonpilot-community/dragonpilot.git openpilot -b beta2 --single-branch
+  git clone https://github.com/dragonpilot-community/dragonpilot.git openpilot -b $DEVEL_BRANCH --single-branch
   cd $BUILD_DIR
 fi
 
