@@ -2,7 +2,6 @@
 import threading
 from traceback import print_exception
 import numpy as np
-from time import strftime, gmtime
 import cereal.messaging as messaging
 from common.realtime import Ratekeeper, set_core_affinity, set_realtime_priority
 from selfdrive.mapd.lib.osm import OSM
@@ -10,7 +9,9 @@ from selfdrive.mapd.lib.geo import distance_to_points
 from selfdrive.mapd.lib.WayCollection import WayCollection
 from selfdrive.mapd.config import QUERY_RADIUS, MIN_DISTANCE_FOR_NEW_QUERY, FULL_STOP_MAX_SPEED, LOOK_AHEAD_HORIZON_TIME
 from system.swaglog import cloudlog
-
+from cereal import log
+from selfdrive.navd.helpers import Coordinate
+import math
 
 _DEBUG = False
 _CLOUDLOG_DEBUG = True
@@ -46,44 +47,27 @@ class MapD():
     self.last_fetch_location = None
     self.last_route_update_fix_timestamp = 0
     self.last_publish_fix_timestamp = 0
-    # self._op_enabled = False
-    # self._disengaging = False
     self._query_thread = None
     self._lock = threading.RLock()
 
-  # def udpate_state(self, sm):
-  #   sock = 'controlsState'
-  #   if not sm.updated[sock] or not sm.valid[sock]:
-  #     return
-  #
-  #   controls_state = sm[sock]
-  #   self._disengaging = not controls_state.enabled and self._op_enabled
-  #   self._op_enabled = controls_state.enabled
-
-  def update_gps(self, sm):
-    sock = 'gpsLocationExternal'
+  def update_location(self, sm):
+    sock = 'liveLocationKalman'
     if not sm.updated[sock] or not sm.valid[sock]:
       return
 
-    log = sm[sock]
-    self.last_gps = log
+    location = sm[sock]
 
-    # ignore the message if the fix is invalid
-    if log.flags % 2 == 0:
+    locationd_valid = (location.status == log.LiveLocationKalman.Status.valid) and location.positionGeodetic.valid
+    if not locationd_valid:
       return
 
-    self.last_gps_fix_timestamp = log.unixTimestampMillis  # Unix TS. Milliseconds since January 1, 1970.
-    self.location_rad = np.radians(np.array([log.latitude, log.longitude], dtype=float))
-    self.location_deg = (log.latitude, log.longitude)
-    self.bearing_rad = np.radians(log.bearingDeg, dtype=float)
-    self.gps_speed = log.speed
-    self.location_stdev = log.accuracy  # log accuracies are presumably 1 standard deviation.
-
-    _debug('Mapd: ********* Got GPS fix'
-           + f'Pos: {self.location_deg} +/- {self.location_stdev * 2.} mts.\n'
-           + f'Bearing: {log.bearingDeg} +/- {log.bearingAccuracyDeg * 2.} deg.\n'
-           + f'timestamp: {strftime("%d-%m-%y %H:%M:%S", gmtime(self.last_gps_fix_timestamp * 1e-3))}'
-           + '*******', log_to_cloud=False)
+    self.last_gps_fix_timestamp = location.unixTimestampMillis  # Unix TS. Milliseconds since January 1, 1970.
+    position = Coordinate(location.positionGeodetic.value[0], location.positionGeodetic.value[1])
+    self.location_rad = np.radians(np.array([position.latitude, position.longitude], dtype=float))
+    self.location_deg = (position.latitude, position.longitude)
+    self.bearing_rad = np.radians(math.degrees(location.calibratedOrientationNED.value[2]), dtype=float)
+    self.gps_speed = location.velocityCalibrated.value[0]
+    self.location_stdev = 1.
 
   def _query_osm_not_blocking(self):
     def query(osm, location_deg, location_rad, radius):
@@ -195,22 +179,11 @@ class MapD():
 
     speed_limit = self.route.current_speed_limit
     next_speed_limit_section = self.route.next_speed_limit_section
-    turn_speed_limit_section = self.route.current_curvature_speed_limit_section
-    horizon_mts = self.gps_speed * LOOK_AHEAD_HORIZON_TIME
-    next_turn_speed_limit_sections = self.route.next_curvature_speed_limit_sections(horizon_mts)
     current_road_name = self.route.current_road_name
 
     map_data_msg = messaging.new_message('liveMapData')
-    map_data_msg.valid = sm.all_alive(service_list=['gpsLocationExternal']) and \
-                         sm.all_valid(service_list=['gpsLocationExternal'])
-
-    map_data_msg.liveMapData.lastGpsTimestamp = self.last_gps.unixTimestampMillis
-    map_data_msg.liveMapData.lastGpsLatitude = float(self.last_gps.latitude)
-    map_data_msg.liveMapData.lastGpsLongitude = float(self.last_gps.longitude)
-    map_data_msg.liveMapData.lastGpsSpeed = float(self.last_gps.speed)
-    map_data_msg.liveMapData.lastGpsBearingDeg = float(self.last_gps.bearingDeg)
-    map_data_msg.liveMapData.lastGpsAccuracy = float(self.last_gps.accuracy)
-    map_data_msg.liveMapData.lastGpsBearingAccuracyDeg = float(self.last_gps.bearingAccuracyDeg)
+    map_data_msg.valid = sm.all_alive(service_list=['liveLocationKalman']) and \
+                         sm.all_valid(service_list=['liveLocationKalman'])
 
     map_data_msg.liveMapData.speedLimitValid = bool(speed_limit is not None)
     map_data_msg.liveMapData.speedLimit = float(speed_limit if speed_limit is not None else 0.0)
@@ -219,17 +192,6 @@ class MapD():
                                                      if next_speed_limit_section is not None else 0.0)
     map_data_msg.liveMapData.speedLimitAheadDistance = float(next_speed_limit_section.start
                                                              if next_speed_limit_section is not None else 0.0)
-
-    map_data_msg.liveMapData.turnSpeedLimitValid = bool(turn_speed_limit_section is not None)
-    map_data_msg.liveMapData.turnSpeedLimit = float(turn_speed_limit_section.value
-                                                    if turn_speed_limit_section is not None else 0.0)
-    map_data_msg.liveMapData.turnSpeedLimitSign = int(turn_speed_limit_section.curv_sign
-                                                      if turn_speed_limit_section is not None else 0)
-    map_data_msg.liveMapData.turnSpeedLimitEndDistance = float(turn_speed_limit_section.end
-                                                               if turn_speed_limit_section is not None else 0.0)
-    map_data_msg.liveMapData.turnSpeedLimitsAhead = [float(s.value) for s in next_turn_speed_limit_sections]
-    map_data_msg.liveMapData.turnSpeedLimitsAheadDistances = [float(s.start) for s in next_turn_speed_limit_sections]
-    map_data_msg.liveMapData.turnSpeedLimitsAheadSigns = [float(s.curv_sign) for s in next_turn_speed_limit_sections]
 
     map_data_msg.liveMapData.currentRoadName = str(current_road_name if current_road_name is not None else "")
 
@@ -246,14 +208,13 @@ def mapd_thread(sm=None, pm=None):
 
   # *** setup messaging
   if sm is None:
-    sm = messaging.SubMaster(['gpsLocationExternal']) #, 'controlsState'])
+    sm = messaging.SubMaster(['liveLocationKalman'])
   if pm is None:
     pm = messaging.PubMaster(['liveMapData'])
 
   while True:
     sm.update()
-    # mapd.udpate_state(sm)
-    mapd.update_gps(sm)
+    mapd.update_location(sm)
     mapd.updated_osm_data()
     mapd.update_route()
     mapd.publish(pm, sm)
