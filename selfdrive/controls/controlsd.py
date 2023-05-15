@@ -89,6 +89,8 @@ class Controls:
     self.log_sock = messaging.sub_sock('androidLog')
 
     self.params = Params()
+    self.dp_no_gps_ctrl = self.params.get_bool("dp_no_gps_ctrl")
+    self.dp_no_fan_ctrl = self.params.get_bool("dp_no_fan_ctrl")
     self.sm = sm
     if self.sm is None:
       ignore = ['testJoystick']
@@ -288,7 +290,7 @@ class Controls:
     #  self.events.add(EventName.highCpuUsage)
 
     # Alert if fan isn't spinning for 5 seconds
-    if not NO_FAN_CTRL and self.sm['peripheralState'].pandaType != log.PandaState.PandaType.unknown:
+    if not self.dp_no_fan_ctrl and self.sm['peripheralState'].pandaType != log.PandaState.PandaType.unknown:
       if self.sm['peripheralState'].fanSpeedRpm < 500 and self.sm['deviceState'].fanSpeedPercentDesired > 50:
         # allow enough time for the fan controller in the panda to recover from stalls
         if (self.sm.frame - self.last_functional_fan_frame) * DT_CTRL > 15.0:
@@ -348,7 +350,7 @@ class Controls:
           self.events.add(EventName.cameraMalfunction)
         elif not self.sm.all_freq_ok(self.camera_packets):
           self.events.add(EventName.cameraFrameRate)
-    if self.rk.lagging:
+    if not REPLAY and self.rk.lagging:
       self.events.add(EventName.controlsdLagging)
     if len(self.sm['radarState'].radarErrors) or not self.sm.all_checks(['radarState']):
       self.events.add(EventName.radarFault)
@@ -422,11 +424,11 @@ class Controls:
 
     # TODO: fix simulator
     if not SIMULATION:
-      if not NOSENSOR:
+      if not NOSENSOR and not self.dp_no_gps_ctrl:
         # rick - assuming gps never ok before and it's ok once, meaning the gps is functioning
         if not self.dp_gps_ok_once and self.sm['liveLocationKalman'].gpsOK:
           self.dp_gps_ok_once = True
-        if not NO_GPS_CTRL and self.dp_gps_ok_once and not self.sm['liveLocationKalman'].gpsOK and self.sm['liveLocationKalman'].inputsOK and (self.distance_traveled > 1000):
+        if self.dp_gps_ok_once and not self.sm['liveLocationKalman'].gpsOK and self.sm['liveLocationKalman'].inputsOK and (self.distance_traveled > 1000):
           # Not show in first 1 km to allow for driving out of garage. This event shows after 5 minutes
           self.events.add(EventName.noGps)
 

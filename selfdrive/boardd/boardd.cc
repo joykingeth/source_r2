@@ -582,8 +582,14 @@ void panda_state_thread(PubMaster *pm, std::vector<Panda *> pandas, bool spoofin
 }
 
 
-void peripheral_control_thread(Panda *panda, bool no_fan_control, bool no_ir_control) {
+void peripheral_control_thread(Panda *panda, bool no_fan_control) {
   util::set_thread_name("boardd_peripheral_control");
+  // rick - a device with black panda = EON / LEON / clone 1.5
+  if (panda->hw_type == cereal::PandaState::PandaType::BLACK_PANDA) {
+      Params().putBool("dp_no_fan_ctrl", true);
+      no_fan_control = true;
+      LOGW("dp_no_fan_ctrl = true\n");
+  }
 
   SubMaster sm({"deviceState", "driverCameraState"});
 
@@ -595,10 +601,6 @@ void peripheral_control_thread(Panda *panda, bool no_fan_control, bool no_ir_con
   #ifdef QCOM
   bool prev_charging_disabled = false;
   #endif
-
-  Params p;
-  no_fan_control = p.getBool("dp_no_fan_ctrl");
-  no_ir_control = p.getBool("dp_no_ir_ctrl");
 
   FirstOrderFilter integ_lines_filter(0, 30.0, 0.05);
 
@@ -633,7 +635,7 @@ void peripheral_control_thread(Panda *panda, bool no_fan_control, bool no_ir_con
       }
     }
 
-    if (sm.updated("driverCameraState") && !no_ir_control) {
+    if (sm.updated("driverCameraState")) {
       auto event = sm["driverCameraState"];
       int cur_integ_lines = event.getDriverCameraState().getIntegLines();
 
@@ -679,6 +681,7 @@ static void pigeon_publish_raw(PubMaster &pm, const std::string &dat) {
 void pigeon_thread(Panda *panda) {
   if (!panda->has_gps) {
     Params().putBool("dp_no_gps_ctrl", true);
+    LOGW("dp_no_gps_ctrl = true\n");
     return;
   }
   util::set_thread_name("boardd_pigeon");
@@ -760,7 +763,7 @@ void boardd_main_thread(std::vector<std::string> serials) {
     std::vector<std::thread> threads;
 
     threads.emplace_back(panda_state_thread, &pm, pandas, getenv("STARTED") != nullptr);
-    threads.emplace_back(peripheral_control_thread, peripheral_panda, getenv("NO_FAN_CONTROL") != nullptr, getenv("NO_IR_CONTROL") != nullptr);
+    threads.emplace_back(peripheral_control_thread, peripheral_panda, getenv("NO_FAN_CONTROL") != nullptr);
     #ifdef QCOM
     threads.emplace_back(pigeon_thread, peripheral_panda);
     #endif
