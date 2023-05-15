@@ -278,7 +278,15 @@ void AnnotatedCameraWidget::updateState(const UIState &s) {
   setProperty("speed", cur_speed);
   setProperty("setSpeed", set_speed);
   setProperty("speedUnit", s.scene.is_metric ? tr("km/h") : tr("mph"));
-  setProperty("hideDM", (cs.getAlertSize() != cereal::ControlsState::AlertSize::NONE));
+  if (!dp_no_ir_ctrl_checked) {
+    dp_no_ir_ctrl_checked = true;
+    dp_no_ir_ctrl = Params().getBool("dp_no_ir_ctrl");
+  }
+  if (!dp_no_ir_ctrl) {
+    setProperty("hideDM", (cs.getAlertSize() != cereal::ControlsState::AlertSize::NONE));
+  } else {
+    setProperty("hideDM", true);
+  }
   setProperty("status", s.status);
 
   // update engageability/experimental mode button

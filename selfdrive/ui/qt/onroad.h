@@ -96,6 +96,8 @@ private:
   bool wide_cam_requested = false;
 
   QString roadName;
+  bool dp_no_ir_ctrl = false;
+  bool dp_no_ir_ctrl_checked = false;
 
 protected:
   void paintGL() override;
