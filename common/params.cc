@@ -206,6 +206,8 @@ std::unordered_map<std::string, uint32_t> keys = {
     // dp - car selector
     {"dp_car_assigned", PERSISTENT},
     {"dp_car_list", PERSISTENT},
+    {"dp_no_ir_ctrl", PERSISTENT},
+    {"dp_no_fan_ctrl", PERSISTENT},
 };
 
 } // namespace

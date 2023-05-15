@@ -38,10 +38,10 @@ SIMULATION = "SIMULATION" in os.environ
 NOSENSOR = "NOSENSOR" in os.environ
 IGNORE_PROCESSES = {"loggerd", "encoderd", "statsd", "mapd"}
 
-NO_IR_CTRL = os.path.isfile('/data/media/0/no_ir_ctrl')
+NO_IR_CTRL = Params().get_bool("dp_no_ir_ctrl")
 if NO_IR_CTRL:
   IGNORE_PROCESSES |= {'driverCameraState', 'driverMonitoringState'}
-NO_FAN_CTRL = os.path.isfile('/data/media/0/no_fan_ctrl')
+NO_FAN_CTRL = Params().get_bool("dp_no_fan_ctrl")
 
 ThermalStatus = log.DeviceState.ThermalStatus
 State = log.ControlsState.OpenpilotState
@@ -75,7 +75,7 @@ class Controls:
       self.pm = messaging.PubMaster(['sendcan', 'controlsState', 'carState',
                                      'carControl', 'carEvents', 'carParams'])
 
-    if self.dp_no_ir_ctrl:
+    if NO_IR_CTRL:
       self.camera_packets = ["roadCameraState"]
     else:
       self.camera_packets = ["roadCameraState", "driverCameraState"]
@@ -93,7 +93,7 @@ class Controls:
       ignore = ['testJoystick']
       if SIMULATION:
         ignore += ['driverCameraState', 'managerState']
-      if self.dp_no_ir_ctrl:
+      if NO_IR_CTRL:
         ignore += ['driverCameraState', 'driverMonitoringState']
       # if self.params.get_bool('WideCameraOnly'):
       #   ignore += ['roadCameraState']
@@ -264,7 +264,7 @@ class Controls:
     if CS.gasPressed:
       self.events.add(EventName.gasPressedOverride)
 
-    if not self.CP.notCar and not self.dp_no_ir_ctrl:
+    if not self.CP.notCar and not NO_IR_CTRL:
       self.events.add_from_msg(self.sm['driverMonitoringState'].events)
 
     # Add car events, ignore if CAN isn't valid
@@ -765,7 +765,7 @@ class Controls:
       else:
         self.steer_limited = abs(CC.actuators.steer - CC.actuatorsOutput.steer) > 1e-2
 
-    if self.dp_no_ir_ctrl:
+    if NO_IR_CTRL:
       self.sm['driverMonitoringState'].awarenessStatus = 1.
 
     force_decel = (self.sm['driverMonitoringState'].awarenessStatus < 0.) or \
