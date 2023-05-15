@@ -42,6 +42,7 @@ NO_IR_CTRL = Params().get_bool("dp_no_ir_ctrl")
 if NO_IR_CTRL:
   IGNORE_PROCESSES |= {'driverCameraState', 'driverMonitoringState'}
 NO_FAN_CTRL = Params().get_bool("dp_no_fan_ctrl")
+NO_GPS_CTRL = Params().get_bool("dp_no_gps_ctrl")
 
 ThermalStatus = log.DeviceState.ThermalStatus
 State = log.ControlsState.OpenpilotState
@@ -64,7 +65,7 @@ class Controls:
   def __init__(self, sm=None, pm=None, can_sock=None, CI=None):
     config_realtime_process(4 if TICI else 3, Priority.CTRL_HIGH)
 
-    self.dp_no_ir_ctrl = NO_IR_CTRL
+    self.dp_gps_ok_once = False
 
     # Ensure the current branch is cached, otherwise the first iteration of controlsd lags
     self.branch = get_short_branch("")
@@ -422,7 +423,10 @@ class Controls:
     # TODO: fix simulator
     if not SIMULATION:
       if not NOSENSOR:
-        if not self.sm['liveLocationKalman'].gpsOK and self.sm['liveLocationKalman'].inputsOK and (self.distance_traveled > 1000):
+        # rick - assuming gps never ok before and it's ok once, meaning the gps is functioning
+        if not self.dp_gps_ok_once and self.sm['liveLocationKalman'].gpsOK:
+          self.dp_gps_ok_once = True
+        if not NO_GPS_CTRL and self.dp_gps_ok_once and not self.sm['liveLocationKalman'].gpsOK and self.sm['liveLocationKalman'].inputsOK and (self.distance_traveled > 1000):
           # Not show in first 1 km to allow for driving out of garage. This event shows after 5 minutes
           self.events.add(EventName.noGps)
 
