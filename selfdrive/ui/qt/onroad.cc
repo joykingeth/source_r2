@@ -546,6 +546,7 @@ void AnnotatedCameraWidget::drawLaneLines(QPainter &painter, const UIState *s) {
   }
 
   // paint path
+  #ifndef QCOM
   QLinearGradient bg(0, height(), 0, 0);
   if (sm["controlsState"].getControlsState().getExperimentalMode()) {
     // The first half of track_vertices are the points for the right side of the path
@@ -574,6 +575,26 @@ void AnnotatedCameraWidget::drawLaneLines(QPainter &painter, const UIState *s) {
       i += (i + 2) < max_len ? 1 : 0;
     }
 
+  #else
+  QLinearGradient bg(0, height(), 0, height() / 4);
+  float start_hue, end_hue;
+  if (sm["controlsState"].getControlsState().getExperimentalMode()) {
+    const auto &acceleration = sm["modelV2"].getModelV2().getAcceleration();
+    float acceleration_future = 0;
+    if (acceleration.getZ().size() > 16) {
+      acceleration_future = acceleration.getX()[16];  // 2.5 seconds
+    }
+    start_hue = 60;
+    // speed up: 120, slow down: 0
+    end_hue = fmax(fmin(start_hue + acceleration_future * 45, 148), 0);
+
+    // FIXME: painter.drawPolygon can be slow if hue is not rounded
+    end_hue = int(end_hue * 100 + 0.5) / 100;
+
+    bg.setColorAt(0.0, QColor::fromHslF(start_hue / 360., 0.97, 0.56, 0.4));
+    bg.setColorAt(0.5, QColor::fromHslF(end_hue / 360., 1.0, 0.68, 0.35));
+    bg.setColorAt(1.0, QColor::fromHslF(end_hue / 360., 1.0, 0.68, 0.0));
+  #endif
   } else {
     bg.setColorAt(0.0, QColor::fromHslF(148 / 360., 0.94, 0.51, 0.4));
     bg.setColorAt(0.5, QColor::fromHslF(112 / 360., 1.0, 0.68, 0.35));
