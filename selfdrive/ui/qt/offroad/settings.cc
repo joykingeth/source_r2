@@ -122,6 +122,12 @@ TogglesPanel::TogglesPanel(SettingsWindow *parent) : ListWidget(parent) {
       tr("When enabled, pressing the accelerator pedal will disengage openpilot."),
       "../assets/offroad/icon_disengage_on_accelerator.svg",
     },
+    {
+      "dp_alka",
+      tr("Enable ALKA"),
+      tr("When enabled, openpilot lateral Control will be always on when ACC MAIN is ON.\nReboot required."),
+      "",
+    },
 #ifdef ENABLE_MAPS
     {
       "NavSettingTime24h",

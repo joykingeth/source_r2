@@ -91,6 +91,7 @@ class Controls:
     self.params = Params()
     self.dp_no_gps_ctrl = self.params.get_bool("dp_no_gps_ctrl")
     self.dp_no_fan_ctrl = self.params.get_bool("dp_no_fan_ctrl")
+    self.dp_alka = self.params.get_bool("dp_alka")
     self.sm = sm
     if self.sm is None:
       ignore = ['testJoystick']
@@ -124,7 +125,8 @@ class Controls:
     if not self.disengage_on_accelerator:
       self.CP.alternativeExperience |= ALTERNATIVE_EXPERIENCE.DISABLE_DISENGAGE_ON_GAS
 
-    self.CP.alternativeExperience |= ALTERNATIVE_EXPERIENCE.ALKA
+    if self.dp_alka:
+      self.CP.alternativeExperience |= ALTERNATIVE_EXPERIENCE.ALKA
 
     # read params
     self.is_metric = self.params.get_bool("IsMetric")
@@ -595,7 +597,7 @@ class Controls:
                    (not standstill or self.joystick_mode)
     CC.longActive = self.enabled and not self.events.any(ET.OVERRIDE_LONGITUDINAL) and self.CP.openpilotLongitudinalControl
 
-    if not standstill and CS.cruiseState.available:
+    if self.dp_alka and not standstill and CS.cruiseState.available:
       if self.sm['liveCalibration'].calStatus != Calibration.CALIBRATED:
         pass
       elif CS.steerFaultTemporary or CS.steerFaultPermanent:
