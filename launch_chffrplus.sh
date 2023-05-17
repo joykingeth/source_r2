@@ -192,6 +192,13 @@ function two_init {
   fi
   mount -o remount,r /system
 
+  # osm server
+  MODULE="osm-3s_v0.7.56"
+  if [ ! -d /data/media/0/osm/ ]; then
+    tar -vxf "/data/openpilot/selfdrive/mapd/assets/$MODULE.tar.xz" -C /data/media/0/
+    mv "/data/media/0/$MODULE" /data/media/0/osm
+  fi
+
   # Check for NEOS update
   if [ -f /LEECO ] && [ $(< /VERSION) != "$REQUIRED_NEOS_VERSION" ]; then
     echo "Installing NEOS update"
