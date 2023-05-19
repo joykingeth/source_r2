@@ -49,6 +49,7 @@ SoftwarePanel::SoftwarePanel(QWidget* parent) : ListWidget(parent) {
   });
   addItem(installBtn);
 
+  #ifndef QCOM
   // branch selecting
   targetBranchBtn = new ButtonControl(tr("Target Branch"), tr("SELECT"));
   connect(targetBranchBtn, &ButtonControl::clicked, [=]() {
@@ -73,6 +74,7 @@ SoftwarePanel::SoftwarePanel(QWidget* parent) : ListWidget(parent) {
   if (!params.getBool("IsTestedBranch")) {
     addItem(targetBranchBtn);
   }
+  #endif
 
   // uninstall button
   auto uninstallBtn = new ButtonControl(tr("Uninstall %1").arg(getBrand()), tr("UNINSTALL"));
@@ -142,7 +144,9 @@ void SoftwarePanel::updateLabels() {
     }
     downloadBtn->setEnabled(true);
   }
+  #ifndef QCOM
   targetBranchBtn->setValue(QString::fromStdString(params.get("UpdaterTargetBranch")));
+  #endif
 
   // current + new versions
   versionLbl->setText(QString::fromStdString(params.get("UpdaterCurrentDescription")));
