@@ -2,7 +2,7 @@
 import threading
 from traceback import print_exception
 import numpy as np
-from time import strftime, gmtime
+# from time import strftime, gmtime
 import cereal.messaging as messaging
 from common.realtime import Ratekeeper, set_core_affinity, set_realtime_priority
 from selfdrive.mapd.lib.osm import OSM
@@ -10,6 +10,10 @@ from selfdrive.mapd.lib.geo import distance_to_points
 from selfdrive.mapd.lib.WayCollection import WayCollection
 from selfdrive.mapd.config import QUERY_RADIUS, MIN_DISTANCE_FOR_NEW_QUERY, FULL_STOP_MAX_SPEED, LOOK_AHEAD_HORIZON_TIME
 from system.swaglog import cloudlog
+from common.params import Params
+import json
+from cereal import log
+import math
 
 
 _DEBUG = False
@@ -47,7 +51,7 @@ class MapD():
     self.last_route_update_fix_timestamp = 0
     self.last_publish_fix_timestamp = 0
     # self._op_enabled = False
-    # self._disengaging = False
+    self._disengaging = False
     self._query_thread = None
     self._lock = threading.RLock()
     self._location_valid = False
@@ -171,9 +175,9 @@ class MapD():
     def update_proc():
       # Ensure we clear the route on op disengage, this way we can correct possible incorrect map data due
       # to wrongly locating or picking up the wrong route.
-      # if self._disengaging:
-      #   self.route = None
-      #   _debug('Mapd *****: Clearing Route as system is disengaging. ********')
+      if self._disengaging:
+        self.route = None
+        _debug('Mapd *****: Clearing Route as system is disengaging. ********')
 
       if self.way_collection is None or self.location_rad is None or self.bearing_rad is None:
         _debug('Mapd *****: Can not update route. Missing WayCollection, location or bearing ********')
@@ -287,6 +291,7 @@ def mapd_thread(sm=None, pm=None):
 
   while True:
     sm.update()
+    mapd.apply_last_gps_pos()
     # mapd.udpate_state(sm)
     mapd.update_car_state(sm)
     mapd.update_locationd(sm)
