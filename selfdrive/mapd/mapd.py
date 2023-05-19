@@ -195,22 +195,22 @@ class MapD():
 
     speed_limit = self.route.current_speed_limit
     next_speed_limit_section = self.route.next_speed_limit_section
-    turn_speed_limit_section = self.route.current_curvature_speed_limit_section
-    horizon_mts = self.gps_speed * LOOK_AHEAD_HORIZON_TIME
-    next_turn_speed_limit_sections = self.route.next_curvature_speed_limit_sections(horizon_mts)
+    # turn_speed_limit_section = self.route.current_curvature_speed_limit_section
+    # horizon_mts = self.gps_speed * LOOK_AHEAD_HORIZON_TIME
+    # next_turn_speed_limit_sections = self.route.next_curvature_speed_limit_sections(horizon_mts)
     current_road_name = self.route.current_road_name
 
     map_data_msg = messaging.new_message('liveMapData')
     map_data_msg.valid = sm.all_alive(service_list=['gpsLocationExternal']) and \
                          sm.all_valid(service_list=['gpsLocationExternal'])
 
-    map_data_msg.liveMapData.lastGpsTimestamp = self.last_gps.unixTimestampMillis
-    map_data_msg.liveMapData.lastGpsLatitude = float(self.last_gps.latitude)
-    map_data_msg.liveMapData.lastGpsLongitude = float(self.last_gps.longitude)
-    map_data_msg.liveMapData.lastGpsSpeed = float(self.last_gps.speed)
-    map_data_msg.liveMapData.lastGpsBearingDeg = float(self.last_gps.bearingDeg)
-    map_data_msg.liveMapData.lastGpsAccuracy = float(self.last_gps.accuracy)
-    map_data_msg.liveMapData.lastGpsBearingAccuracyDeg = float(self.last_gps.bearingAccuracyDeg)
+    # map_data_msg.liveMapData.lastGpsTimestamp = self.last_gps.unixTimestampMillis
+    # map_data_msg.liveMapData.lastGpsLatitude = float(self.last_gps.latitude)
+    # map_data_msg.liveMapData.lastGpsLongitude = float(self.last_gps.longitude)
+    # map_data_msg.liveMapData.lastGpsSpeed = float(self.last_gps.speed)
+    # map_data_msg.liveMapData.lastGpsBearingDeg = float(self.last_gps.bearingDeg)
+    # map_data_msg.liveMapData.lastGpsAccuracy = float(self.last_gps.accuracy)
+    # map_data_msg.liveMapData.lastGpsBearingAccuracyDeg = float(self.last_gps.bearingAccuracyDeg)
 
     map_data_msg.liveMapData.speedLimitValid = bool(speed_limit is not None)
     map_data_msg.liveMapData.speedLimit = float(speed_limit if speed_limit is not None else 0.0)
@@ -220,16 +220,16 @@ class MapD():
     map_data_msg.liveMapData.speedLimitAheadDistance = float(next_speed_limit_section.start
                                                              if next_speed_limit_section is not None else 0.0)
 
-    map_data_msg.liveMapData.turnSpeedLimitValid = bool(turn_speed_limit_section is not None)
-    map_data_msg.liveMapData.turnSpeedLimit = float(turn_speed_limit_section.value
-                                                    if turn_speed_limit_section is not None else 0.0)
-    map_data_msg.liveMapData.turnSpeedLimitSign = int(turn_speed_limit_section.curv_sign
-                                                      if turn_speed_limit_section is not None else 0)
-    map_data_msg.liveMapData.turnSpeedLimitEndDistance = float(turn_speed_limit_section.end
-                                                               if turn_speed_limit_section is not None else 0.0)
-    map_data_msg.liveMapData.turnSpeedLimitsAhead = [float(s.value) for s in next_turn_speed_limit_sections]
-    map_data_msg.liveMapData.turnSpeedLimitsAheadDistances = [float(s.start) for s in next_turn_speed_limit_sections]
-    map_data_msg.liveMapData.turnSpeedLimitsAheadSigns = [float(s.curv_sign) for s in next_turn_speed_limit_sections]
+    # map_data_msg.liveMapData.turnSpeedLimitValid = bool(turn_speed_limit_section is not None)
+    # map_data_msg.liveMapData.turnSpeedLimit = float(turn_speed_limit_section.value
+    #                                                 if turn_speed_limit_section is not None else 0.0)
+    # map_data_msg.liveMapData.turnSpeedLimitSign = int(turn_speed_limit_section.curv_sign
+    #                                                   if turn_speed_limit_section is not None else 0)
+    # map_data_msg.liveMapData.turnSpeedLimitEndDistance = float(turn_speed_limit_section.end
+    #                                                            if turn_speed_limit_section is not None else 0.0)
+    # map_data_msg.liveMapData.turnSpeedLimitsAhead = [float(s.value) for s in next_turn_speed_limit_sections]
+    # map_data_msg.liveMapData.turnSpeedLimitsAheadDistances = [float(s.start) for s in next_turn_speed_limit_sections]
+    # map_data_msg.liveMapData.turnSpeedLimitsAheadSigns = [float(s.curv_sign) for s in next_turn_speed_limit_sections]
 
     map_data_msg.liveMapData.currentRoadName = str(current_road_name if current_road_name is not None else "")
 
