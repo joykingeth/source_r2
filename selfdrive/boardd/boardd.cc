@@ -584,16 +584,18 @@ void panda_state_thread(PubMaster *pm, std::vector<Panda *> pandas, bool spoofin
 
 void peripheral_control_thread(Panda *panda, bool no_fan_control) {
   util::set_thread_name("boardd_peripheral_control");
+  Params p;
   // rick - a device with black panda = EON / LEON / clone 1.5
   if (panda->hw_type == cereal::PandaState::PandaType::BLACK_PANDA) {
-      Params().putBool("dp_no_fan_ctrl", true);
+      p.putBool("dp_no_fan_ctrl", true);
       no_fan_control = true;
       LOGW("dp_no_fan_ctrl = true\n");
   } else {
-      Params().putBool("dp_no_fan_ctrl", false);
+      p.putBool("dp_no_fan_ctrl", false);
       no_fan_control = false;
       LOGW("dp_no_fan_ctrl = false\n");
   }
+  bool no_ir_ctrl = p.getBool("dp_no_ir_ctrl");
 
   SubMaster sm({"deviceState", "driverCameraState"});
 
@@ -639,7 +641,7 @@ void peripheral_control_thread(Panda *panda, bool no_fan_control) {
       }
     }
 
-    if (sm.updated("driverCameraState")) {
+    if (sm.updated("driverCameraState") && !no_ir_ctrl) {
       auto event = sm["driverCameraState"];
       int cur_integ_lines = event.getDriverCameraState().getIntegLines();
 
