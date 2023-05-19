@@ -37,7 +37,10 @@ threading.excepthook = excepthook
 
 class MapD():
   def __init__(self):
-    self.osm = OSM()
+    last_gps_params = Params().get('LastGPSPosition')
+    self.last_gps_pos = json.loads(last_gps_params) if last_gps_params is not None else []
+
+    self.osm = OSM(self.last_gps_pos)
     self.way_collection = None
     self.route = None
     self.last_gps_fix_timestamp = 0
