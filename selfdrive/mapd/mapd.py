@@ -50,6 +50,7 @@ class MapD():
     # self._disengaging = False
     self._query_thread = None
     self._lock = threading.RLock()
+    self._location_valid = False
 
   # def udpate_state(self, sm):
   #   sock = 'controlsState'
@@ -60,30 +61,64 @@ class MapD():
   #   self._disengaging = not controls_state.enabled and self._op_enabled
   #   self._op_enabled = controls_state.enabled
 
-  def update_gps(self, sm):
-    sock = 'gpsLocationExternal'
+  def apply_last_gps_pos(self):
+    # use last gps position before first fixed
+    if not self._location_valid and self.last_gps_pos is not None and len(self.last_gps_pos) > 0:
+      self.location_rad = np.radians(np.array([self.last_gps_pos["latitude"], self.last_gps_pos["longitude"]], dtype=float))
+      self.location_deg = (self.last_gps_pos["latitude"], self.last_gps_pos["longitude"])
+      self.bearing_rad = np.radians(0., dtype=float)
+      self.location_stdev = 5.
+
+  def update_car_state(self, sm):
+    sock = 'carState'
+    if not sm.updated[sock] or not sm.valid[sock]:
+      return
+    car_state = sm[sock]
+    self.gps_speed = car_state.vEgo
+    self._disengaging = abs(car_state.steeringRateDeg) > 60
+
+  def update_locationd(self, sm):
+    sock = 'liveLocationKalman'
     if not sm.updated[sock] or not sm.valid[sock]:
       return
 
-    log = sm[sock]
-    self.last_gps = log
+    location = sm[sock]
+    self._location_valid = (location.status == log.LiveLocationKalman.Status.valid) and location.positionGeodetic.valid
 
-    # ignore the message if the fix is invalid
-    if log.flags % 2 == 0:
-      return
+    if self._location_valid:
+      self.last_gps_fix_timestamp = location.unixTimestampMillis
+      self.location_stdev = 1.25
 
-    self.last_gps_fix_timestamp = log.unixTimestampMillis  # Unix TS. Milliseconds since January 1, 1970.
-    self.location_rad = np.radians(np.array([log.latitude, log.longitude], dtype=float))
-    self.location_deg = (log.latitude, log.longitude)
-    self.bearing_rad = np.radians(log.bearingDeg, dtype=float)
-    self.gps_speed = log.speed
-    self.location_stdev = log.accuracy  # log accuracies are presumably 1 standard deviation.
+      lat = location.positionGeodetic.value[0]
+      lon = location.positionGeodetic.value[1]
+      self.location_rad = np.radians(np.array([lat, lon], dtype=float))
+      self.location_deg = (lat, lon)
+      self.bearing_rad = np.radians(math.degrees(location.calibratedOrientationNED.value[2]), dtype=float)
 
-    _debug('Mapd: ********* Got GPS fix'
-           + f'Pos: {self.location_deg} +/- {self.location_stdev * 2.} mts.\n'
-           + f'Bearing: {log.bearingDeg} +/- {log.bearingAccuracyDeg * 2.} deg.\n'
-           + f'timestamp: {strftime("%d-%m-%y %H:%M:%S", gmtime(self.last_gps_fix_timestamp * 1e-3))}'
-           + '*******', log_to_cloud=False)
+  # def update_gps(self, sm):
+  #   sock = 'gpsLocationExternal'
+  #   if not sm.updated[sock] or not sm.valid[sock]:
+  #     return
+  #
+  #   log = sm[sock]
+  #   self.last_gps = log
+  #
+  #   # ignore the message if the fix is invalid
+  #   if log.flags % 2 == 0:
+  #     return
+  #
+  #   self.last_gps_fix_timestamp = log.unixTimestampMillis  # Unix TS. Milliseconds since January 1, 1970.
+  #   self.location_rad = np.radians(np.array([log.latitude, log.longitude], dtype=float))
+  #   self.location_deg = (log.latitude, log.longitude)
+  #   self.bearing_rad = np.radians(log.bearingDeg, dtype=float)
+  #   self.gps_speed = log.speed
+  #   self.location_stdev = log.accuracy  # log accuracies are presumably 1 standard deviation.
+  #
+  #   _debug('Mapd: ********* Got GPS fix'
+  #          + f'Pos: {self.location_deg} +/- {self.location_stdev * 2.} mts.\n'
+  #          + f'Bearing: {log.bearingDeg} +/- {log.bearingAccuracyDeg * 2.} deg.\n'
+  #          + f'timestamp: {strftime("%d-%m-%y %H:%M:%S", gmtime(self.last_gps_fix_timestamp * 1e-3))}'
+  #          + '*******', log_to_cloud=False)
 
   def _query_osm_not_blocking(self):
     def query(osm, location_deg, location_rad, radius):
@@ -201,8 +236,8 @@ class MapD():
     current_road_name = self.route.current_road_name
 
     map_data_msg = messaging.new_message('liveMapData')
-    map_data_msg.valid = sm.all_alive(service_list=['gpsLocationExternal']) and \
-                         sm.all_valid(service_list=['gpsLocationExternal'])
+    map_data_msg.valid = sm.all_alive(service_list=['liveLocationKalman']) and \
+                         sm.all_valid(service_list=['liveLocationKalman'])
 
     # map_data_msg.liveMapData.lastGpsTimestamp = self.last_gps.unixTimestampMillis
     # map_data_msg.liveMapData.lastGpsLatitude = float(self.last_gps.latitude)
@@ -246,14 +281,16 @@ def mapd_thread(sm=None, pm=None):
 
   # *** setup messaging
   if sm is None:
-    sm = messaging.SubMaster(['gpsLocationExternal']) #, 'controlsState'])
+    sm = messaging.SubMaster(["carState", "liveLocationKalman"])
   if pm is None:
     pm = messaging.PubMaster(['liveMapData'])
 
   while True:
     sm.update()
     # mapd.udpate_state(sm)
-    mapd.update_gps(sm)
+    mapd.update_car_state(sm)
+    mapd.update_locationd(sm)
+    # mapd.update_gps(sm)
     mapd.updated_osm_data()
     mapd.update_route()
     mapd.publish(pm, sm)
