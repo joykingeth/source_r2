@@ -237,7 +237,9 @@ class LongitudinalPlanner:
     self.mpc.set_accel_limits(accel_limits_turns[0], accel_limits_turns[1])
     self.mpc.set_cur_state(self.v_desired_filter.x, self.a_desired)
     x, v, a, j = self.parse_model(sm['modelV2'], self.v_model_error)
-    self.mpc.update(sm['radarState'], v_cruise, x, v, a, j, prev_accel_constraint, T_FOLLOW, interp(sm['carState'].vEgo, [0., 2.78, 5.55, 22.], [3., 4., 5, STOP_DISTANCE]))
+    # dynamic stopping distance ONLY when on radarUnavailable vehicles (e.g. Toyota C-HR, VW)
+    stop_distance = STOP_DISTANCE if not self.CP.radarUnavailable else interp(sm['carState'].vEgo, [0., 2.78, 5.55, 22.], [3.7, 4., 5, STOP_DISTANCE])
+    self.mpc.update(sm['radarState'], v_cruise, x, v, a, j, prev_accel_constraint, T_FOLLOW, stop_distance)
 
     self.v_desired_trajectory_full = np.interp(T_IDXS, T_IDXS_MPC, self.mpc.v_solution)
     self.a_desired_trajectory_full = np.interp(T_IDXS, T_IDXS_MPC, self.mpc.a_solution)
