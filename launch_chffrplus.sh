@@ -193,10 +193,15 @@ function two_init {
   mount -o remount,r /system
 
   # osm server
-  MODULE="osm-3s_v0.7.56"
-  if [ ! -d /data/media/0/osm/ ]; then
-    tar -vxf "/data/openpilot/selfdrive/mapd/assets/$MODULE.tar.xz" -C /data/media/0/
-    mv "/data/media/0/$MODULE" /data/media/0/osm
+  if [ -f /data/params/d/dp_mapd ]; then
+    dp_mapd=`cat /data/params/d/dp_mapd`
+    if [ $dp_mapd == "1" ]; then
+      MODULE="osm-3s_v0.7.56"
+      if [ ! -d /data/media/0/osm/ ]; then
+        tar -vxf "/data/openpilot/selfdrive/mapd/assets/$MODULE.tar.xz" -C /data/media/0/
+        mv "/data/media/0/$MODULE" /data/media/0/osm
+      fi
+    fi
   fi
 
   # Check for NEOS update
