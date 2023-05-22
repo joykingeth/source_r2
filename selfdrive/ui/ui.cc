@@ -297,6 +297,8 @@ UIState::UIState(QObject *parent) : QObject(parent) {
     "carControl",
     // dp - for mapd
     "liveMapData",
+    // dp - for lane priority mode
+    "lateralPlan",
   });
 
   Params params;

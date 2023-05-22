@@ -134,6 +134,13 @@ TogglesPanel::TogglesPanel(SettingsWindow *parent) : ListWidget(parent) {
       tr("When enabled, openpilot will display current road name and speed limit on the screen.\nReboot required."),
       "",
     },
+    {
+      "dp_lat_lane_priority_mode",
+      tr("Enable Lane Priority Mode"),
+      tr("When enabled, openpilot will use lane lines for lateral control, fallback to laneless mode automatically when lane lines probabilities are low.\nReboot required."),
+      "",
+    },
+
 #ifdef ENABLE_MAPS
     {
       "NavSettingTime24h",

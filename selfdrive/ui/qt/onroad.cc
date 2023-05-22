@@ -307,6 +307,7 @@ void AnnotatedCameraWidget::updateState(const UIState &s) {
     setProperty("speedLimit", speed_limit);
     setProperty("has_us_speed_limit", speed_limit > 1);
   }
+  setProperty("use_lanelines", sm["lateralPlan"].getLateralPlan().getUseLaneLines());
 
   // DM icon transition
   dm_fade_state = fmax(0.0, fmin(1.0, dm_fade_state+0.2*(0.5-(float)(dmActive))));
@@ -537,7 +538,11 @@ void AnnotatedCameraWidget::drawLaneLines(QPainter &painter, const UIState *s) {
 
   // lanelines
   for (int i = 0; i < std::size(scene.lane_line_vertices); ++i) {
-    painter.setBrush(QColor::fromRgbF(1.0, 1.0, 1.0, std::clamp<float>(scene.lane_line_probs[i], 0.0, 0.7)));
+    if (use_lanelines) {
+      painter.setBrush(QColor::fromRgbF(0x22, 0xa0, 0xdc, std::clamp<float>(scene.lane_line_probs[i], 0.0, 0xf1)));
+    } else {
+      painter.setBrush(QColor::fromRgbF(1.0, 1.0, 1.0, std::clamp<float>(scene.lane_line_probs[i], 0.0, 0.7)));
+    }
     painter.drawPolygon(scene.lane_line_vertices[i]);
   }
 
