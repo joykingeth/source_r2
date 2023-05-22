@@ -128,6 +128,12 @@ TogglesPanel::TogglesPanel(SettingsWindow *parent) : ListWidget(parent) {
       tr("When enabled, openpilot lateral Control will be always on when ACC MAIN is ON.\nReboot required."),
       "",
     },
+    {
+      "dp_mapd",
+      tr("Enable MapD"),
+      tr("When enabled, openpilot will display current road name and speed limit on the screen.\nReboot required."),
+      "",
+    },
 #ifdef ENABLE_MAPS
     {
       "NavSettingTime24h",

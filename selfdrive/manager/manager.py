@@ -45,6 +45,7 @@ def manager_init() -> None:
     ("dp_no_gps_ctrl", "0"),
     ("dp_no_fan_ctrl", "0"),
     ("dp_alka", "1"),
+    ("dp_mapd", "1"),
   ]
   if not PC:
     default_params.append(("LastUpdateTime", datetime.datetime.utcnow().isoformat().encode('utf8')))
@@ -138,8 +139,10 @@ def manager_thread() -> None:
     ignore.append("pandad")
   ignore += [x for x in os.getenv("BLOCK", "").split(",") if len(x) > 0]
 
+  if not params.get_bool("dp_mapd") or params.get_bool("dp_no_gps_ctrl"):
+    ignore += ["gpx_uploader", "mapd", "gpxd"]
   if params.get_bool("dp_no_gps_ctrl"):
-    ignore += ["ubloxd", "gpx_uploader", "mapd", "gpxd"]
+    ignore += ["ubloxd"]
 
   sm = messaging.SubMaster(['deviceState', 'carParams'], poll=['deviceState'])
   pm = messaging.PubMaster(['managerState'])
