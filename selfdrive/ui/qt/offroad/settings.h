@@ -36,27 +36,6 @@ private:
   QStackedWidget *panel_widget;
 };
 
-class CarSelectionPanel : public QWidget {
-  Q_OBJECT
-public:
-  explicit CarSelectionPanel(SettingsWindow *parent);
-signals:
-  void carSelected();
-};
-
-
-class C2NetworkPanel: public QWidget {
-  Q_OBJECT
-
-public:
-  explicit C2NetworkPanel(QWidget *parent = 0);
-
-private:
-  void showEvent(QShowEvent *event) override;
-  QString getIPAddress();
-  LabelControl *ipaddress;
-};
-
 class DevicePanel : public ListWidget {
   Q_OBJECT
 public:
@@ -72,6 +51,14 @@ private slots:
 
 private:
   Params params;
+};
+
+class CarSelectionPanel : public QWidget {
+  Q_OBJECT
+public:
+  explicit CarSelectionPanel(SettingsWindow *parent);
+signals:
+  void carSelected();
 };
 
 class TogglesPanel : public ListWidget {
@@ -110,4 +97,15 @@ private:
 
   Params params;
   QFileSystemWatcher *fs_watch;
+};
+
+class C2NetworkPanel: public QWidget {
+  Q_OBJECT
+public:
+  explicit C2NetworkPanel(QWidget* parent = nullptr);
+
+private:
+  void showEvent(QShowEvent *event) override;
+  QString getIPAddress();
+  LabelControl *ipaddress;
 };
