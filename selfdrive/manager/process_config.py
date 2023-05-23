@@ -85,7 +85,7 @@ procs = [
   PythonProcess("androidd", "system.hardware.eon.androidd", enabled=EON, offroad=True),
 
   # mapd
-  PythonProcess("mapd", "selfdrive.mapd.mapd"),
+  PythonProcess("mapd", "selfdrive.dragonpilot.mapd"),
   # gpxd
   PythonProcess("gpxd", "selfdrive.dragonpilot.gpxd"),
   PythonProcess("gpx_uploader", "selfdrive.dragonpilot.gpx_uploader", offroad=True),

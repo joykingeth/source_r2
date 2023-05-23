@@ -141,9 +141,9 @@ def manager_thread() -> None:
   ignore += [x for x in os.getenv("BLOCK", "").split(",") if len(x) > 0]
 
   if not params.get_bool("dp_mapd") or params.get_bool("dp_no_gps_ctrl"):
-    ignore += ["gpx_uploader", "mapd", "gpxd"]
+    ignore += ["mapd"]
   if params.get_bool("dp_no_gps_ctrl"):
-    ignore += ["ubloxd"]
+    ignore += ["ubloxd", "gpx_uploader", "gpxd"]
 
   sm = messaging.SubMaster(['deviceState', 'carParams'], poll=['deviceState'])
   pm = messaging.PubMaster(['managerState'])
