@@ -292,6 +292,8 @@ UIState::UIState(QObject *parent) : QObject(parent) {
     "liveMapData",
     // dp - for lane priority mode
     "lateralPlan",
+    // dp - for e2e/acc detection
+    "longitudinalPlan",
   });
 
   Params params;

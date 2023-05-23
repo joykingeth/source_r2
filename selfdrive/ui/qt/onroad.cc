@@ -556,7 +556,7 @@ void AnnotatedCameraWidget::drawLaneLines(QPainter &painter, const UIState *s) {
   // paint path
   #ifndef QCOM
   QLinearGradient bg(0, height(), 0, 0);
-  if (sm["controlsState"].getControlsState().getExperimentalMode()) {
+  if (sm["controlsState"].getControlsState().getExperimentalMode() && !sm["longitudinalPlan"].getLongitudinalPlan().getLongitudinalValid()) {
     // The first half of track_vertices are the points for the right side of the path
     // and the indices match the positions of accel from uiPlan
     const auto &acceleration = sm["uiPlan"].getUiPlan().getAccel();
@@ -586,7 +586,7 @@ void AnnotatedCameraWidget::drawLaneLines(QPainter &painter, const UIState *s) {
   #else
   QLinearGradient bg(0, height(), 0, height() / 4);
   float start_hue, end_hue;
-  if (sm["controlsState"].getControlsState().getExperimentalMode()) {
+  if (sm["controlsState"].getControlsState().getExperimentalMode() && !sm["longitudinalPlan"].getLongitudinalPlan().getLongitudinalValid()) {
     const auto &acceleration = sm["modelV2"].getModelV2().getAcceleration();
     float acceleration_future = 0;
     if (acceleration.getZ().size() > 16) {
