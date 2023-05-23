@@ -600,7 +600,7 @@ class Controls:
     CC.longActive = self.enabled and not self.events.any(ET.OVERRIDE_LONGITUDINAL) and self.CP.openpilotLongitudinalControl
 
     if self.dp_alka and not standstill and CS.cruiseState.available:
-      if self.sm['liveCalibration'].calStatus != Calibration.CALIBRATED:
+      if self.sm['liveCalibration'].calStatus != log.LiveCalibrationData.Status.calibrated:
         pass
       elif CS.steerFaultTemporary or CS.steerFaultPermanent:
         pass
