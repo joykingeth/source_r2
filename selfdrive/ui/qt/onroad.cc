@@ -302,10 +302,11 @@ void AnnotatedCameraWidget::updateState(const UIState &s) {
 
   auto lmd = sm["liveMapData"].getLiveMapData();
   setProperty("roadName", QString::fromStdString(lmd.getCurrentRoadName()));
-  if (!nav_alive && lmd.getSpeedLimitValid()) {
+  if (!nav_alive && lmd.getSpeedLimit() > 0) {
     speed_limit = lmd.getSpeedLimit() * (s.scene.is_metric ? MS_TO_KPH : MS_TO_MPH);
     setProperty("speedLimit", speed_limit);
-    setProperty("has_us_speed_limit", speed_limit > 1);
+    setProperty("has_eu_speed_limit", speed_limit > 1);
+    setProperty("speed_limit_valid", lmd.getSpeedLimitValid());
   }
   setProperty("use_lanelines", sm["lateralPlan"].getLateralPlan().getUseLaneLines());
 
@@ -404,7 +405,7 @@ void AnnotatedCameraWidget::drawHud(QPainter &p) {
 
     // Smaller white square with black border
     QRect sign_rect(sign_rect_outer.left() + 1.5 * border_width, sign_rect_outer.top() + 1.5 * border_width, sign_width - 3 * border_width, sign_height - 3 * border_width);
-    p.setPen(QPen(blackColor(), border_width));
+    p.setPen(QPen(speed_limit_valid? QColor(0, 100, 0) : blackColor(), border_width));
     p.setBrush(whiteColor());
     p.drawRoundedRect(sign_rect, 16, 16);
 
@@ -440,7 +441,7 @@ void AnnotatedCameraWidget::drawHud(QPainter &p) {
     p.setPen(Qt::NoPen);
     p.setBrush(whiteColor());
     p.drawEllipse(center, outer_radius, outer_radius);
-    p.setBrush(QColor(255, 0, 0, 255));
+    p.setBrush(speed_limit_valid? QColor(0, 100, 0) : QColor(255, 0, 0, 255));
     p.drawEllipse(center, inner_radius_1, inner_radius_1);
     p.setBrush(whiteColor());
     p.drawEllipse(center, inner_radius_2, inner_radius_2);
@@ -450,7 +451,7 @@ void AnnotatedCameraWidget::drawHud(QPainter &p) {
     configFont(p, "Inter", font_size, "Bold");
     QRect speed_limit_rect = getTextRect(p, Qt::AlignCenter, speedLimitStr);
     speed_limit_rect.moveCenter(center);
-    p.setPen(blackColor());
+    p.setPen(speed_limit_valid? QColor(0, 100, 0) : blackColor());
     p.drawText(speed_limit_rect, Qt::AlignCenter, speedLimitStr);
   }
 

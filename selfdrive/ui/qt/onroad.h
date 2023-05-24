@@ -66,6 +66,7 @@ class AnnotatedCameraWidget : public CameraWidget {
 
   Q_PROPERTY(QString roadName MEMBER roadName);
   Q_PROPERTY(bool use_lanelines MEMBER use_lanelines);
+  Q_PROPERTY(bool speed_limit_valid MEMBER speed_limit_valid);
 
 public:
   explicit AnnotatedCameraWidget(VisionStreamType type, QWidget* parent = 0);
@@ -100,6 +101,7 @@ private:
   bool dp_no_ir_ctrl = false;
   bool dp_no_ir_ctrl_checked = false;
   bool use_lanelines = false;
+  bool speed_limit_valid = false;
 
 protected:
   void paintGL() override;
