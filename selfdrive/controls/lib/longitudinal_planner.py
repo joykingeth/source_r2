@@ -109,6 +109,8 @@ class LongitudinalPlanner:
     return reset_state
 
   def conditional_e2e(self, sm):
+    if not sm['controlsState'].experimentalMode:
+      return self._set_dp_e2e_mode('acc', True)
     v_ego_kph = sm['carState'].vEgo * 3.6
     standstill = sm['carState'].standstill
 
