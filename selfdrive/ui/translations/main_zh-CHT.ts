@@ -110,6 +110,13 @@
     </message>
 </context>
 <context>
+    <name>CarSelectionPanel</name>
+    <message>
+        <source>[AUTO SELECT]</source>
+        <translation>[自動選擇]</translation>
+    </message>
+</context>
+<context>
     <name>ConfirmationDialog</name>
     <message>
         <source>Ok</source>
@@ -657,6 +664,14 @@ This may take up to a minute.</source>
         <source>Navigation</source>
         <translation>導航</translation>
     </message>
+    <message>
+        <source>Vehicle Model:</source>
+        <translation>車型：</translation>
+    </message>
+    <message>
+        <source>[AUTO SELECT]</source>
+        <translation>[自動選擇]</translation>
+    </message>
 </context>
 <context>
     <name>Setup</name>
@@ -1055,23 +1070,53 @@ This may take up to a minute.</source>
     </message>
     <message>
         <source>openpilot Longitudinal Control (Alpha)</source>
-        <translation type="unfinished"></translation>
+        <translation>openpilot 縱向控制（Alpha 版）</translation>
     </message>
     <message>
         <source>WARNING: openpilot longitudinal control is in alpha for this car and will disable Automatic Emergency Braking (AEB).</source>
-        <translation type="unfinished"></translation>
+        <translation>警告：此車輛的 openpilot 縱向控制功能尚處於測試階段（Alpha 版），使用該功能將會停用自動緊急制動系統（AEB）。</translation>
     </message>
     <message>
         <source>On this car, openpilot defaults to the car&apos;s built-in ACC instead of openpilot&apos;s longitudinal control. Enable this to switch to openpilot longitudinal control. Enabling Experimental mode is recommended when enabling openpilot longitudinal control alpha.</source>
-        <translation type="unfinished"></translation>
+        <translation>在這輛車上，openpilot 默認使用車輛內建的自適應巡航系統（ACC），而不是 openpilot 的縱向控制功能。啟用此功能可切換至 openpilot 的縱向控制模式。建議在啟用 openpilo t縱向控制 alpha 版時啟用實驗模式。</translation>
     </message>
     <message>
         <source>Enable Right-Hand Drive</source>
-        <translation type="unfinished"></translation>
+        <translation>啟用右駕模式</translation>
     </message>
     <message>
         <source>Allow openpilot to obey left-hand traffic conventions and perform driver monitoring on right driver seat.</source>
-        <translation type="unfinished"></translation>
+        <translation>允許 openpilot 遵守左側交通規則並在右側駕駛座進行駕駛者監控。</translation>
+    </message>
+    <message>
+        <source>Enable ALKA</source>
+        <translation>啟用全時置中</translation>
+    </message>
+    <message>
+        <source>When enabled, openpilot lateral Control will be always on when ACC MAIN is ON.
+Reboot required.</source>
+        <translation>啟用後，openpilot 的橫向控制將始終在 ACC MAIN 開啟時開啟。
+需要重新啟動。</translation>
+    </message>
+    <message>
+        <source>Enable MapD</source>
+        <translation>啟用地圖服務</translation>
+    </message>
+    <message>
+        <source>When enabled, openpilot will display current road name and speed limit on the screen.
+Reboot required.</source>
+        <translation>啟用後，openpilot 將在屏幕上顯示當前道路名稱和速限。
+需要重新啟動。</translation>
+    </message>
+    <message>
+        <source>Enable Lane Priority Mode</source>
+        <translation>啟用車道優先模式</translation>
+    </message>
+    <message>
+        <source>When enabled, openpilot will use lane lines for lateral control, fallback to laneless mode automatically when lane lines probabilities are low.
+Reboot required.</source>
+        <translation>啟用後，openpilot 將使用車道線進行橫向控制，在車道線的概率低時自動切換至無車道線模式。
+需要重新啟動。</translation>
     </message>
 </context>
 <context>

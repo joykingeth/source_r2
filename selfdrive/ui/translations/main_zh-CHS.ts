@@ -110,6 +110,13 @@
     </message>
 </context>
 <context>
+    <name>CarSelectionPanel</name>
+    <message>
+        <source>[AUTO SELECT]</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>ConfirmationDialog</name>
     <message>
         <source>Ok</source>
@@ -655,6 +662,14 @@ This may take up to a minute.</source>
         <source>Navigation</source>
         <translation>导航</translation>
     </message>
+    <message>
+        <source>Vehicle Model:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>[AUTO SELECT]</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>Setup</name>
@@ -1069,6 +1084,33 @@ This may take up to a minute.</source>
     </message>
     <message>
         <source>Allow openpilot to obey left-hand traffic conventions and perform driver monitoring on right driver seat.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Enable ALKA</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>When enabled, openpilot lateral Control will be always on when ACC MAIN is ON.
+Reboot required.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Enable MapD</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>When enabled, openpilot will display current road name and speed limit on the screen.
+Reboot required.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Enable Lane Priority Mode</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>When enabled, openpilot will use lane lines for lateral control, fallback to laneless mode automatically when lane lines probabilities are low.
+Reboot required.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

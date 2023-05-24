@@ -235,7 +235,7 @@ def startup_master_alert(CP: car.CarParams, CS: car.CarState, sm: messaging.SubM
   return StartupAlert(_("WARNING: This branch is not tested"), branch, alert_status=AlertStatus.userPrompt)
 
 def below_engage_speed_alert(CP: car.CarParams, CS: car.CarState, sm: messaging.SubMaster, metric: bool, soft_disable_time: int) -> Alert:
-  return NoEntryAlert(f"Drive above {get_display_speed(CP.minEnableSpeed, metric)} to engage")
+  return NoEntryAlert(_("Drive above {speed} to engage").format(speed=get_display_speed(CP.minEnableSpeed, metric)))
 
 
 def below_steer_speed_alert(CP: car.CarParams, CS: car.CarState, sm: messaging.SubMaster, metric: bool, soft_disable_time: int) -> Alert:
@@ -247,10 +247,10 @@ def below_steer_speed_alert(CP: car.CarParams, CS: car.CarState, sm: messaging.S
 
 
 def calibration_incomplete_alert(CP: car.CarParams, CS: car.CarState, sm: messaging.SubMaster, metric: bool, soft_disable_time: int) -> Alert:
-  first_word = 'Recalibration' if sm['liveCalibration'].calStatus == log.LiveCalibrationData.Status.recalibrating else 'Calibration'
+  first_word = _('Recalibration') if sm['liveCalibration'].calStatus == log.LiveCalibrationData.Status.recalibrating else _('Calibration')
   return Alert(
-    _("%s in Progress: %d%%" % (first_word, sm['liveCalibration'].calPerc)),
-    _("Drive Above %s" % get_display_speed(MIN_SPEED_FILTER, metric)),
+    _("{word} in Progress: {perc}%").format(word=first_word, perc=sm['liveCalibration'].calPerc),
+    _("Drive Above {speed}").format(speed=get_display_speed(MIN_SPEED_FILTER, metric)),
     AlertStatus.normal, AlertSize.mid,
     Priority.LOWEST, VisualAlert.none, AudibleAlert.none, .2)
 
@@ -272,7 +272,7 @@ def out_of_space_alert(CP: car.CarParams, CS: car.CarState, sm: messaging.SubMas
 def posenet_invalid_alert(CP: car.CarParams, CS: car.CarState, sm: messaging.SubMaster, metric: bool, soft_disable_time: int) -> Alert:
   mdl = sm['modelV2'].velocity.x[0] if len(sm['modelV2'].velocity.x) else math.nan
   err = CS.vEgo - mdl
-  msg = f"Speed Error: {err:.1f} m/s"
+  msg = _("Speed Error: {err:.1f} m/s").format(err=err)
   return NoEntryAlert(msg, alert_text_1=_("Posenet Speed Invalid"))
 
 
@@ -298,7 +298,7 @@ def calibration_invalid_alert(CP: car.CarParams, CS: car.CarState, sm: messaging
   rpy = sm['liveCalibration'].rpyCalib
   yaw = math.degrees(rpy[2] if len(rpy) == 3 else math.nan)
   pitch = math.degrees(rpy[1] if len(rpy) == 3 else math.nan)
-  angles = f"Remount Device (Pitch: {pitch:.1f}°, Yaw: {yaw:.1f}°)"
+  angles = _("Remount Device (Pitch: {pitch:.1f}°, Yaw: {yaw:.1f}°)").format(pitch=pitch, yaw=yaw)
   return NormalPermanentAlert(_("Calibration Invalid"), angles)
 
 
@@ -310,7 +310,7 @@ def overheat_alert(CP: car.CarParams, CS: car.CarState, sm: messaging.SubMaster,
 
 
 def low_memory_alert(CP: car.CarParams, CS: car.CarState, sm: messaging.SubMaster, metric: bool, soft_disable_time: int) -> Alert:
-  return NormalPermanentAlert(_("Low Memory"), f"{sm['deviceState'].memoryUsagePercent}% used")
+  return NormalPermanentAlert(_("Low Memory"), _("{memory_usage_percent}% used").format(memory_usage_percent=sm['deviceState'].memoryUsagePercent))
 
 
 def high_cpu_usage_alert(CP: car.CarParams, CS: car.CarState, sm: messaging.SubMaster, metric: bool, soft_disable_time: int) -> Alert:
@@ -319,7 +319,7 @@ def high_cpu_usage_alert(CP: car.CarParams, CS: car.CarState, sm: messaging.SubM
 
 
 def modeld_lagging_alert(CP: car.CarParams, CS: car.CarState, sm: messaging.SubMaster, metric: bool, soft_disable_time: int) -> Alert:
-  return NormalPermanentAlert(_("Driving Model Lagging"), f"{sm['modelV2'].frameDropPerc:.1f}% frames dropped")
+  return NormalPermanentAlert(_("Driving Model Lagging"), _("{frame_drop_perc:.1f}% frames dropped").format(frame_drop_perc=sm['modelV2'].frameDropPerc))
 
 
 def wrong_car_mode_alert(CP: car.CarParams, CS: car.CarState, sm: messaging.SubMaster, metric: bool, soft_disable_time: int) -> Alert:
@@ -332,7 +332,10 @@ def wrong_car_mode_alert(CP: car.CarParams, CS: car.CarState, sm: messaging.SubM
 def joystick_alert(CP: car.CarParams, CS: car.CarState, sm: messaging.SubMaster, metric: bool, soft_disable_time: int) -> Alert:
   axes = sm['testJoystick'].axes
   gb, steer = list(axes)[:2] if len(axes) else (0., 0.)
-  vals = f"Gas: {round(gb * 100.)}%, Steer: {round(steer * 100.)}%"
+  vals = _("Gas: {gas_percent}%, Steer: {steer_percent}%").format(
+    gas_percent=round(gb * 100.),
+    steer_percent=round(steer * 100.)
+  )
   return NormalPermanentAlert(_("Joystick Mode"), vals)
 
 
@@ -732,8 +735,8 @@ EVENTS: Dict[int, Dict[str, Union[Alert, AlertCallbackType]]] = {
 
   EventName.calibrationRecalibrating: {
     ET.PERMANENT: calibration_incomplete_alert,
-    ET.SOFT_DISABLE: soft_disable_alert("Device Remount Detected: Recalibrating"),
-    ET.NO_ENTRY: NoEntryAlert("Remount Detected: Recalibrating"),
+    ET.SOFT_DISABLE: soft_disable_alert(_("Device Remount Detected: Recalibrating")),
+    ET.NO_ENTRY: NoEntryAlert(_("Remount Detected: Recalibrating")),
   },
 
   EventName.doorOpen: {
@@ -959,9 +962,9 @@ EVENTS: Dict[int, Dict[str, Union[Alert, AlertCallbackType]]] = {
   },
 
   EventName.vehicleSensorsInvalid: {
-    ET.IMMEDIATE_DISABLE: ImmediateDisableAlert("Vehicle Sensors Invalid"),
-    ET.PERMANENT: NormalPermanentAlert("Vehicle Sensors Calibrating", "Drive to Calibrate"),
-    ET.NO_ENTRY: NoEntryAlert("Vehicle Sensors Calibrating"),
+    ET.IMMEDIATE_DISABLE: ImmediateDisableAlert(_("Vehicle Sensors Invalid")),
+    ET.PERMANENT: NormalPermanentAlert(_("Vehicle Sensors Calibrating"), _("Drive to Calibrate")),
+    ET.NO_ENTRY: NoEntryAlert(_("Vehicle Sensors Calibrating")),
   },
 
 }
