@@ -50,7 +50,7 @@ CarSelectionPanel::CarSelectionPanel(SettingsWindow *parent) : QWidget(parent) {
     }
   )");
   car_list->setFixedHeight(750);
-  car_list->addItem(tr("===== Unselected ====="));
+  car_list->addItem(tr("[AUTO SELECT]"));
   int model_size = models.size();
   for (int i = 0; i < model_size; i++) {
     car_list->addItem(models.at(i).toString());
@@ -58,7 +58,7 @@ CarSelectionPanel::CarSelectionPanel(SettingsWindow *parent) : QWidget(parent) {
 
   QObject::connect(car_list, QOverload<QListWidgetItem*>::of(&QListWidget::itemClicked), [=](QListWidgetItem* item) {
     QString text = item->text();
-    Params().put("dp_car_assigned", text == "===== Unselected ====="? "" : text.toStdString());
+    Params().put("dp_car_assigned", text == "[AUTO SELECT]"? "" : text.toStdString());
     item->setSelected(false);
     emit carSelected();
     parent->closeSettings();
@@ -562,35 +562,49 @@ SettingsWindow::SettingsWindow(QWidget *parent) : QFrame(parent) {
   // car selection panel
   // create a button
   QString car_selected = QString::fromUtf8((Params().get("dp_car_assigned")).c_str());
-  QPushButton* car_selection_btn = new QPushButton(car_selected == ""? tr("===== Unselected =====") : car_selected);
+
+  // Create a QLabel for the "Vehicle Model:" label
+  QLabel* vehicle_model_label = new QLabel(tr("Vehicle Model:"));
+  vehicle_model_label->setStyleSheet("margin-right: 2px; font-size: 40px;"); // Adjust the margin if needed
+
+  // Create the QPushButton
+  QPushButton* car_selection_btn = new QPushButton(car_selected == "" ? tr("[AUTO SELECT]") : car_selected);
   car_selection_btn->setObjectName("carSelectionBtn");
-  car_selection_btn->setStyleSheet("margin-right: 30px; background-color: #364DEF;");
-  car_selection_btn->setFixedSize(1250, 80);
+  car_selection_btn->setStyleSheet("background-color: #22A0DC; font-size: 40px;");
 
-  // link to a scroll panel
-  auto carSelectionPanel = new CarSelectionPanel(this);
-  ScrollView *panel_frame = new ScrollView(carSelectionPanel, this);
-  panel_widget->addWidget(panel_frame);
-  QObject::connect(car_selection_btn, &QPushButton::clicked, [=, w = panel_frame]() {
-    car_selection_btn->setChecked(true);
-    panel_widget->setCurrentWidget(w);
-  });
-//  panels.push_back({"CarSelection", carSelectionPanel});
+  // Create a QHBoxLayout to arrange the label and button horizontally
+  QHBoxLayout* layout = new QHBoxLayout;
+  layout->addWidget(vehicle_model_label);
+  layout->addWidget(car_selection_btn);
+  layout->setAlignment(Qt::AlignCenter);
+  layout->setStretch(1, 1); // Stretch the second item (car_selection_btn) to occupy available space
 
-  QWidget *dp_panel_widget = new QWidget;
-  QVBoxLayout *dp_panel_widget_layout = new QVBoxLayout;
+  // Create the panel widget and add the layout
+  QWidget* dp_panel_widget = new QWidget;
+  QVBoxLayout* dp_panel_widget_layout = new QVBoxLayout;
   dp_panel_widget->setContentsMargins(QMargins());
   dp_panel_widget_layout->addSpacing(10);
-  dp_panel_widget_layout->addWidget(car_selection_btn, 0, Qt::AlignCenter);
+  dp_panel_widget_layout->addLayout(layout); // Add the QHBoxLayout to the vertical layout
+
+  // Create the scroll panel
+  auto carSelectionPanel = new CarSelectionPanel(this);
+  ScrollView* panel_frame = new ScrollView(carSelectionPanel, dp_panel_widget);
+  panel_widget->addWidget(panel_frame);
+  QObject::connect(car_selection_btn, &QPushButton::clicked, [=, w = panel_frame]() {
+      car_selection_btn->setChecked(true);
+      panel_widget->setCurrentWidget(w);
+  });
+
   dp_panel_widget_layout->addSpacing(10);
   dp_panel_widget_layout->addWidget(panel_widget);
   dp_panel_widget->setLayout(dp_panel_widget_layout);
 
   main_layout->addWidget(dp_panel_widget);
 
+  // Update the button text when a car is selected
   connect(carSelectionPanel, &CarSelectionPanel::carSelected, [=]() {
       QString selectedCarModel = QString::fromStdString(Params().get("dp_car_assigned"));
-      car_selection_btn->setText(selectedCarModel.length() ? selectedCarModel : tr("===== Unselected ====="));
+      car_selection_btn->setText(selectedCarModel.length() ? selectedCarModel : tr("[AUTO SELECT]"));
   });
 
   setStyleSheet(R"(
