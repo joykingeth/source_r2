@@ -97,6 +97,8 @@ class CAR:
   INSIGHT = "HONDA INSIGHT 2019"
   HONDA_E = "HONDA E 2020"
 
+  CRV_HYBRID_BSM = "HONDA CR-V HYBRID 2019 w/ BSM"
+
 
 class Footnote(Enum):
   CIVIC_DIESEL = CarFootnote(
@@ -198,6 +200,7 @@ FW_QUERY_CONFIG = FwQueryConfig(
 )
 
 FW_VERSIONS = {
+  CAR.CRV_HYBRID_BSM: {(Ecu.vsa, 0xfff, None): [b'\x00']},
   CAR.ACCORD: {
     (Ecu.programmedFuelInjection, 0x18da10f1, None): [
       b'37805-6A0-8720\x00\x00',
@@ -1568,6 +1571,7 @@ DBC = {
   CAR.CRV_5G: dbc_dict('honda_crv_ex_2017_can_generated', None, body_dbc='honda_crv_ex_2017_body_generated'),
   CAR.CRV_EU: dbc_dict('honda_crv_executive_2016_can_generated', 'acura_ilx_2016_nidec'),
   CAR.CRV_HYBRID: dbc_dict('honda_accord_2018_can_generated', None),
+  CAR.CRV_HYBRID_BSM: dbc_dict('honda_accord_2018_can_generated', None, body_dbc='honda_crv_ex_2017_body_generated'),
   CAR.FIT: dbc_dict('honda_fit_ex_2018_can_generated', 'acura_ilx_2016_nidec'),
   CAR.FREED: dbc_dict('honda_fit_ex_2018_can_generated', 'acura_ilx_2016_nidec'),
   CAR.HRV: dbc_dict('honda_fit_ex_2018_can_generated', 'acura_ilx_2016_nidec'),
@@ -1591,6 +1595,6 @@ HONDA_NIDEC_ALT_PCM_ACCEL = {CAR.ODYSSEY}
 HONDA_NIDEC_ALT_SCM_MESSAGES = {CAR.ACURA_ILX, CAR.ACURA_RDX, CAR.CRV, CAR.CRV_EU, CAR.FIT, CAR.FREED, CAR.HRV, CAR.ODYSSEY_CHN,
                                 CAR.PILOT, CAR.RIDGELINE}
 HONDA_BOSCH = {CAR.ACCORD, CAR.ACCORDH, CAR.CIVIC_BOSCH, CAR.CIVIC_BOSCH_DIESEL, CAR.CRV_5G,
-               CAR.CRV_HYBRID, CAR.INSIGHT, CAR.ACURA_RDX_3G, CAR.HONDA_E, CAR.CIVIC_2022, CAR.HRV_3G}
+               CAR.CRV_HYBRID, CAR.INSIGHT, CAR.ACURA_RDX_3G, CAR.HONDA_E, CAR.CIVIC_2022, CAR.HRV_3G, CAR.CRV_HYBRID_BSM}
 HONDA_BOSCH_ALT_BRAKE_SIGNAL = {CAR.ACCORD, CAR.CRV_5G, CAR.ACURA_RDX_3G, CAR.HRV_3G}
 HONDA_BOSCH_RADARLESS = {CAR.CIVIC_2022, CAR.HRV_3G}

@@ -7,6 +7,7 @@ from selfdrive.car.honda.values import CarControllerParams, CruiseButtons, Honda
 from selfdrive.car import STD_CARGO_KG, CivicParams, create_button_event, scale_tire_stiffness, get_safety_config
 from selfdrive.car.interfaces import CarInterfaceBase
 from selfdrive.car.disable_ecu import disable_ecu
+from common.params import Params
 
 
 ButtonType = car.CarState.ButtonEvent.Type
@@ -50,7 +51,7 @@ class CarInterface(CarInterfaceBase):
 
       ret.pcmCruise = not ret.enableGasInterceptor
 
-    if candidate == CAR.CRV_5G:
+    if candidate in (CAR.CRV_5G, CAR.CRV_HYBRID_BSM):
       ret.enableBsm = 0x12f8bfa7 in fingerprint[0]
 
     # Detect Bosch cars with new HUD msgs
@@ -164,7 +165,7 @@ class CarInterface(CarInterfaceBase):
       tire_stiffness_factor = 0.677
       ret.wheelSpeedFactor = 1.025
 
-    elif candidate == CAR.CRV_HYBRID:
+    elif candidate in (CAR.CRV_HYBRID, CAR.CRV_HYBRID_BSM):
       ret.mass = 1667. + STD_CARGO_KG  # mean of 4 models in kg
       ret.wheelbase = 2.66
       ret.centerToFront = ret.wheelbase * 0.41
