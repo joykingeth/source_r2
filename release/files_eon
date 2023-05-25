@@ -37,6 +37,7 @@ system/sensord/sensors_qcom.cc
 
 selfdrive/assets/fonts/*
 selfdrive/assets/training_legacy/**
+selfdrive/assets/locales/**
 
 selfdrive/controls/lib/legacy_lateral_mpc_lib/**
 selfdrive/controls/lib/legacy_longitudinal_mpc_lib/**
