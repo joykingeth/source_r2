@@ -31,9 +31,9 @@ _DP_E2E_LEAD_COUNT = 5
 
 _DP_E2E_STOP_BP = [0., 10., 20., 30., 40., 50., 55.]
 _DP_E2E_STOP_DIST = [10, 30., 50., 70., 80., 90., 120.]
-_DP_E2E_STOP_COUNT = 5
+_DP_E2E_STOP_COUNT = 3
 
-_DP_E2E_SNG_COUNT = 5
+_DP_E2E_SNG_COUNT = 3
 _DP_E2E_SNG_ACC_COUNT = 5
 _DP_E2E_SWAP_COUNT = 10
 
@@ -276,6 +276,7 @@ class LongitudinalPlanner:
     longitudinalPlan.hasLead = sm['radarState'].leadOne.status
     longitudinalPlan.longitudinalPlanSource = self.mpc.source
     longitudinalPlan.fcw = self.fcw
+    longitudinalPlan.longitudinalValid = self.mpc.mode == 'acc'
 
     longitudinalPlan.solverExecutionTime = self.mpc.solve_time
 
