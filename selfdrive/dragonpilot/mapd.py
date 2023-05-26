@@ -30,6 +30,8 @@ from cereal import log
 import overpy
 import os
 import subprocess
+from common.conversions import Conversions as CV
+import re
 
 OSM_QUERY = ["/data/media/0/osm/bin/osm3s_query", "--db-dir=/data/media/0/osm/db/"]
 
@@ -56,7 +58,7 @@ class OSM():
       self.local_osm_enabled = False
     print("Local OSM enabled = %s" % self.local_osm_enabled)
 
-  def process_res(self, res):
+  def _process_res(self, res):
     if len(res) > 0:
       self._way_tags = res[0].tags
       self.way_id = res[0].id
@@ -80,7 +82,7 @@ class OSM():
       try:
         completion = subprocess.run(OSM_QUERY + [f"--request={q}"], check=True, capture_output=True)
         res = self._api.parse_xml(completion.stdout).ways
-        self.process_res(res)
+        self._process_res(res)
       except Exception as e:
         self._local_osm_query_fail_count += 1
         pass
@@ -92,7 +94,7 @@ class OSM():
         return
       try:
         res = self._api.query(q).ways
-        self.process_res(res)
+        self._process_res(res)
         self._local_osm_query_fail_count = 0
       except Exception as e:
         print(f'Exception while querying OSM:\n{e}')
@@ -102,11 +104,52 @@ class OSM():
 
   def _process_tags(self):
     if len(self._way_tags) > 0:
-      for tag in self._way_tags:
-        if tag.startswith("name"):
-          self.road_name = self._way_tags[tag]
-        elif tag.startswith("maxspeed"):
-          self.speed_limit = self._way_tags[tag]
+      self._process_road_name_tag()
+      self._process_speed_limit_tags()
+      # print([self.road_name, self.speed_limit])
+
+  def _process_road_name_tag(self):
+    tag_value = self._way_tags.get("name")
+    if tag_value is not None:
+      self.road_name = str(tag_value).strip()
+    else:
+      self.road_name = ""
+
+  def _process_speed_limit_tags(self):
+    self.speed_limit = self._speed_limit_for_osm_tag_value(self._way_tags.get("maxspeed"))
+
+  # rick - speed limit processor from move-fast
+  # https://github.com/move-fast/openpilot/blob/b170d1bc123a0cf2b872050fbd5e2eecd1b23e22/selfdrive/mapd/lib/WayRelation.py#L95
+  def _speed_limit_for_osm_tag_value(self, value):
+    # https://wiki.openstreetmap.org/wiki/Key:maxspeed
+    if value is None:
+      # When limit is set to 0. is considered not existing.
+      return 0.
+
+    # Attempt to parse limit as simple numeric value considering units.
+    limit = self._speed_limit_value_for_value(value)
+    if limit is not None:
+      return limit
+
+    # Look for matches of speed with country implicit values.
+    v = re.match(r'^\s*([A-Z]{2}):([a-z_]+):?([0-9]{1,3})?(\s+)?(mph)?\s*', value)
+    if v is None:
+      return 0.
+
+    if v[2] == "zone" and v[3] is not None:
+      conv = CV.MPH_TO_MS if v[5] is not None and v[5] == "mph" else CV.KPH_TO_MS
+      limit = conv * float(v[3])
+
+    return limit if limit is not None else 0.
+
+  def _speed_limit_value_for_value(self, value):
+    # Look for matches of speed by default in kph, or in mph when explicitly noted.
+    v = re.match(r'^\s*([0-9]{1,3})\s*?(mph)?\s*$', value)
+    if v is None:
+      return None
+    conv = CV.MPH_TO_MS if v[2] is not None and v[2] == "mph" else CV.KPH_TO_MS
+    return conv * float(v[1])
+
 
 class MapD():
   def __init__(self, position_service):
