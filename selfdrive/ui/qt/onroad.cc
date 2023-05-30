@@ -294,12 +294,15 @@ void AnnotatedCameraWidget::updateState(const UIState &s) {
   // update engageability/experimental mode button
   experimental_btn->updateState(s);
 
-  // update DM icons at 2Hz
-  if (sm.frame % (UI_FREQ / 2) == 0) {
-    setProperty("dmActive", sm["driverMonitoringState"].getDriverMonitoringState().getIsActiveMode());
-    setProperty("rightHandDM", sm["driverMonitoringState"].getDriverMonitoringState().getIsRHD());
-  }
+  // update DM icon
+  auto dm_state = sm["driverMonitoringState"].getDriverMonitoringState();
+  setProperty("dmActive", dm_state.getIsActiveMode());
+  setProperty("rightHandDM", dm_state.getIsRHD());
 
+  // DM icon transition
+  dm_fade_state = std::clamp(dm_fade_state+0.2*(0.5-dmActive), 0.0, 1.0);
+
+  // mapd
   auto lmd = sm["liveMapData"].getLiveMapData();
   setProperty("roadName", QString::fromStdString(lmd.getCurrentRoadName()));
   if (!nav_alive && lmd.getSpeedLimit() > 0) {
@@ -308,10 +311,8 @@ void AnnotatedCameraWidget::updateState(const UIState &s) {
     setProperty("has_eu_speed_limit", speed_limit > 1);
     setProperty("speed_limit_valid", lmd.getSpeedLimitValid());
   }
+  // laneline mode
   setProperty("use_lanelines", sm["lateralPlan"].getLateralPlan().getUseLaneLines());
-
-  // DM icon transition
-  dm_fade_state = fmax(0.0, fmin(1.0, dm_fade_state+0.2*(0.5-(float)(dmActive))));
 }
 
 void AnnotatedCameraWidget::drawHud(QPainter &p) {
