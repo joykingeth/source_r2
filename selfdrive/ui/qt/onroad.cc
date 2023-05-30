@@ -294,6 +294,7 @@ void AnnotatedCameraWidget::updateState(const UIState &s) {
   // update engageability/experimental mode button
   experimental_btn->updateState(s);
 
+  #ifndef QCOM
   // update DM icon
   auto dm_state = sm["driverMonitoringState"].getDriverMonitoringState();
   setProperty("dmActive", dm_state.getIsActiveMode());
@@ -301,6 +302,13 @@ void AnnotatedCameraWidget::updateState(const UIState &s) {
 
   // DM icon transition
   dm_fade_state = std::clamp(dm_fade_state+0.2*(0.5-dmActive), 0.0, 1.0);
+  #else
+  // update DM icons at 2Hz
+  if (sm.frame % (UI_FREQ / 2) == 0) {
+    setProperty("dmActive", sm["driverMonitoringState"].getDriverMonitoringState().getIsActiveMode());
+    setProperty("rightHandDM", sm["driverMonitoringState"].getDriverMonitoringState().getIsRHD());
+  }
+  #endif
 
   // mapd
   auto lmd = sm["liveMapData"].getLiveMapData();
