@@ -189,7 +189,6 @@ std::unordered_map<std::string, uint32_t> keys = {
     {"ApiCache_Device", PERSISTENT},
     {"ApiCache_DriveStats", PERSISTENT},
     {"ApiCache_NavDestinations", PERSISTENT},
-    {"ApiCache_Owner", PERSISTENT},
     {"Offroad_BadNvme", CLEAR_ON_MANAGER_START},
     {"Offroad_CarUnrecognized", CLEAR_ON_MANAGER_START | CLEAR_ON_ONROAD_TRANSITION},
     {"Offroad_ConnectivityNeeded", CLEAR_ON_MANAGER_START},
@@ -206,6 +205,7 @@ std::unordered_map<std::string, uint32_t> keys = {
 
     {"dp_no_gps_ctrl", PERSISTENT},
     {"dp_no_fan_ctrl", PERSISTENT},
+    {"dp_logging", PERSISTENT},
 
     // dp - car selector
     {"dp_car_assigned", PERSISTENT},
