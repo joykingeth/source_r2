@@ -8,4 +8,12 @@ if [ -f /EON ]; then
 else
   export LD_LIBRARY_PATH="$DIR/../../third_party/snpe/x86_64-linux-clang:$DIR/../../openpilot/third_party/snpe/x86_64:$LD_LIBRARY_PATH"
 fi
-exec ./_modeld
+old_model="0"
+if [ -f /data/params/d/dp_0813 ]; then
+  old_model=`cat /data/params/d/dp_0813`
+fi
+if [ $old_model == "1" ]; then
+  exec ./_modeld_0813
+else
+  exec ./_modeld
+fi
