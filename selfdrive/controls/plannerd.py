@@ -5,12 +5,15 @@ from common.params import Params
 from common.realtime import Priority, config_realtime_process
 from system.swaglog import cloudlog
 from selfdrive.hybrid_modeld.constants import T_IDXS
-from selfdrive.controls.lib.longitudinal_planner import LongitudinalPlanner
-from selfdrive.controls.lib.lateral_planner import LateralPlanner
-# from selfdrive.controls.lib.legacy_longitudinal_planner import LongitudinalPlanner
-# from selfdrive.controls.lib.legacy_lateral_planner import LateralPlanner
 import cereal.messaging as messaging
 from system.hardware import TICI
+
+if Params().get_bool("dp_0813"):
+  from selfdrive.controls.lib.legacy_longitudinal_planner import LongitudinalPlanner
+  from selfdrive.controls.lib.legacy_lateral_planner import LateralPlanner
+else:
+  from selfdrive.controls.lib.longitudinal_planner import LongitudinalPlanner
+  from selfdrive.controls.lib.lateral_planner import LateralPlanner
 
 def cumtrapz(x, t):
   return np.concatenate([[0], np.cumsum(((x[0:-1] + x[1:])/2) * np.diff(t))])

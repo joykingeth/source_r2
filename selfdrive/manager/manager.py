@@ -51,6 +51,7 @@ def manager_init() -> None:
     ("dp_alka", "1"),
     ("dp_mapd", "1"),
     ("dp_lat_lane_priority_mode", "0"),
+    ("dp_0813", "0"),
   ]
   if not PC:
     default_params.append(("LastUpdateTime", datetime.datetime.utcnow().isoformat().encode('utf8')))

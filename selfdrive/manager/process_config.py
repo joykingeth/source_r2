@@ -32,6 +32,9 @@ def ublox(started, params, CP: car.CarParams) -> bool:
 def qcomgps(started, params, CP: car.CarParams) -> bool:
   return started and not ublox_available()
 
+def use_old_modeld(started, params, CP: car.CarParams) -> bool:
+  return params.get_bool("dp_0813")
+
 procs = [
   # due to qualcomm kernel bugs SIGKILLing camerad sometimes causes page table corruption
   NativeProcess("camerad", "selfdrive/camerad", ["./camerad"], unkillable=True, callback=driverview),
@@ -46,8 +49,8 @@ procs = [
   NativeProcess("dmonitoringmodeld", "selfdrive/hybrid_modeld", ["./dmonitoringmodeld"], enabled=(not PC or WEBCAM) and not NO_IR_CTRL, callback=driverview),
   # NativeProcess("encoderd", "system/loggerd", ["./encoderd"]),
   NativeProcess("loggerd", "selfdrive/loggerd", ["./loggerd"], onroad=False, callback=logging),
-  NativeProcess("modeld", "selfdrive/hybrid_modeld", ["./modeld"]),
-  # NativeProcess("modeld", "selfdrive/hybrid_modeld", ["./modeld_0813"]),
+  NativeProcess("modeld", "selfdrive/hybrid_modeld", ["./modeld"], callback=not use_old_modeld),
+  NativeProcess("modeld", "selfdrive/hybrid_modeld", ["./modeld_0813"], callback=use_old_modeld),
   # NativeProcess("mapsd", "selfdrive/navd", ["./map_renderer"], enabled=False),
   # NativeProcess("navmodeld", "selfdrive/modeld", ["./navmodeld"], enabled=False),
   NativeProcess("sensord", "system/sensord", ["./sensord"], enabled=not PC, offroad=True),
