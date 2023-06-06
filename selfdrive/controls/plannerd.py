@@ -7,6 +7,8 @@ from system.swaglog import cloudlog
 from selfdrive.hybrid_modeld.constants import T_IDXS
 from selfdrive.controls.lib.longitudinal_planner import LongitudinalPlanner
 from selfdrive.controls.lib.lateral_planner import LateralPlanner
+# from selfdrive.controls.lib.legacy_longitudinal_planner import LongitudinalPlanner
+# from selfdrive.controls.lib.legacy_lateral_planner import LateralPlanner
 import cereal.messaging as messaging
 from system.hardware import TICI
 
