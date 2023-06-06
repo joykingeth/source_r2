@@ -1,4 +1,4 @@
-#include "selfdrive/hybrid_modeld/models/driving.h"
+#include "selfdrive/legacy_modeld/models/driving.h"
 
 #include <fcntl.h>
 #include <unistd.h>
@@ -11,7 +11,6 @@
 #include "common/clutil.h"
 #include "common/params.h"
 #include "common/timing.h"
-#include "common/swaglog.h"
 
 constexpr float FCW_THRESHOLD_5MS2_HIGH = 0.15;
 constexpr float FCW_THRESHOLD_5MS2_LOW = 0.05;
@@ -22,18 +21,21 @@ std::array<float, 3> prev_brake_3ms2_probs = {0,0,0};
 
 // #define DUMP_YUV
 
+template<class T, size_t size>
+constexpr const kj::ArrayPtr<const T> to_kj_array_ptr(const std::array<T, size> &arr) {
+  return kj::ArrayPtr(arr.data(), arr.size());
+}
+
 void model_init(ModelState* s, cl_device_id device_id, cl_context context) {
   s->frame = new ModelFrame(device_id, context);
-  s->wide_frame = new ModelFrame(device_id, context);
 
 #ifdef USE_THNEED
-  s->m = std::make_unique<ThneedModel>("models/supercombo.thneed",
+  s->m = std::make_unique<ThneedModel>("models/supercombo.thneed", &s->output[0], NET_OUTPUT_SIZE, USE_GPU_RUNTIME);
 #elif USE_ONNX_MODEL
-  s->m = std::make_unique<ONNXModel>("models/supercombo.onnx",
+  s->m = std::make_unique<ONNXModel>("models/supercombo.onnx", &s->output[0], NET_OUTPUT_SIZE, USE_GPU_RUNTIME);
 #else
-  s->m = std::make_unique<SNPEModel>("models/supercombo.dic",
+  s->m = std::make_unique<SNPEModel>("models/supercombo.dlc", &s->output[0], NET_OUTPUT_SIZE, USE_GPU_RUNTIME);
 #endif
-   &s->output[0], NET_OUTPUT_SIZE, USE_GPU_RUNTIME, true);
 
 #ifdef TEMPORAL
   s->m->addRecurrent(&s->output[OUTPUT_SIZE], TEMPORAL_SIZE);
@@ -44,17 +46,10 @@ void model_init(ModelState* s, cl_device_id device_id, cl_context context) {
 #endif
 
 #ifdef TRAFFIC_CONVENTION
+  const int idx = Params().getBool("IsRhdDetected") ? 1 : 0;
+  s->traffic_convention[idx] = 1.0;
   s->m->addTrafficConvention(s->traffic_convention, TRAFFIC_CONVENTION_LEN);
 #endif
-
-#ifdef DRIVING_STYLE
-  s->m->addDrivingStyle(s->driving_style, DRIVING_STYLE_LEN);
-#endif
-
-#ifdef NAV
-  s->m->addNavFeatures(s->nav_features, NAV_FEATURE_LEN);
-#endif
-
 }
 
 ModelOutput* model_eval_frame(ModelState* s, VisionBuf* buf, VisionBuf* wbuf,
@@ -73,18 +68,6 @@ ModelOutput* model_eval_frame(ModelState* s, VisionBuf* buf, VisionBuf* wbuf,
     }
   }
 #endif
-
-#ifdef NAV
-  std::memcpy(s->nav_features, nav_features, sizeof(float)*NAV_FEATURE_LEN);
-#endif
-
-#ifdef DRIVING_STYLE
-  std::memcpy(s->driving_style, driving_style, sizeof(float)*DRIVING_STYLE_LEN);
-#endif
-
-  int rhd_idx = is_rhd;
-  s->traffic_convention[rhd_idx] = 1.0;
-  s->traffic_convention[1-rhd_idx] = 0.0;
 
   // if getInputBuf is not NULL, net_input_buf will be
   auto net_input_buf = s->frame->prepare(buf->buf_cl, buf->width, buf->height, transform, static_cast<cl_mem*>(s->m->getInputBuf()));
@@ -215,7 +198,6 @@ void fill_plan(cereal::ModelDataV2::Builder &framed, const ModelOutputPlanPredic
   std::array<float, TRAJECTORY_SIZE> pos_x_std, pos_y_std, pos_z_std;
   std::array<float, TRAJECTORY_SIZE> vel_x, vel_y, vel_z;
   std::array<float, TRAJECTORY_SIZE> rot_x, rot_y, rot_z;
-  std::array<float, TRAJECTORY_SIZE> acc_x, acc_y, acc_z;
   std::array<float, TRAJECTORY_SIZE> rot_rate_x, rot_rate_y, rot_rate_z;
 
   for(int i=0; i<TRAJECTORY_SIZE; i++) {
@@ -228,9 +210,6 @@ void fill_plan(cereal::ModelDataV2::Builder &framed, const ModelOutputPlanPredic
     vel_x[i] = plan.mean[i].velocity.x;
     vel_y[i] = plan.mean[i].velocity.y;
     vel_z[i] = plan.mean[i].velocity.z;
-    acc_x[i] = plan.mean[i].acceleration.x;
-    acc_y[i] = plan.mean[i].acceleration.y;
-    acc_z[i] = plan.mean[i].acceleration.z;
     rot_x[i] = plan.mean[i].rotation.x;
     rot_y[i] = plan.mean[i].rotation.y;
     rot_z[i] = plan.mean[i].rotation.z;
@@ -241,7 +220,6 @@ void fill_plan(cereal::ModelDataV2::Builder &framed, const ModelOutputPlanPredic
 
   fill_xyzt(framed.initPosition(), T_IDXS_FLOAT, pos_x, pos_y, pos_z, pos_x_std, pos_y_std, pos_z_std);
   fill_xyzt(framed.initVelocity(), T_IDXS_FLOAT, vel_x, vel_y, vel_z);
-  fill_xyzt(framed.initAcceleration(), T_IDXS_FLOAT, acc_x, acc_y, acc_z);
   fill_xyzt(framed.initOrientation(), T_IDXS_FLOAT, rot_x, rot_y, rot_z);
   fill_xyzt(framed.initOrientationRate(), T_IDXS_FLOAT, rot_rate_x, rot_rate_y, rot_rate_z);
 }
