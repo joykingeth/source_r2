@@ -91,32 +91,6 @@
     </message>
 </context>
 <context>
-    <name>C2NetworkPanel</name>
-    <message>
-        <source>Wi-Fi Settings</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>OPEN</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Tethering Settings</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>IP Address</source>
-        <translation type="unfinished">IP アドレス</translation>
-    </message>
-</context>
-<context>
-    <name>CarSelectionPanel</name>
-    <message>
-        <source>[AUTO SELECT]</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>ConfirmationDialog</name>
     <message>
         <source>Ok</source>
@@ -271,14 +245,6 @@
     <message>
         <source>Review</source>
         <translation>確認</translation>
-    </message>
-    <message>
-        <source>Debug Console</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Error displaying tmux output.</source>
-        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -656,14 +622,6 @@ This may take up to a minute.</source>
         <source>Navigation</source>
         <translation>ﾅﾋﾞｹﾞｰｼｮﾝ</translation>
     </message>
-    <message>
-        <source>Vehicle Model:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>[AUTO SELECT]</source>
-        <translation type="unfinished"></translation>
-    </message>
 </context>
 <context>
     <name>Setup</name>
@@ -896,6 +854,26 @@ This may take up to a minute.</source>
         <source>Uninstall</source>
         <translation>アンインストール</translation>
     </message>
+    <message>
+        <source>failed to check for update</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>up to date, last checked %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>DOWNLOAD</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>update available</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>never</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>SshControl</name>
@@ -1073,38 +1051,23 @@ This may take up to a minute.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Enable Right-Hand Drive</source>
+        <source>Aggressive</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Allow openpilot to obey left-hand traffic conventions and perform driver monitoring on right driver seat.</source>
+        <source>Standard</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Enable ALKA</source>
+        <source>Relaxed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>When enabled, openpilot lateral Control will be always on when ACC MAIN is ON.
-Reboot required.</source>
+        <source>Driving Personality</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Enable MapD</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>When enabled, openpilot will display current road name and speed limit on the screen.
-Reboot required.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Enable Lane Priority Mode</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>When enabled, openpilot will use lane lines for lateral control, fallback to laneless mode automatically when lane lines probabilities are low.
-Reboot required.</source>
+        <source>Standard is recommended. In aggressive mode, openpilot will follow lead cars closer and be more aggressive with the gas and brake.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
