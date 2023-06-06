@@ -9,6 +9,19 @@ from selfdrive.controls.lib.desire_helper import DesireHelper
 import cereal.messaging as messaging
 from cereal import log
 
+STEER_RATE_COST = {
+  "chrysler": 0.7,
+  "ford": 1.,
+  "gm": 1.,
+  "honda": 0.5,
+  "hyundai": 0.5,
+  "mazda": 1.,
+  "nissan": 0.5,
+  "subaru": 0.7,
+  "tesla": 0.5,
+  "toyota": 1.,
+  "volkswagen": 1.,
+}
 
 class LateralPlanner:
   def __init__(self, CP, use_lanelines=True):
@@ -17,7 +30,10 @@ class LateralPlanner:
     self.DH = DesireHelper()
 
     self.last_cloudlog_t = 0
-    self.steer_rate_cost = CP.steerRateCost
+    try:
+      self.steer_rate_cost = STEER_RATE_COST[CP.carName]
+    except:
+      self.steer_rate_cost = 0.
     self.solution_invalid_cnt = 0
 
     self.path_xyz = np.zeros((TRAJECTORY_SIZE, 3))
