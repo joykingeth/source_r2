@@ -58,7 +58,7 @@ CarSelectionPanel::CarSelectionPanel(SettingsWindow *parent) : QWidget(parent) {
 
   QObject::connect(car_list, QOverload<QListWidgetItem*>::of(&QListWidget::itemClicked), [=](QListWidgetItem* item) {
     QString text = item->text();
-    Params().put("dp_car_assigned", text == "[AUTO SELECT]"? "" : text.toStdString());
+    Params().put("dp_car_assigned", text == tr("[AUTO SELECT]")? "" : text.toStdString());
     item->setSelected(false);
     emit carSelected();
     parent->closeSettings();
