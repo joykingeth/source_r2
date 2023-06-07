@@ -147,7 +147,7 @@ public:
     key = param.toStdString();
     QObject::connect(this, &ParamControl::toggleFlipped, [=](bool state) {
       QString content("<body><h2 style=\"text-align: center;\">" + title + "</h2><br>"
-                      "<p style=\"text-align: center; margin: 0 128px; font-size: 50px;\">" + getDescription() + "</p></body>");
+                      "<p style=\"text-align: center; margin: 0 128px; font-size: 36px;\">" + getDescription() + "</p></body>");
       ConfirmationDialog dialog(content, tr("Enable"), tr("Cancel"), true, this);
 
       bool confirmed = store_confirm && params.getBool(key + "Confirmed");
@@ -205,10 +205,10 @@ public:
                      const std::vector<QString> &button_texts) : AbstractControl(title, desc, icon) {
     const QString style = R"(
       QPushButton {
-        border-radius: 50px;
-        font-size: 40px;
+        border-radius: 40px;
+        font-size: 32px;
         font-weight: 500;
-        height:100px;
+        height:80px;
         padding: 0 25 0 25;
         color: #E4E4E4;
         background-color: #393939;
@@ -254,7 +254,7 @@ class ListWidget : public QWidget {
     outer_layout.setSpacing(0);
     outer_layout.addLayout(&inner_layout);
     inner_layout.setMargin(0);
-    inner_layout.setSpacing(25); // default spacing is 25
+    inner_layout.setSpacing(20); // default spacing is 25
     outer_layout.addStretch();
   }
   inline void addItem(QWidget *w) { inner_layout.addWidget(w); }
