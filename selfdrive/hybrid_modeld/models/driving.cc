@@ -31,7 +31,7 @@ void model_init(ModelState* s, cl_device_id device_id, cl_context context) {
 #elif USE_ONNX_MODEL
   s->m = std::make_unique<ONNXModel>("models/supercombo.onnx",
 #else
-  s->m = std::make_unique<SNPEModel>("models/supercombo.dic",
+  s->m = std::make_unique<SNPEModel>("models/supercombo.dlc",
 #endif
    &s->output[0], NET_OUTPUT_SIZE, USE_GPU_RUNTIME, true);
 
