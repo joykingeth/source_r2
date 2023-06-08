@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-24 11:41+0800\n"
+"POT-Creation-Date: 2023-06-08 16:04+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: nikkurie <@nikkurie>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -502,15 +502,12 @@ msgstr "ローメモリ:デバイスを再起動"
 
 #: ../selfdrive/controls/lib/events.py:830
 #: ../selfdrive/controls/lib/events.py:832
-#: ../selfdrive/controls/lib/events.py:897
-#: ../selfdrive/controls/lib/events.py:899
-#: ../selfdrive/controls/lib/events.py:956
+#: ../selfdrive/controls/lib/events.py:950
 msgid "Cruise Fault: Restart the Car"
 msgstr "クルーズ失敗:車を再起動"
 
 #: ../selfdrive/controls/lib/events.py:831
-#: ../selfdrive/controls/lib/events.py:898
-#: ../selfdrive/controls/lib/events.py:955
+#: ../selfdrive/controls/lib/events.py:949
 msgid "Cruise Fault: Restart the car to engage"
 msgstr "クルーズ失敗:車を再起動後発進"
 
@@ -569,78 +566,78 @@ msgstr "LKASの故障:車を再起動"
 msgid "LKAS Fault: Restart the car to engage"
 msgstr "LKASの故障:車を再起動後発進"
 
-#: ../selfdrive/controls/lib/events.py:904
+#: ../selfdrive/controls/lib/events.py:898
 #, fuzzy
 msgid ""
 "Reverse\n"
 "Gear"
 msgstr "Rに切り替え"
 
-#: ../selfdrive/controls/lib/events.py:908
-#: ../selfdrive/controls/lib/events.py:909
+#: ../selfdrive/controls/lib/events.py:902
+#: ../selfdrive/controls/lib/events.py:903
 msgid "Reverse Gear"
 msgstr "Rに切り替え"
 
-#: ../selfdrive/controls/lib/events.py:915
+#: ../selfdrive/controls/lib/events.py:909
 msgid "Cruise Is Off"
 msgstr "クルーズコントロールオフ"
 
-#: ../selfdrive/controls/lib/events.py:922
-#: ../selfdrive/controls/lib/events.py:923
+#: ../selfdrive/controls/lib/events.py:916
+#: ../selfdrive/controls/lib/events.py:917
 msgid "Planner Solution Error"
 msgstr "Planner Solution エラー"
 
-#: ../selfdrive/controls/lib/events.py:931
-#: ../selfdrive/controls/lib/events.py:932
-#: ../selfdrive/controls/lib/events.py:933
+#: ../selfdrive/controls/lib/events.py:925
+#: ../selfdrive/controls/lib/events.py:926
+#: ../selfdrive/controls/lib/events.py:927
 #, fuzzy
 msgid "Harness Relay Malfunction"
 msgstr "ハーネスが故障"
 
-#: ../selfdrive/controls/lib/events.py:932
+#: ../selfdrive/controls/lib/events.py:926
 #, fuzzy
 msgid "Check Hardware"
 msgstr "ハードウェアを確認して"
 
-#: ../selfdrive/controls/lib/events.py:938
+#: ../selfdrive/controls/lib/events.py:932
 msgid "openpilot Canceled"
 msgstr "オープンパイロットはキャンセルされました"
 
-#: ../selfdrive/controls/lib/events.py:939
+#: ../selfdrive/controls/lib/events.py:933
 msgid "Speed too low"
 msgstr "速度が遅すぎる"
 
-#: ../selfdrive/controls/lib/events.py:947
+#: ../selfdrive/controls/lib/events.py:941
 msgid "Speed Too High"
 msgstr "速度が速すぎる"
 
-#: ../selfdrive/controls/lib/events.py:948
+#: ../selfdrive/controls/lib/events.py:942
 msgid "Model uncertain at this speed"
 msgstr ""
 
-#: ../selfdrive/controls/lib/events.py:951
+#: ../selfdrive/controls/lib/events.py:945
 msgid "Slow down to engage"
 msgstr "速度を落として発進"
 
-#: ../selfdrive/controls/lib/events.py:960
+#: ../selfdrive/controls/lib/events.py:954
 #, fuzzy
 msgid "LKAS Disabled: Enable LKAS to engage"
 msgstr "LKASの故障:車を再起動後発進"
 
-#: ../selfdrive/controls/lib/events.py:961
+#: ../selfdrive/controls/lib/events.py:955
 msgid "LKAS Disabled"
 msgstr ""
 
-#: ../selfdrive/controls/lib/events.py:965
+#: ../selfdrive/controls/lib/events.py:959
 msgid "Vehicle Sensors Invalid"
 msgstr ""
 
-#: ../selfdrive/controls/lib/events.py:966
-#: ../selfdrive/controls/lib/events.py:967
+#: ../selfdrive/controls/lib/events.py:960
+#: ../selfdrive/controls/lib/events.py:961
 msgid "Vehicle Sensors Calibrating"
 msgstr ""
 
-#: ../selfdrive/controls/lib/events.py:966
+#: ../selfdrive/controls/lib/events.py:960
 #, fuzzy
 msgid "Drive to Calibrate"
 msgstr "ドライバーは注意力散漫"
