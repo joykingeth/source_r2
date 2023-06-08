@@ -199,7 +199,7 @@ void TogglesPanel::updateToggles() {
   auto e2e_toggle = toggles["ExperimentalMode"];
   if (params.getBool("dp_0813"))  {
     e2e_toggle->setVisible(false);
-    params.setBool("ExperimentalMode", false);
+    params.putBool("ExperimentalMode", false);
   }
 
   auto op_long_toggle = toggles["ExperimentalLongitudinalEnabled"];
