@@ -8,7 +8,7 @@ from cereal import log
 import cereal.messaging as messaging
 from common.filter_simple import FirstOrderFilter
 from common.realtime import DT_MDL
-from selfdrive.modeld.constants import T_IDXS
+from selfdrive.legacy_modeld.constants import T_IDXS
 from common.conversions import Conversions as CV
 from selfdrive.controls.lib.longcontrol import LongCtrlState
 from selfdrive.controls.lib.legacy_longitudinal_mpc_lib.long_mpc import LongitudinalMpc, STOP_DISTANCE
