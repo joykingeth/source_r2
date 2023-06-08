@@ -72,17 +72,17 @@ struct Alert {
       // Handle controls timeout
       if (sm.rcv_frame("controlsState") < started_frame) {
         // car is started, but controlsState hasn't been seen at all
-        return {tr("openpilot Unavailable"), tr("Waiting for controls to start"),
+        return {QObject::tr("openpilot Unavailable"), QObject::tr("Waiting for controls to start"),
                 "controlsWaiting", cereal::ControlsState::AlertSize::MID,
                 AudibleAlert::NONE};
       } else if (controls_missing > CONTROLS_TIMEOUT && !Hardware::PC()) {
         // car is started, but controls is lagging or died
         if (cs.getEnabled() && (controls_missing - CONTROLS_TIMEOUT) < 10) {
-          return {tr("TAKE CONTROL IMMEDIATELY"), tr("Controls Unresponsive"),
+          return {QObject::tr("TAKE CONTROL IMMEDIATELY"), QObject::tr("Controls Unresponsive"),
                   "controlsUnresponsive", cereal::ControlsState::AlertSize::FULL,
                   AudibleAlert::WARNING_IMMEDIATE};
         } else {
-          return {tr("Controls Unresponsive"), tr("Reboot Device"),
+          return {QObject::tr("Controls Unresponsive"), QObject::tr("Reboot Device"),
                   "controlsUnresponsivePermanent", cereal::ControlsState::AlertSize::MID,
                   AudibleAlert::NONE};
         }
