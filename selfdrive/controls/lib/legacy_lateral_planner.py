@@ -8,6 +8,7 @@ from selfdrive.controls.lib.lane_planner import LanePlanner, TRAJECTORY_SIZE
 from selfdrive.controls.lib.desire_helper import DesireHelper
 import cereal.messaging as messaging
 from cereal import log
+from common.params import Params
 
 STEER_RATE_COST = {
   "chrysler": 0.7,
@@ -24,10 +25,11 @@ STEER_RATE_COST = {
 }
 
 class LateralPlanner:
-  def __init__(self, CP, use_lanelines=True):
-    self.use_lanelines = use_lanelines
+  def __init__(self, CP):
     self.LP = LanePlanner()
     self.DH = DesireHelper()
+    self.dp_lat_lane_priority_mode = Params().get_bool("dp_lat_lane_priority_mode")
+    self.dp_lat_lane_priority_mode_active = False
 
     self.last_cloudlog_t = 0
     try:
@@ -72,8 +74,14 @@ class LateralPlanner:
       self.LP.lll_prob *= self.DH.lane_change_ll_prob
       self.LP.rll_prob *= self.DH.lane_change_ll_prob
 
+    # dp - check laneline prob when priority is on
+    use_laneline = False
+    if self.dp_lat_lane_priority_mode:
+      self._update_laneless_laneline_mode()
+      use_laneline = self.dp_lat_lane_priority_mode_active
+
     # Calculate final driving path and set MPC costs
-    if self.use_lanelines:
+    if use_laneline:
       d_path_xyz = self.LP.get_d_path(v_ego, self.t_idxs, self.path_xyz)
       self.lat_mpc.set_weights(MPC_COST_LAT.PATH, MPC_COST_LAT.HEADING, self.steer_rate_cost)
     else:
@@ -132,8 +140,16 @@ class LateralPlanner:
     lateralPlan.solverExecutionTime = self.lat_mpc.solve_time
 
     lateralPlan.desire = self.DH.desire
-    lateralPlan.useLaneLines = self.use_lanelines
+    lateralPlan.useLaneLines = self.dp_lat_lane_priority_mode and self.dp_lat_lane_priority_mode_active
     lateralPlan.laneChangeState = self.DH.lane_change_state
     lateralPlan.laneChangeDirection = self.DH.lane_change_direction
 
     pm.send('lateralPlan', plan_send)
+
+
+  def _update_laneless_laneline_mode(self):
+    # decide what mode should we use
+    if (self.LP.lll_prob + self.LP.rll_prob)/2 < 0.3:
+      self.dp_lat_lane_priority_mode_active = False
+    if (self.LP.lll_prob + self.LP.rll_prob)/2 > 0.5:
+      self.dp_lat_lane_priority_mode_active = True
