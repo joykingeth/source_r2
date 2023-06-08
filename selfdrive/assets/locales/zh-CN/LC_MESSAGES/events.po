@@ -28,7 +28,7 @@ msgstr "立即接管控制"
 #: ../selfdrive/controls/lib/events.py:171
 #, fuzzy
 msgid "openpilot will disengage"
-msgstr "Openpilot 将解除"
+msgstr "dragonpilot 将解除"
 
 #: ../selfdrive/controls/lib/events.py:198
 msgid "Always keep hands on wheel and eyes on road"
@@ -588,7 +588,7 @@ msgstr "请检查硬体"
 
 #: ../selfdrive/controls/lib/events.py:932
 msgid "openpilot Canceled"
-msgstr "openpilot 已取消"
+msgstr "dragonpilot 已取消"
 
 #: ../selfdrive/controls/lib/events.py:933
 msgid "Speed too low"

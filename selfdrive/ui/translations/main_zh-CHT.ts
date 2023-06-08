@@ -68,6 +68,29 @@
     </message>
 </context>
 <context>
+    <name>Alert</name>
+    <message>
+        <source>openpilot Unavailable</source>
+        <translation>無法使用 dragonpilot</translation>
+    </message>
+    <message>
+        <source>Waiting for controls to start</source>
+        <translation>等待控制服務開始</translation>
+    </message>
+    <message>
+        <source>TAKE CONTROL IMMEDIATELY</source>
+        <translation>立即接管控制</translation>
+    </message>
+    <message>
+        <source>Controls Unresponsive</source>
+        <translation>控制服務無回應</translation>
+    </message>
+    <message>
+        <source>Reboot Device</source>
+        <translation>重新啟動設備</translation>
+    </message>
+</context>
+<context>
     <name>AnnotatedCameraWidget</name>
     <message>
         <source>km/h</source>
@@ -278,7 +301,7 @@ Reboot Required.</source>
     <name>DeclinePage</name>
     <message>
         <source>You must accept the Terms and Conditions in order to use openpilot.</source>
-        <translation>您必須先接受條款和條件才能使用 openpilot。</translation>
+        <translation>您必須先接受條款和條件才能使用 dragonpilot。</translation>
     </message>
     <message>
         <source>Back</source>
@@ -337,7 +360,7 @@ Reboot Required.</source>
     </message>
     <message>
         <source>Review the rules, features, and limitations of openpilot</source>
-        <translation>觀看 openpilot 的使用規則、功能和限制</translation>
+        <translation>觀看 dragonpilot 的使用規則、功能和限制</translation>
     </message>
     <message>
         <source>Are you sure you want to review the training guide?</source>
@@ -373,7 +396,7 @@ Reboot Required.</source>
     </message>
     <message>
         <source>openpilot requires the device to be mounted within 4° left or right and within 5° up or 8° down. openpilot is continuously calibrating, resetting is rarely required.</source>
-        <translation>openpilot 需要將設備固定在左右偏差 4° 以內，朝上偏差 5° 以内或朝下偏差 8° 以内。鏡頭在後台會持續自動校準，很少有需要重置的情况。</translation>
+        <translation>dragonpilot 需要將設備固定在左右偏差 4° 以內，朝上偏差 5° 以内或朝下偏差 8° 以内。鏡頭在後台會持續自動校準，很少有需要重置的情况。</translation>
     </message>
     <message>
         <source> Your device is pointed %1° %2 and %3° %4.</source>
@@ -724,7 +747,7 @@ location set</source>
     </message>
     <message>
         <source>openpilot</source>
-        <translation>openpilot</translation>
+        <translation>dragonpilot</translation>
     </message>
     <message numerus="yes">
         <source>%n minute(s) ago</source>
@@ -1141,11 +1164,11 @@ This may take up to a minute.</source>
     <name>TogglesPanel</name>
     <message>
         <source>Enable openpilot</source>
-        <translation>啟用 openpilot</translation>
+        <translation>啟用 dragonpilot</translation>
     </message>
     <message>
         <source>Use the openpilot system for adaptive cruise control and lane keep driver assistance. Your attention is required at all times to use this feature. Changing this setting takes effect when the car is powered off.</source>
-        <translation>使用 openpilot 的主動式巡航和車道保持功能，開啟後您需要持續集中注意力，設定變更在重新啟動車輛後生效。</translation>
+        <translation>使用 dragonpilot 的主動式巡航和車道保持功能，開啟後您需要持續集中注意力，設定變更在重新啟動車輛後生效。</translation>
     </message>
     <message>
         <source>Enable Lane Departure Warnings</source>
@@ -1177,7 +1200,7 @@ This may take up to a minute.</source>
     </message>
     <message>
         <source>When enabled, pressing the accelerator pedal will disengage openpilot.</source>
-        <translation>啟用後，踩踏油門將會取消 openpilot 控制。</translation>
+        <translation>啟用後，踩踏油門將會取消 dragonpilot 控制。</translation>
     </message>
     <message>
         <source>Show ETA in 24h Format</source>
@@ -1201,7 +1224,7 @@ This may take up to a minute.</source>
     </message>
     <message>
         <source>openpilot defaults to driving in &lt;b&gt;chill mode&lt;/b&gt;. Experimental mode enables &lt;b&gt;alpha-level features&lt;/b&gt; that aren&apos;t ready for chill mode. Experimental features are listed below:</source>
-        <translation>openpilot 預設以 &lt;b&gt;輕鬆模式&lt;/b&gt; 駕駛。    實驗模式啟用了尚未準備好進入輕鬆模式的 &lt;b&gt;alpha 級功能&lt;/b&gt;。實驗功能如下：</translation>
+        <translation>dragonpilot 預設以 &lt;b&gt;輕鬆模式&lt;/b&gt; 駕駛。    實驗模式啟用了尚未準備好進入輕鬆模式的 &lt;b&gt;alpha 級功能&lt;/b&gt;。實驗功能如下：</translation>
     </message>
     <message>
         <source>🌮 End-to-End Longitudinal Control 🌮</source>
@@ -1209,7 +1232,7 @@ This may take up to a minute.</source>
     </message>
     <message>
         <source>Let the driving model control the gas and brakes. openpilot will drive as it thinks a human would, including stopping for red lights and stop signs. Since the driving model decides the speed to drive, the set speed will only act as an upper bound. This is an alpha quality feature; mistakes should be expected.</source>
-        <translation>讓駕駛模型來控制油門及煞車。openpilot將會模擬人類的駕駛行為，包含在看見紅燈及停止標示時停車。由於車速將由駕駛模型決定，因此您設定的時速將成為速度上限。本功能仍在早期實驗階段，請預期模型有犯錯的可能性。</translation>
+        <translation>讓駕駛模型來控制油門及煞車。dragonpilot 將會模擬人類的駕駛行為，包含在看見紅燈及停止標示時停車。由於車速將由駕駛模型決定，因此您設定的時速將成為速度上限。本功能仍在早期實驗階段，請預期模型有犯錯的可能性。</translation>
     </message>
     <message>
         <source>New Driving Visualization</source>
@@ -1225,11 +1248,11 @@ This may take up to a minute.</source>
     </message>
     <message>
         <source>openpilot longitudinal control may come in a future update.</source>
-        <translation>未來可能會推出openpilot縱向控制</translation>
+        <translation>未來可能會推出 dragonpilot 縱向控制</translation>
     </message>
     <message>
         <source>An experimental version of openpilot longitudinal control can be tested, along with Experimental mode, on non-release branches.</source>
-        <translation>在非發行分支中 可找到包含實驗模式的openpilot縱向控制測試版本</translation>
+        <translation>在非發行分支中 可找到包含實驗模式的 dragonpilot 縱向控制測試版本</translation>
     </message>
     <message>
         <source>Enable experimental longitudinal control to allow Experimental mode.</source>
@@ -1237,15 +1260,15 @@ This may take up to a minute.</source>
     </message>
     <message>
         <source>openpilot Longitudinal Control (Alpha)</source>
-        <translation>openpilot 縱向控制（Alpha 版）</translation>
+        <translation>dragonpilot 縱向控制（Alpha 版）</translation>
     </message>
     <message>
         <source>WARNING: openpilot longitudinal control is in alpha for this car and will disable Automatic Emergency Braking (AEB).</source>
-        <translation>警告: openpilot 縱向控制對於此車輛處於測試階段（Alpha 版），並將停用自動緊急制動（AEB）。</translation>
+        <translation>警告: dragonpilot 縱向控制對於此車輛處於測試階段（Alpha 版），並將停用自動緊急制動（AEB）。</translation>
     </message>
     <message>
         <source>On this car, openpilot defaults to the car&apos;s built-in ACC instead of openpilot&apos;s longitudinal control. Enable this to switch to openpilot longitudinal control. Enabling Experimental mode is recommended when enabling openpilot longitudinal control alpha.</source>
-        <translation>在這輛車上，openpilot 默認使用車輛內置的 ACC 而不是 openpilot 的縱向控制。啟用此選項以切換至 openpilot 的縱向控制。建議在啟用 openpilot 縱向控制 Alpha 版時啟用實驗模式。</translation>
+        <translation>在這輛車上，dragonpilot 默認使用車輛內置的 ACC 而不是 dragonpilot 的縱向控制。啟用此選項以切換至 dragonpilot 的縱向控制。建議在啟用 dragonpilot 縱向控制 Alpha 版時啟用實驗模式。</translation>
     </message>
     <message>
         <source>Aggressive</source>
@@ -1265,7 +1288,7 @@ This may take up to a minute.</source>
     </message>
     <message>
         <source>Standard is recommended. In aggressive mode, openpilot will follow lead cars closer and be more aggressive with the gas and brake.</source>
-        <translation>推薦使用標準模式。在積極模式下，openpilot 將更緊密地跟隨前車，並更積極的控制油門和剎車。</translation>
+        <translation>推薦使用標準模式。在積極模式下，dragonpilot 將更緊密地跟隨前車，並更積極的控制油門和剎車。</translation>
     </message>
     <message>
         <source>Enable Right-Hand Drive</source>
@@ -1273,7 +1296,7 @@ This may take up to a minute.</source>
     </message>
     <message>
         <source>Allow openpilot to obey left-hand traffic conventions and perform driver monitoring on right driver seat.</source>
-        <translation>允許 openpilot 遵守左側交通規則並在右側駕駛座上進行駕駛者監控。</translation>
+        <translation>允許 dragonpilot 遵守左側交通規則並在右側駕駛座上進行駕駛者監控。</translation>
     </message>
     <message>
         <source>Enable ALKA</source>
@@ -1367,7 +1390,7 @@ Reboot required.</source>
     </message>
     <message>
         <source>Connect to Wi-Fi to upload driving data and help improve openpilot</source>
-        <translation>連接到 Wi-Fi 上傳駕駛數據，幫助改進 openpilot</translation>
+        <translation>連接到 Wi-Fi 上傳駕駛數據，幫助改進 dragonpilot</translation>
     </message>
     <message>
         <source>Open Settings</source>
@@ -1379,7 +1402,7 @@ Reboot required.</source>
     </message>
     <message>
         <source>Your data is used to train driving models and help improve openpilot</source>
-        <translation>您的數據用於訓練駕駛模型並幫助改進 openpilot</translation>
+        <translation>您的數據用於訓練駕駛模型並幫助改進 dragonpilot</translation>
     </message>
 </context>
 <context>
