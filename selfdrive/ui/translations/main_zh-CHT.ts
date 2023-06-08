@@ -91,6 +91,32 @@
     </message>
 </context>
 <context>
+    <name>C2NetworkPanel</name>
+    <message>
+        <source>Wi-Fi Settings</source>
+        <translation>Wi-Fi 設定</translation>
+    </message>
+    <message>
+        <source>OPEN</source>
+        <translation>開啟</translation>
+    </message>
+    <message>
+        <source>Tethering Settings</source>
+        <translation>熱點設定</translation>
+    </message>
+    <message>
+        <source>IP Address</source>
+        <translation>IP 地址</translation>
+    </message>
+</context>
+<context>
+    <name>CarSelectionPanel</name>
+    <message>
+        <source>[AUTO SELECT]</source>
+        <translation>[自動選擇]</translation>
+    </message>
+</context>
+<context>
     <name>ConfirmationDialog</name>
     <message>
         <source>Ok</source>
@@ -100,6 +126,129 @@
         <source>Cancel</source>
         <translation>取消</translation>
     </message>
+</context>
+<context>
+    <name>DPCtrlPanel</name>
+    <message>
+        <source>When enabled, openpilot lateral Control will be always on when ACC MAIN is ON.
+Reboot required.</source>
+        <translation>當啟用時，當 ACC MAIN 為 ON，openpilot 的橫向控制功能將一直保持開啟。
+需要重新啟動。</translation>
+    </message>
+    <message>
+        <source>Enable MapD</source>
+        <translation>啟用 MapD 服務</translation>
+    </message>
+    <message>
+        <source>When enabled, openpilot will display current road name and speed limit on the screen.
+Reboot required.</source>
+        <translation>當啟用時，openpilot 將在螢幕上顯示當前道路名稱和速限。
+需要重新啟動。</translation>
+    </message>
+    <message>
+        <source>Enable Lane Priority Mode</source>
+        <translation>啟用車道優先模式</translation>
+    </message>
+    <message>
+        <source>When enabled, openpilot will use lane lines for lateral control, fallback to laneless mode automatically when lane lines probabilities are low.
+Reboot required.</source>
+        <translation>當啟用時，openpilot 將使用車道線進行橫向控制，在車道線概率較低時自動切換至無車道線模式。
+需要重新啟動。</translation>
+    </message>
+    <message>
+        <source>Enable Auto Shutdown</source>
+        <translation>啟用自動關機</translation>
+    </message>
+  <message>
+      <source>When enabled, openpilot will shutdown the device automatically.
+  Reboot required.</source>
+      <translation>啟用後，openpilot 將會自動關閉設備。
+  需要重新啟動。</translation>
+  </message>
+<message>
+    <source>Auto Shutdown In</source>
+    <translation>自動關機倒數</translation>
+</message>
+<message>
+    <source>Adjust your shutdown waiting period.
+0 = shutdown immediately.</source>
+    <translation>調整關機等待時間。
+0 = 立即關機。</translation>
+</message>
+<message>
+    <source> mins</source>
+    <translation> 分鐘</translation>
+</message>
+<message>
+    <source>Enable Stop and Go (SnG) Hack</source>
+    <translation>啟用停止與行走（SnG）修改</translation>
+</message>
+<message>
+    <source>When enabled, openpilot will stop sending standstill signal when the car is fully stopped.
+ONLY WORK ON SOME VEHICLES.
+Reboot Required.</source>
+    <translation>啟用後，當車輛完全停止時，openpilot 將停止發送停止信號。
+僅適用於部分車輛。
+需要重新啟動。</translation>
+</message>
+<message>
+    <source>Enable Door Auto Locking</source>
+    <translation>啟用自動門鎖定</translation>
+</message>
+<message>
+    <source>When enabled, openpilot will attempt to lock the doors when driving above 10 km/h (6.2 mph).
+Reboot Required.</source>
+    <translation>啟用後，當速度超過10公里/小時（6.2英里/小時）時，openpilot 將嘗試鎖定車門。
+需要重新啟動。</translation>
+</message>
+<message>
+    <source>Enable Door Auto Unlocking</source>
+    <translation>啟用自動解鎖車門</translation>
+</message>
+<message>
+    <source>When enabled, openpilot will attempt to unlock the doors when shifting to gear P.
+Reboot Required.</source>
+    <translation>啟用後，當換檔至 P 檔時，openpilot 將嘗試解鎖車門。
+需要重新啟動。</translation>
+</message>
+<message>
+    <source>When enabled, openpilot will use the good old 0.8.13.1 driving model.
+For safety reason, vision-only openpilot longitudinal will be disabled.
+Reboot required.</source>
+    <translation>啟用後，openpilot 將使用舊版的0.8.13.1駕駛模型。
+出於安全考慮，僅基於視覺的 openpilot 縱向控制將被禁用。
+需要重新啟動。</translation>
+</message>
+<message>
+    <source>Use 0.8.13.1 Driving Model</source>
+    <translation>使用 0.8.13.1 駕駛模型</translation>
+</message>
+<message>
+    <source>Ctrl - Lateral</source>
+    <translation>橫向控制</translation>
+</message>
+<message>
+    <source>Enable ALKA</source>
+    <translation>啟用ALKA</translation>
+</message>
+<message>
+    <source>Ctrl - Longitudinal</source>
+    <translation>縱向控制</translation>
+</message>
+<message>
+    <source>Device</source>
+    <translation>設備</translation>
+</message>
+<message>
+    <source>Ctrl - Overall</source>
+    <translation>整體控制</translation>
+</message>
+<message>
+    <source>Toyota / Lexus</source>
+    <translation>豐田/雷克薩斯</translation>
+</message>
+</message>
+
 </context>
 <context>
     <name>DeclinePage</name>
@@ -245,6 +394,14 @@
     <message>
         <source>Review</source>
         <translation>回顧</translation>
+    </message>
+    <message>
+        <source>除錯控制台</source>
+        <translation>除錯控制台</translation>
+    </message>
+    <message>
+        <source>顯示 tmux 輸出時發生錯誤。</source>
+        <translation>顯示 tmux 輸出時發生錯誤。</translation>
     </message>
 </context>
 <context>
@@ -622,6 +779,15 @@ This may take up to a minute.</source>
         <source>Navigation</source>
         <translation>導航</translation>
     </message>
+<message>
+    <source>Vehicle Model:</source>
+    <translation>車輛型號：</translation>
+</message>
+<message>
+    <source>[AUTO SELECT]</source>
+    <translation>[自動選擇]</translation>
+</message>
+
 </context>
 <context>
     <name>Setup</name>
@@ -854,26 +1020,27 @@ This may take up to a minute.</source>
         <source>Uninstall</source>
         <translation>解除安裝</translation>
     </message>
-    <message>
-        <source>failed to check for update</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>up to date, last checked %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>DOWNLOAD</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>update available</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>never</source>
-        <translation type="unfinished"></translation>
-    </message>
+<message>
+    <source>failed to check for update</source>
+    <translation>檢查更新失敗</translation>
+</message>
+<message>
+    <source>up to date, last checked %1</source>
+    <translation>已是最新版本，上次檢查時間：%1</translation>
+</message>
+<message>
+    <source>DOWNLOAD</source>
+    <translation>下載</translation>
+</message>
+<message>
+    <source>update available</source>
+    <translation>有可用的更新</translation>
+</message>
+<message>
+    <source>never</source>
+    <translation>從未更新</translation>
+</message>
+
 </context>
 <context>
     <name>SshControl</name>
@@ -1040,36 +1207,75 @@ This may take up to a minute.</source>
     </message>
     <message>
         <source>openpilot Longitudinal Control (Alpha)</source>
-        <translation type="unfinished"></translation>
+        <translation>openpilot 縱向控制（Alpha 版）</translation>
     </message>
     <message>
         <source>WARNING: openpilot longitudinal control is in alpha for this car and will disable Automatic Emergency Braking (AEB).</source>
-        <translation type="unfinished"></translation>
+        <translation>警告: openpilot 縱向控制對於此車輛處於測試階段（Alpha 版），並將停用自動緊急制動（AEB）。</translation>
     </message>
     <message>
         <source>On this car, openpilot defaults to the car&apos;s built-in ACC instead of openpilot&apos;s longitudinal control. Enable this to switch to openpilot longitudinal control. Enabling Experimental mode is recommended when enabling openpilot longitudinal control alpha.</source>
-        <translation type="unfinished"></translation>
+        <translation>在這輛車上，openpilot 默認使用車輛內置的 ACC 而不是 openpilot 的縱向控制。啟用此選項以切換至 openpilot 的縱向控制。建議在啟用 openpilot 縱向控制 Alpha 版時啟用實驗模式。</translation>
     </message>
     <message>
         <source>Aggressive</source>
-        <translation type="unfinished"></translation>
+        <translation>積極</translation>
     </message>
     <message>
         <source>Standard</source>
-        <translation type="unfinished"></translation>
+        <translation>標準</translation>
     </message>
     <message>
         <source>Relaxed</source>
-        <translation type="unfinished"></translation>
+        <translation>舒適</translation>
     </message>
     <message>
         <source>Driving Personality</source>
-        <translation type="unfinished"></translation>
+        <translation>駕駛風格</translation>
     </message>
     <message>
         <source>Standard is recommended. In aggressive mode, openpilot will follow lead cars closer and be more aggressive with the gas and brake.</source>
-        <translation type="unfinished"></translation>
+        <translation>推薦使用標準模式。在積極模式下，openpilot 將更緊密地跟隨前車，並更積極的控制油門和剎車。</translation>
     </message>
+    <message>
+        <source>Enable Right-Hand Drive</source>
+        <translation>啟用右駕模式</translation>
+    </message>
+    <message>
+        <source>Allow openpilot to obey left-hand traffic conventions and perform driver monitoring on right driver seat.</source>
+        <translation>允許 openpilot 遵守左側交通規則並在右側駕駛座上進行駕駛者監控。</translation>
+    </message>
+    <message>
+        <source>Enable ALKA</source>
+        <translation>啟用全時置中</translation>
+    </message>
+    <message>
+        <source>When enabled, openpilot lateral Control will be always on when ACC MAIN is ON.
+    Reboot required.</source>
+        <translation>啟用後，當 ACC 系統開關開啟時，openpilot 的橫向控制將始終保持開啟狀態。
+    需要重新啟動。</translation>
+    </message>
+    <message>
+        <source>Enable MapD</source>
+        <translation>啟用 MapD</translation>
+    </message>
+    <message>
+        <source>When enabled, openpilot will display current road name and speed limit on the screen.
+    Reboot required.</source>
+        <translation>啟用後，openpilot 將在屏幕上顯示當前道路名稱和速度限制。
+    需要重新啟動。</translation>
+    </message>
+    <message>
+        <source>Enable Lane Priority Mode</source>
+        <translation>啟用車道優先模式</translation>
+    </message>
+    <message>
+        <source>When enabled, openpilot will use lane lines for lateral control, fallback to laneless mode automatically when lane lines probabilities are low.
+    Reboot required.</source>
+        <translation>啟用後，openpilot 將使用車道線進行橫向控制，當車道線概率較低時，將自動切換至無車道模式。
+    需要重新啟動。</translation>
+    </message>
+
 </context>
 <context>
     <name>Updater</name>
