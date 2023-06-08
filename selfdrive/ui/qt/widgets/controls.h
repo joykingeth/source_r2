@@ -11,6 +11,9 @@
 #include "selfdrive/ui/qt/widgets/input.h"
 #include "selfdrive/ui/qt/widgets/toggle.h"
 
+// dp
+#include <QSpinBox>
+
 QFrame *horizontal_line(QWidget *parent = nullptr);
 
 class ElidedLabel : public QLabel {
@@ -300,4 +303,70 @@ protected:
 
 signals:
   void clicked();
+};
+
+
+// dp
+class SpinBoxControl : public AbstractControl {
+  Q_OBJECT
+
+public:
+  SpinBoxControl(const QString &title, const QString &desc = "", const QString &icon = "", const int val = 0, QWidget *parent = nullptr) : AbstractControl(title, desc, icon, parent) {
+    spinbox.setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    spinbox.setAlignment(Qt::AlignCenter);
+    spinbox.setStyleSheet(R"(
+      QSpinBox {
+        width: 300px;
+        height: 80px;
+        padding: 0px;
+        border-radius:40px;
+      }
+      QSpinBox::up-button  {
+        subcontrol-origin: margin;
+        subcontrol-position: center right;
+        image: url(../assets/offroad/icon_plus.png);
+        right: 1px;
+        height: 80px;
+        width: 80px;
+      }
+      QSpinBox::down-button  {
+        subcontrol-origin: margin;
+        subcontrol-position: center left;
+        image: url(../assets/offroad/icon_minus.png);
+        left: 1px;
+        height: 80px;
+        width: 80px;
+      }
+    )");
+
+    hlayout->addWidget(&spinbox);
+    QObject::connect(&spinbox, QOverload<int>::of(&QSpinBox::valueChanged), this, &SpinBoxControl::valChanged);
+  }
+
+signals:
+  void valChanged(int val);
+
+protected:
+  QSpinBox spinbox;
+};
+
+class ParamSpinBoxControl : public SpinBoxControl {
+  Q_OBJECT
+
+public:
+  ParamSpinBoxControl(const QString &param, const QString &title, const QString &desc, const QString &icon, const int minimum = 0, const int maximum = 100, const int step = 1, const QString suffix = "", const QString minText = "", QWidget *parent = nullptr) : SpinBoxControl(title, desc, icon, 0, parent) {
+    spinbox.setRange(minimum, maximum);
+    spinbox.setSingleStep(step);
+    spinbox.setSuffix(suffix);
+    spinbox.setSpecialValueText(minText);
+
+    std::string str_val = Params().get(param.toStdString().c_str());
+    if (str_val != "") {
+      int val = std::stoi(str_val);
+      spinbox.setValue(val);
+      QObject::connect(this, &SpinBoxControl::valChanged, [=](int val) {
+        Params().put(param.toStdString(), std::to_string(val));
+      });
+    }
+  }
 };

@@ -27,6 +27,7 @@
 #include "selfdrive/ui/qt/util.h"
 #include "selfdrive/ui/qt/qt_window.h"
 #include "selfdrive/ui/qt/widgets/input.h"
+#include "selfdrive/ui/qt/offroad/settings_dp.h"
 
 // car selection panel
 #include <QJsonObject>
@@ -522,6 +523,7 @@ SettingsWindow::SettingsWindow(QWidget *parent) : QFrame(parent) {
     #endif
     {tr("Toggles"), toggles},
     {tr("Software"), new SoftwarePanel(this)},
+    {"dragonpilot", new DPCtrlPanel(this)},
   };
 
 #ifdef ENABLE_MAPS

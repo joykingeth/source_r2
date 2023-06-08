@@ -1,0 +1,154 @@
+#include "selfdrive/ui/qt/offroad/settings_dp.h"
+
+#include "common/params.h"
+#include "selfdrive/ui/ui.h"
+
+DPCtrlPanel::DPCtrlPanel(QWidget *parent) : ListWidget(parent) {
+  // param, title, desc, icon, confirm
+  std::vector<std::tuple<QString, QString, QString>> toggle_defs{
+    {
+      "",
+      tr("Ctrl - Overall"),
+      "",
+    },
+    {
+      "dp_0813",
+      QString::fromUtf8("．") + tr("Use 0.8.13.1 Driving Model"),
+      tr("When enabled, openpilot will use the good old 0.8.13.1 driving model.\nFor safety reason, vision only openpilot longitudinal will be disabled.\nReboot required."),
+    },
+    {
+      "",
+      tr("Ctrl - Lateral"),
+      "",
+    },
+    {
+      "dp_alka",
+      QString::fromUtf8("．") + tr("Enable ALKA"),
+      tr("When enabled, openpilot lateral Control will be always on when ACC MAIN is ON.\nReboot required."),
+    },
+    {
+      "dp_lat_lane_priority_mode",
+      QString::fromUtf8("．") + tr("Enable Lane Priority Mode"),
+      tr("When enabled, openpilot will use lane lines for lateral control, fallback to laneless mode automatically when lane lines probabilities are low.\nReboot required."),
+    },
+    {
+      "",
+      tr("Ctrl - Longitudinal"),
+      "",
+    },
+    {
+      "dp_mapd",
+      QString::fromUtf8("．") + tr("Enable MapD"),
+      tr("When enabled, openpilot will display current road name and speed limit on the screen.\nReboot required."),
+    },
+//    {
+//      "SpeedLimitControl",
+//      QString::fromUtf8("．") + tr("MapD - Enable Speed Limit Control"),
+//      tr("When enabled, openpilot will use speed limit signs information from map data to automatically adapt cruise speed to road limits.\nReboot required."),
+//    },
+    {
+      "",
+      tr("Device"),
+      "",
+    },
+    {
+      "dp_auto_shutdown",
+      QString::fromUtf8("．") + tr("Enable Auto Shutdown"),
+      tr("When enabled, openpilot will shutdown the device automatically.\nReboot required."),
+    },
+  };
+
+  auto_shutdown_timer_toggle = new ParamSpinBoxControl("dp_auto_shutdown_in", tr("Auto Shutdown In"), tr("Adjust your shutdown waiting period.\n0 = shutdown immediately."), "", 0, 600, 1, tr(" mins"));
+  for (auto &[param, title, desc] : toggle_defs) {
+    if (param == "") {
+      auto label = new LabelControl(title, "");
+      addItem(label);
+      continue;
+    }
+    auto toggle = new ParamControl(param, title, desc, "", this);
+
+    bool locked = params.getBool((param + "Lock").toStdString());
+    toggle->setEnabled(!locked);
+
+    addItem(toggle);
+    toggles[param.toStdString()] = toggle;
+
+    if (param == "dp_auto_shutdown") {
+      connect(toggle, &ToggleControl::toggleFlipped, [=]() {
+        updateToggles();
+      });
+      auto_shutdown_timer_toggle->setVisible(false);
+      addItem(auto_shutdown_timer_toggle);
+    }
+    if (param == "dp_mapd") {
+      connect(toggle, &ToggleControl::toggleFlipped, [=]() {
+        updateToggles();
+      });
+    }
+    if (param == "SpeedLimitControl") {
+      toggle->setVisible(false);
+    }
+  }
+
+  auto cp_bytes = params.get("CarParamsPersistent");
+  if (!cp_bytes.empty()) {
+    AlignedBuffer aligned_buf;
+    capnp::FlatArrayMessageReader cmsg(aligned_buf.align(cp_bytes.data(), cp_bytes.size()));
+    cereal::CarParams::Reader CP = cmsg.getRoot<cereal::CarParams>();
+
+    std::vector<std::tuple<QString, QString, QString>> toyota_toggle_defs{
+      {
+        "",
+        tr("Toyota / Lexus"),
+        "",
+      },
+      {
+        "dp_toyota_sng",
+        QString::fromUtf8("．") + tr("Enable Stop and Go (SnG) Hack"),
+        tr("When enabled, openpilot will stop sending standstill signal when the car is fully stopped.\nONLY WORK ON SOME VEHICLES.\nReboot Required."),
+      },
+      {
+        "dp_toyota_auto_lock",
+        QString::fromUtf8("．") + tr("Enable Door Auto Locking"),
+        tr("When enabled, openpilot will attempt to lock the doors when drive above 10 km/h (6.2 mph).\nReboot Required."),
+      },
+      {
+        "dp_toyota_auto_unlock",
+        QString::fromUtf8("．") + tr("Enable Door Auto Unlocking"),
+        tr("When enabled, openpilot will attempt to unlock the doors when shift to gear P.\nReboot Required."),
+      },
+    };
+
+    std::vector<std::tuple<QString, QString, QString>> model_specific_toggle_defs;
+    auto car_name = CP.getCarName();
+    if (car_name == "toyota") {
+      model_specific_toggle_defs = toyota_toggle_defs;
+    }
+
+    for (auto& [param, title, desc] : model_specific_toggle_defs) {
+      if (param == "") {
+        auto label = new LabelControl(title, "");
+        addItem(label);
+        continue;
+      }
+      auto toggle = new ParamControl(param, title, desc, "", this);
+      bool locked = params.getBool((param + "Lock").toStdString());
+      toggle->setEnabled(!locked);
+      addItem(toggle);
+      toggles[param.toStdString()] = toggle;
+    }
+  }
+}
+
+void DPCtrlPanel::expandToggleDescription(const QString &param) {
+  toggles[param.toStdString()]->showDescription();
+}
+
+void DPCtrlPanel::showEvent(QShowEvent *event) {
+  updateToggles();
+}
+
+void DPCtrlPanel::updateToggles() {
+  auto_shutdown_timer_toggle->setVisible(params.getBool("dp_auto_shutdown"));
+  toggles["SpeedLimitControl"]->setVisible(params.getBool("dp_mapd"));
+}
