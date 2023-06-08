@@ -150,5 +150,5 @@ void DPCtrlPanel::showEvent(QShowEvent *event) {
 
 void DPCtrlPanel::updateToggles() {
   auto_shutdown_timer_toggle->setVisible(params.getBool("dp_auto_shutdown"));
-  toggles["SpeedLimitControl"]->setVisible(params.getBool("dp_mapd"));
+//  toggles["SpeedLimitControl"]->setVisible(params.getBool("dp_mapd"));
 }
