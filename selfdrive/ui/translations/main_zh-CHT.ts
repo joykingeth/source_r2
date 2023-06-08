@@ -147,7 +147,7 @@ Reboot required.</source>
     </message>
     <message>
         <source>Enable Lane Priority Mode</source>
-        <translation>啟用車道優先模式</translation>
+        <translation>啟用車道線優先模式</translation>
     </message>
     <message>
         <source>When enabled, openpilot will use lane lines for lateral control, fallback to laneless mode automatically when lane lines probabilities are low.
@@ -181,7 +181,7 @@ Reboot required.</source>
     </message>
     <message>
         <source>Enable Stop and Go (SnG) Hack</source>
-        <translation>啟用停止與行走（SnG）修改</translation>
+        <translation>啟用停止行走（SnG）修改</translation>
     </message>
     <message>
         <source>When enabled, openpilot will stop sending standstill signal when the car is fully stopped.
@@ -198,7 +198,7 @@ Reboot Required.</source>
     <message>
         <source>When enabled, openpilot will attempt to lock the doors when driving above 10 km/h (6.2 mph).
 Reboot Required.</source>
-        <translation type="vanished">啟用後，當速度超過10公里/小時（6.2英里/小時）時，openpilot 將嘗試鎖定車門。
+        <translation type="vanished">啟用後，當速度超過 10 km/h（6.2 mph）時，openpilot 將嘗試鎖定車門。
 需要重新啟動。</translation>
     </message>
     <message>
@@ -225,15 +225,15 @@ Reboot required.</source>
     </message>
     <message>
         <source>Ctrl - Lateral</source>
-        <translation>橫向控制</translation>
+        <translation>控制 - 橫向</translation>
     </message>
     <message>
         <source>Enable ALKA</source>
-        <translation>啟用ALKA</translation>
+        <translation>啟用全時置中</translation>
     </message>
     <message>
         <source>Ctrl - Longitudinal</source>
-        <translation>縱向控制</translation>
+        <translation>控制 - 縱向</translation>
     </message>
     <message>
         <source>Device</source>
@@ -241,7 +241,7 @@ Reboot required.</source>
     </message>
     <message>
         <source>Ctrl - Overall</source>
-        <translation>整體控制</translation>
+        <translation>控制 - 整體</translation>
     </message>
     <message>
         <source>Toyota / Lexus</source>
@@ -251,26 +251,26 @@ Reboot required.</source>
         <source>When enabled, openpilot will use the good old 0.8.13.1 driving model.
 For safety reason, vision only openpilot longitudinal will be disabled.
 Reboot required.</source>
-        <translation>啟用後，openpilot將使用優良的0.8.13.1駕駛模型。
-出於安全考慮，僅基於視覺的openpilot縱向控制將被禁用。
+        <translation>啟用後，openpilot 將使用優良的0.8.13.1駕駛模型。
+出於安全考慮，僅基於視覺的 openpilot 縱向控制將被禁用。
 需要重新啟動。</translation>
     </message>
     <message>
         <source>When enabled, openpilot will shutdown the device automatically.
 Reboot required.</source>
-        <translation>啟用後，openpilot將自動關機。
+        <translation>啟用後，openpilot 將自動關機。
 需要重新啟動。</translation>
     </message>
     <message>
         <source>When enabled, openpilot will attempt to lock the doors when drive above 10 km/h (6.2 mph).
 Reboot Required.</source>
-        <translation>啟用後，當速度超過10公里/小時（6.2英里/小時）時，openpilot將嘗試鎖定車門。
+        <translation>啟用後，當速度超過 10 km/h（6.2 mph）時，openpilot 將嘗試鎖定車門。
 需要重新啟動。</translation>
     </message>
     <message>
         <source>When enabled, openpilot will attempt to unlock the doors when shift to gear P.
 Reboot Required.</source>
-        <translation>啟用後，當換到P檔時，openpilot將嘗試解鎖車門。
+        <translation>啟用後，當換到 P 檔時，openpilot 將嘗試解鎖車門。
 需要重新啟動。</translation>
     </message>
 </context>
