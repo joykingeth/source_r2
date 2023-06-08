@@ -159,96 +159,120 @@ Reboot required.</source>
         <source>Enable Auto Shutdown</source>
         <translation>啟用自動關機</translation>
     </message>
-  <message>
-      <source>When enabled, openpilot will shutdown the device automatically.
+    <message>
+        <source>When enabled, openpilot will shutdown the device automatically.
   Reboot required.</source>
-      <translation>啟用後，openpilot 將會自動關閉設備。
+        <translation type="vanished">啟用後，openpilot 將會自動關閉設備。
   需要重新啟動。</translation>
-  </message>
-<message>
-    <source>Auto Shutdown In</source>
-    <translation>自動關機倒數</translation>
-</message>
-<message>
-    <source>Adjust your shutdown waiting period.
+    </message>
+    <message>
+        <source>Auto Shutdown In</source>
+        <translation>自動關機倒數</translation>
+    </message>
+    <message>
+        <source>Adjust your shutdown waiting period.
 0 = shutdown immediately.</source>
-    <translation>調整關機等待時間。
+        <translation>調整關機等待時間。
 0 = 立即關機。</translation>
-</message>
-<message>
-    <source> mins</source>
-    <translation> 分鐘</translation>
-</message>
-<message>
-    <source>Enable Stop and Go (SnG) Hack</source>
-    <translation>啟用停止與行走（SnG）修改</translation>
-</message>
-<message>
-    <source>When enabled, openpilot will stop sending standstill signal when the car is fully stopped.
+    </message>
+    <message>
+        <source> mins</source>
+        <translation> 分鐘</translation>
+    </message>
+    <message>
+        <source>Enable Stop and Go (SnG) Hack</source>
+        <translation>啟用停止與行走（SnG）修改</translation>
+    </message>
+    <message>
+        <source>When enabled, openpilot will stop sending standstill signal when the car is fully stopped.
 ONLY WORK ON SOME VEHICLES.
 Reboot Required.</source>
-    <translation>啟用後，當車輛完全停止時，openpilot 將停止發送停止信號。
+        <translation>啟用後，當車輛完全停止時，openpilot 將停止發送停止信號。
 僅適用於部分車輛。
 需要重新啟動。</translation>
-</message>
-<message>
-    <source>Enable Door Auto Locking</source>
-    <translation>啟用自動門鎖定</translation>
-</message>
-<message>
-    <source>When enabled, openpilot will attempt to lock the doors when driving above 10 km/h (6.2 mph).
+    </message>
+    <message>
+        <source>Enable Door Auto Locking</source>
+        <translation>啟用自動門鎖定</translation>
+    </message>
+    <message>
+        <source>When enabled, openpilot will attempt to lock the doors when driving above 10 km/h (6.2 mph).
 Reboot Required.</source>
-    <translation>啟用後，當速度超過10公里/小時（6.2英里/小時）時，openpilot 將嘗試鎖定車門。
+        <translation type="vanished">啟用後，當速度超過10公里/小時（6.2英里/小時）時，openpilot 將嘗試鎖定車門。
 需要重新啟動。</translation>
-</message>
-<message>
-    <source>Enable Door Auto Unlocking</source>
-    <translation>啟用自動解鎖車門</translation>
-</message>
-<message>
-    <source>When enabled, openpilot will attempt to unlock the doors when shifting to gear P.
+    </message>
+    <message>
+        <source>Enable Door Auto Unlocking</source>
+        <translation>啟用自動解鎖車門</translation>
+    </message>
+    <message>
+        <source>When enabled, openpilot will attempt to unlock the doors when shifting to gear P.
 Reboot Required.</source>
-    <translation>啟用後，當換檔至 P 檔時，openpilot 將嘗試解鎖車門。
+        <translation type="vanished">啟用後，當換檔至 P 檔時，openpilot 將嘗試解鎖車門。
 需要重新啟動。</translation>
-</message>
-<message>
-    <source>When enabled, openpilot will use the good old 0.8.13.1 driving model.
+    </message>
+    <message>
+        <source>When enabled, openpilot will use the good old 0.8.13.1 driving model.
 For safety reason, vision-only openpilot longitudinal will be disabled.
 Reboot required.</source>
-    <translation>啟用後，openpilot 將使用舊版的0.8.13.1駕駛模型。
+        <translation type="vanished">啟用後，openpilot 將使用舊版的0.8.13.1駕駛模型。
 出於安全考慮，僅基於視覺的 openpilot 縱向控制將被禁用。
 需要重新啟動。</translation>
-</message>
-<message>
-    <source>Use 0.8.13.1 Driving Model</source>
-    <translation>使用 0.8.13.1 駕駛模型</translation>
-</message>
-<message>
-    <source>Ctrl - Lateral</source>
-    <translation>橫向控制</translation>
-</message>
-<message>
-    <source>Enable ALKA</source>
-    <translation>啟用ALKA</translation>
-</message>
-<message>
-    <source>Ctrl - Longitudinal</source>
-    <translation>縱向控制</translation>
-</message>
-<message>
-    <source>Device</source>
-    <translation>設備</translation>
-</message>
-<message>
-    <source>Ctrl - Overall</source>
-    <translation>整體控制</translation>
-</message>
-<message>
-    <source>Toyota / Lexus</source>
-    <translation>豐田/雷克薩斯</translation>
-</message>
-</message>
-
+    </message>
+    <message>
+        <source>Use 0.8.13.1 Driving Model</source>
+        <translation>使用 0.8.13.1 駕駛模型</translation>
+    </message>
+    <message>
+        <source>Ctrl - Lateral</source>
+        <translation>橫向控制</translation>
+    </message>
+    <message>
+        <source>Enable ALKA</source>
+        <translation>啟用ALKA</translation>
+    </message>
+    <message>
+        <source>Ctrl - Longitudinal</source>
+        <translation>縱向控制</translation>
+    </message>
+    <message>
+        <source>Device</source>
+        <translation>設備</translation>
+    </message>
+    <message>
+        <source>Ctrl - Overall</source>
+        <translation>整體控制</translation>
+    </message>
+    <message>
+        <source>Toyota / Lexus</source>
+        <translation>豐田/雷克薩斯</translation>
+    </message>
+    <message>
+        <source>When enabled, openpilot will use the good old 0.8.13.1 driving model.
+For safety reason, vision only openpilot longitudinal will be disabled.
+Reboot required.</source>
+        <translation>啟用後，openpilot將使用優良的0.8.13.1駕駛模型。
+出於安全考慮，僅基於視覺的openpilot縱向控制將被禁用。
+需要重新啟動。</translation>
+    </message>
+    <message>
+        <source>When enabled, openpilot will shutdown the device automatically.
+Reboot required.</source>
+        <translation>啟用後，openpilot將自動關機。
+需要重新啟動。</translation>
+    </message>
+    <message>
+        <source>When enabled, openpilot will attempt to lock the doors when drive above 10 km/h (6.2 mph).
+Reboot Required.</source>
+        <translation>啟用後，當速度超過10公里/小時（6.2英里/小時）時，openpilot將嘗試鎖定車門。
+需要重新啟動。</translation>
+    </message>
+    <message>
+        <source>When enabled, openpilot will attempt to unlock the doors when shift to gear P.
+Reboot Required.</source>
+        <translation>啟用後，當換到P檔時，openpilot將嘗試解鎖車門。
+需要重新啟動。</translation>
+    </message>
 </context>
 <context>
     <name>DeclinePage</name>
@@ -397,10 +421,18 @@ Reboot required.</source>
     </message>
     <message>
         <source>除錯控制台</source>
-        <translation>除錯控制台</translation>
+        <translation type="vanished">除錯控制台</translation>
     </message>
     <message>
         <source>顯示 tmux 輸出時發生錯誤。</source>
+        <translation type="vanished">顯示 tmux 輸出時發生錯誤。</translation>
+    </message>
+    <message>
+        <source>Debug Console</source>
+        <translation>除錯控制台</translation>
+    </message>
+    <message>
+        <source>Error displaying tmux output.</source>
         <translation>顯示 tmux 輸出時發生錯誤。</translation>
     </message>
 </context>
@@ -779,15 +811,14 @@ This may take up to a minute.</source>
         <source>Navigation</source>
         <translation>導航</translation>
     </message>
-<message>
-    <source>Vehicle Model:</source>
-    <translation>車輛型號：</translation>
-</message>
-<message>
-    <source>[AUTO SELECT]</source>
-    <translation>[自動選擇]</translation>
-</message>
-
+    <message>
+        <source>Vehicle Model:</source>
+        <translation>車輛型號：</translation>
+    </message>
+    <message>
+        <source>[AUTO SELECT]</source>
+        <translation>[自動選擇]</translation>
+    </message>
 </context>
 <context>
     <name>Setup</name>
@@ -1020,27 +1051,26 @@ This may take up to a minute.</source>
         <source>Uninstall</source>
         <translation>解除安裝</translation>
     </message>
-<message>
-    <source>failed to check for update</source>
-    <translation>檢查更新失敗</translation>
-</message>
-<message>
-    <source>up to date, last checked %1</source>
-    <translation>已是最新版本，上次檢查時間：%1</translation>
-</message>
-<message>
-    <source>DOWNLOAD</source>
-    <translation>下載</translation>
-</message>
-<message>
-    <source>update available</source>
-    <translation>有可用的更新</translation>
-</message>
-<message>
-    <source>never</source>
-    <translation>從未更新</translation>
-</message>
-
+    <message>
+        <source>failed to check for update</source>
+        <translation>檢查更新失敗</translation>
+    </message>
+    <message>
+        <source>up to date, last checked %1</source>
+        <translation>已是最新版本，上次檢查時間：%1</translation>
+    </message>
+    <message>
+        <source>DOWNLOAD</source>
+        <translation>下載</translation>
+    </message>
+    <message>
+        <source>update available</source>
+        <translation>有可用的更新</translation>
+    </message>
+    <message>
+        <source>never</source>
+        <translation>從未更新</translation>
+    </message>
 </context>
 <context>
     <name>SshControl</name>
@@ -1252,7 +1282,7 @@ This may take up to a minute.</source>
     <message>
         <source>When enabled, openpilot lateral Control will be always on when ACC MAIN is ON.
     Reboot required.</source>
-        <translation>啟用後，當 ACC 系統開關開啟時，openpilot 的橫向控制將始終保持開啟狀態。
+        <translation type="vanished">啟用後，當 ACC 系統開關開啟時，openpilot 的橫向控制將始終保持開啟狀態。
     需要重新啟動。</translation>
     </message>
     <message>
@@ -1262,7 +1292,7 @@ This may take up to a minute.</source>
     <message>
         <source>When enabled, openpilot will display current road name and speed limit on the screen.
     Reboot required.</source>
-        <translation>啟用後，openpilot 將在屏幕上顯示當前道路名稱和速度限制。
+        <translation type="vanished">啟用後，openpilot 將在屏幕上顯示當前道路名稱和速度限制。
     需要重新啟動。</translation>
     </message>
     <message>
@@ -1272,10 +1302,27 @@ This may take up to a minute.</source>
     <message>
         <source>When enabled, openpilot will use lane lines for lateral control, fallback to laneless mode automatically when lane lines probabilities are low.
     Reboot required.</source>
-        <translation>啟用後，openpilot 將使用車道線進行橫向控制，當車道線概率較低時，將自動切換至無車道模式。
+        <translation type="vanished">啟用後，openpilot 將使用車道線進行橫向控制，當車道線概率較低時，將自動切換至無車道模式。
     需要重新啟動。</translation>
     </message>
-
+    <message>
+        <source>When enabled, openpilot lateral Control will be always on when ACC MAIN is ON.
+Reboot required.</source>
+        <translation>當啟用時，當 ACC MAIN 為 ON，openpilot 的橫向控制功能將一直保持開啟。
+需要重新啟動。</translation>
+    </message>
+    <message>
+        <source>When enabled, openpilot will display current road name and speed limit on the screen.
+Reboot required.</source>
+        <translation>當啟用時，openpilot 將在螢幕上顯示當前道路名稱和速限。
+需要重新啟動。</translation>
+    </message>
+    <message>
+        <source>When enabled, openpilot will use lane lines for lateral control, fallback to laneless mode automatically when lane lines probabilities are low.
+Reboot required.</source>
+        <translation>當啟用時，openpilot 將使用車道線進行橫向控制，在車道線概率較低時自動切換至無車道線模式。
+需要重新啟動。</translation>
+    </message>
 </context>
 <context>
     <name>Updater</name>
@@ -1316,23 +1363,23 @@ This may take up to a minute.</source>
     <name>WiFiPromptWidget</name>
     <message>
         <source>Setup Wi-Fi</source>
-        <translation type="unfinished"></translation>
+        <translation>設置 Wi-Fi</translation>
     </message>
     <message>
         <source>Connect to Wi-Fi to upload driving data and help improve openpilot</source>
-        <translation type="unfinished"></translation>
+        <translation>連接到 Wi-Fi 上傳駕駛數據，幫助改進 openpilot</translation>
     </message>
     <message>
         <source>Open Settings</source>
-        <translation type="unfinished"></translation>
+        <translation>打開設置</translation>
     </message>
     <message>
         <source>Uploading training data</source>
-        <translation type="unfinished"></translation>
+        <translation>正在上傳訓練數據</translation>
     </message>
     <message>
         <source>Your data is used to train driving models and help improve openpilot</source>
-        <translation type="unfinished"></translation>
+        <translation>您的數據用於訓練駕駛模型並幫助改進 openpilot</translation>
     </message>
 </context>
 <context>
