@@ -263,7 +263,7 @@ DevicePanel::DevicePanel(SettingsWindow *parent) : ListWidget(parent) {
   setSpacing(50);
   auto tmuxBtn = new ButtonControl(tr("Debug Console"), tr("VIEW"), "");
   connect(tmuxBtn, &ButtonControl::clicked, [=]() {
-    FILE* pipe = popen("tmux capture-pane -p -t 0 -S -500", "r");
+    FILE* pipe = popen("tmux capture-pane -p -t 0 -S -250", "r");
     if (pipe) {
       char buffer[128];
       std::string result = "";
