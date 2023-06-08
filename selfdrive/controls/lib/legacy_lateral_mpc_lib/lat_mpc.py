@@ -7,7 +7,7 @@ from casadi import SX, vertcat, sin, cos
 from common.realtime import sec_since_boot
 # from selfdrive.controls.lib.drive_helpers import LAT_MPC_N as N
 N = 16
-from selfdrive.modeld.constants import T_IDXS
+from selfdrive.legacy_modeld.constants import T_IDXS
 
 if __name__ == '__main__':  # generating code
   from third_party.acados.acados_template import AcadosModel, AcadosOcp, AcadosOcpSolver
