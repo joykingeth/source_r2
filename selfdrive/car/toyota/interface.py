@@ -225,11 +225,6 @@ class CarInterface(CarInterfaceBase):
       ret.experimentalLongitudinalAvailable = bool(ret.flags & ToyotaFlags.SMART_DSU)
       ret.openpilotLongitudinalControl = experimental_long and ret.experimentalLongitudinalAvailable
 
-      # rick - 0813 should disable long control when on a radarUnavailable model
-      p = Params()
-      if ret.openpilotLongitudinalControl and p.get_bool("dp_0813"):
-        ret.openpilotLongitudinalControl = False
-
     if not ret.openpilotLongitudinalControl:
       ret.safetyConfigs[0].safetyParam |= Panda.FLAG_TOYOTA_STOCK_LONGITUDINAL
 
