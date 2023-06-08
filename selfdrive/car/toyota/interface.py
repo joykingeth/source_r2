@@ -6,6 +6,7 @@ from selfdrive.car.toyota.values import Ecu, CAR, DBC, ToyotaFlags, CarControlle
                                         MIN_ACC_SPEED, EPS_SCALE, EV_HYBRID_CAR, UNSUPPORTED_DSU_CAR, NO_STOP_TIMER_CAR, ANGLE_CONTROL_CAR
 from selfdrive.car import STD_CARGO_KG, scale_tire_stiffness, get_safety_config
 from selfdrive.car.interfaces import CarInterfaceBase
+from common.params import Params
 
 EventName = car.CarEvent.EventName
 
@@ -216,6 +217,13 @@ class CarInterface(CarInterfaceBase):
     # if the smartDSU is detected, openpilot can send ACC_CMD (and the smartDSU will block it from the DSU) or not (the DSU is "connected")
     ret.openpilotLongitudinalControl = bool(ret.flags & ToyotaFlags.SMART_DSU) or ret.enableDsu or candidate in (TSS2_CAR - RADAR_ACC_CAR)
     ret.autoResumeSng = ret.openpilotLongitudinalControl and candidate in NO_STOP_TIMER_CAR
+
+    # toyota radar acc car should consider radarUnavailable = True
+    # and when radarUnavailable, openpilot longitudinal control is allowed when smart dsu is installed and experimental_long is on
+    ret.radarUnavailable = candidate in RADAR_ACC_CAR
+    if ret.radarUnavailable:
+      ret.experimentalLongitudinalAvailable = bool(ret.flags & ToyotaFlags.SMART_DSU)
+      ret.openpilotLongitudinalControl = experimental_long and ret.experimentalLongitudinalAvailable
 
     if not ret.openpilotLongitudinalControl:
       ret.safetyConfigs[0].safetyParam |= Panda.FLAG_TOYOTA_STOCK_LONGITUDINAL

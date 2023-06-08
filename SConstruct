@@ -496,6 +496,7 @@ SConscript(['selfdrive/controls/lib/longitudinal_mpc_lib/SConscript'])
 SConscript(['selfdrive/locationd/SConscript'])
 # SConscript(['selfdrive/navd/SConscript'])
 SConscript(['selfdrive/hybrid_modeld/SConscript'])
+SConscript(['selfdrive/legacy_modeld/SConscript'])
 SConscript(['selfdrive/ui/SConscript'])
 
 
@@ -506,3 +507,6 @@ if (arch in ['x86_64', 'Darwin'] and Dir('#tools/cabana/').exists()) or GetOptio
 external_sconscript = GetOption('external_sconscript')
 if external_sconscript:
   SConscript([external_sconscript])
+
+SConscript(['selfdrive/controls/lib/legacy_lateral_mpc_lib/SConscript'])
+SConscript(['selfdrive/controls/lib/legacy_longitudinal_mpc_lib/SConscript'])

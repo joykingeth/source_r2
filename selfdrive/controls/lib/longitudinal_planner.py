@@ -11,7 +11,7 @@ from common.filter_simple import FirstOrderFilter
 from common.realtime import DT_MDL
 from selfdrive.hybrid_modeld.constants import T_IDXS
 from selfdrive.controls.lib.longcontrol import LongCtrlState
-from selfdrive.controls.lib.longitudinal_mpc_lib.long_mpc import LongitudinalMpc, MIN_ACCEL, MAX_ACCEL, T_FOLLOW, STOP_DISTANCE
+from selfdrive.controls.lib.longitudinal_mpc_lib.long_mpc import LongitudinalMpc, MIN_ACCEL, MAX_ACCEL, STOP_DISTANCE
 from selfdrive.controls.lib.longitudinal_mpc_lib.long_mpc import T_IDXS as T_IDXS_MPC
 from selfdrive.controls.lib.drive_helpers import V_CRUISE_MAX, CONTROL_N, get_speed_error
 from system.swaglog import cloudlog
@@ -72,7 +72,6 @@ class LongitudinalPlanner:
     self.dp_e2e_standstill_last = False
     self.dp_e2e_swap_count = 0
     self.dp_e2e_stop_count = 0
-    self.dp_e2e_tf = T_FOLLOW
     self.dp_e2e_tf_count = 0
 
     self.CP = CP
@@ -162,7 +161,7 @@ class LongitudinalPlanner:
     # if sm['dragonConf'].dpE2EConditionalVoacc and self.dp_e2e_has_lead:
     if self.CP.radarUnavailable and self.dp_e2e_has_lead:
       # drive above conditional speed and lead is too close
-      if lead_dist <= v_ego_kph * self.dp_e2e_tf * interp(v_ego_kph, [50., 60., 80., 85, 90.], [1.25, 1.20, 1.10, 1.05, 1.]) / 3.6:
+      if lead_dist <= v_ego_kph * self.mpc.t_follow * interp(v_ego_kph, [50., 60., 80., 85, 90.], [1.25, 1.20, 1.10, 1.05, 1.]) / 3.6:
         self.dp_e2e_tf_count += 1
       else:
         self.dp_e2e_tf_count = 0

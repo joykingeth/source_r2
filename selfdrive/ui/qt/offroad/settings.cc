@@ -156,7 +156,7 @@ TogglesPanel::TogglesPanel(SettingsWindow *parent) : ListWidget(parent) {
 #endif
   };
 
-
+  bool dp_0813 = params.getBool("dp_0813");
   std::vector<QString> longi_button_texts{tr("Aggressive"), tr("Standard"), tr("Relaxed")};
   ButtonParamControl* long_personality_setting = new ButtonParamControl("LongitudinalPersonality", tr("Driving Personality"),
                                           tr("Standard is recommended. In aggressive mode, openpilot will follow lead cars closer and be more aggressive with the gas and brake."),
@@ -174,6 +174,10 @@ TogglesPanel::TogglesPanel(SettingsWindow *parent) : ListWidget(parent) {
     // insert longitudinal personality after NDOG toggle
     if (param == "DisengageOnAccelerator") {
       addItem(long_personality_setting);
+    }
+    if (param == "ExperimentalMode" && dp_0813)  {
+      toggle->setVisible(false)
+      params.setBool("ExperimentalMode", false);
     }
   }
 

@@ -93,4 +93,13 @@ selfdrive/hybrid_modeld/models/supercombo.thneed
 selfdrive/hybrid_modeld/models/supercombo_badweights.thneed
 selfdrive/hybrid_modeld/thneed/compile
 selfdrive/loggerd/bootlog
+
+# 0813 models
+selfdrive/legacy_modeld/_modeld
+selfdrive/legacy_modeld/models/supercombo.thneed
+selfdrive/legacy_modeld/_dmonitoringmodeld
+selfdrive/legacy_modeld/models/supercombo_badweights.thneed
+selfdrive/legacy_modeld/thneed/compile
+third_party/acados/lib
+# lang files
 *.po~

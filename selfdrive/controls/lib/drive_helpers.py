@@ -37,6 +37,13 @@ CRUISE_INTERVAL_SIGN = {
   ButtonType.decelCruise: -1,
 }
 
+# rick - for 0813
+LAT_MPC_N = 16
+class MPC_COST_LAT:
+  PATH = 1.0
+  HEADING = 1.0
+  STEER_RATE = 1.0
+
 
 class VCruiseHelper:
   def __init__(self, CP):
