@@ -54,6 +54,11 @@ def manager_init() -> None:
     ("dp_mapd", "1"),
     ("dp_lat_lane_priority_mode", "0"),
     ("dp_0813", "0"),
+    ("dp_auto_shutdown", "0"),
+    ("dp_auto_shutdown_in", "300"),
+    ("dp_toyota_sng", "0"),
+    ("dp_toyota_auto_lock", "0"),
+    ("dp_toyota_auto_unlock", "0"),
   ]
   if not PC:
     default_params.append(("LastUpdateTime", datetime.datetime.utcnow().isoformat().encode('utf8')))

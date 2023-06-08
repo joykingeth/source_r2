@@ -215,7 +215,12 @@ std::unordered_map<std::string, uint32_t> keys = {
     {"dp_alka", PERSISTENT},
     {"dp_mapd", PERSISTENT},
     {"dp_lat_lane_priority_mode", PERSISTENT},
-    {"dp_0813", PERSISTENT}
+    {"dp_0813", PERSISTENT},
+    {"dp_auto_shutdown", PERSISTENT},
+    {"dp_auto_shutdown_in", PERSISTENT},
+    {"dp_toyota_sng", PERSISTENT},
+    {"dp_toyota_auto_lock", PERSISTENT},
+    {"dp_toyota_auto_unlock", PERSISTENT},
 };
 
 } // namespace

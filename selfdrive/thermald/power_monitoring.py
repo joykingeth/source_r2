@@ -40,8 +40,8 @@ class PowerMonitoring:
     self.car_voltage_instant_mV = 12e3          # Last value of peripheralState voltage
     self.integration_lock = threading.Lock()
     self.is_oneplus = os.path.isfile('/ONEPLUS')
-    self.dp_auto_shutdown = True
-    self.dp_auto_shutdown_in = 300
+    self.dp_auto_shutdown = self.params.get_bool("dp_auto_shutdown")
+    self.dp_auto_shutdown_in = self.params.get("dp_auto_shutdown_in")
     self.dp_auto_shutdown_voltage_prev = 0
 
     car_battery_capacity_uWh = self.params.get("CarBatteryCapacity")

@@ -9,6 +9,7 @@ from selfdrive.car.toyota.values import CAR, STATIC_DSU_MSGS, NO_STOP_TIMER_CAR,
                                         UNSUPPORTED_DSU_CAR
 from opendbc.can.packer import CANPacker
 from common.conversions import Conversions as CV
+from common.params import Params
 
 VisualAlert = car.CarControl.HUDControl.VisualAlert
 
@@ -42,6 +43,10 @@ class CarController:
 
     self.dp_auto_lock_gear_prev = GearShifter.park
     self.dp_auto_lock_once = False
+    p = Params()
+    self.dp_toyota_auto_lock = p.get_bool("dp_toyota_auto_lock")
+    self.dp_toyota_auto_unlock = p.get_bool("dp_toyota_auto_unlock")
+    self.dp_toyota_sng = p.get_bool("dp_toyota_sng")
 
 
   def update(self, CC, CS, now_nanos):
@@ -97,7 +102,7 @@ class CarController:
       pcm_cancel_cmd = 1
 
     # on entering standstill, send standstill request
-    if CS.out.standstill and not self.last_standstill and (self.CP.carFingerprint not in NO_STOP_TIMER_CAR or self.CP.enableGasInterceptor):
+    if not self.dp_toyota_sng and CS.out.standstill and not self.last_standstill and (self.CP.carFingerprint not in NO_STOP_TIMER_CAR or self.CP.enableGasInterceptor):
       self.standstill_req = True
     if CS.pcm_acc_status != 8:
       # pcm entered standstill or it's disabled
@@ -114,10 +119,12 @@ class CarController:
     if not CS.out.doorOpen:
       gear = CS.out.gearShifter
       if gear == GearShifter.park and self.dp_auto_lock_gear_prev != gear:
-          can_sends.append(make_can_msg(0x750, UNLOCK_CMD, 0))
+          if self.dp_toyota_auto_lock:
+            can_sends.append(make_can_msg(0x750, UNLOCK_CMD, 0))
           self.dp_auto_lock_once = False
       elif gear == GearShifter.drive and not self.dp_auto_lock_once and CS.out.vEgo >= LOCK_AT_SPEED:
-        can_sends.append(make_can_msg(0x750, LOCK_CMD, 0))
+        if self.dp_toyota_auto_unlock:
+          can_sends.append(make_can_msg(0x750, LOCK_CMD, 0))
         self.dp_auto_lock_once = True
       self.dp_auto_lock_gear_prev = gear
 
