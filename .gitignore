@@ -100,6 +100,6 @@ selfdrive/legacy_modeld/models/supercombo.thneed
 selfdrive/legacy_modeld/_dmonitoringmodeld
 selfdrive/legacy_modeld/models/supercombo_badweights.thneed
 selfdrive/legacy_modeld/thneed/compile
-
+third_party/acados/lib
 # lang files
 *.po~
