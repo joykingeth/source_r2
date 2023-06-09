@@ -58,7 +58,7 @@ DPCtrlPanel::DPCtrlPanel(QWidget *parent) : ListWidget(parent) {
     },
   };
 
-  auto_shutdown_timer_toggle = new ParamSpinBoxControl("dp_auto_shutdown_in", tr("Auto Shutdown In"), tr("Adjust your shutdown waiting period.\n0 = shutdown immediately."), "", 0, 600, 1, tr(" mins"));
+  auto_shutdown_timer_toggle = new ParamSpinBoxControl("dp_device_auto_shutdown_in", tr("Auto Shutdown In"), tr("Adjust your shutdown waiting period.\n0 = shutdown immediately."), "", 0, 600, 1, tr(" mins"));
   for (auto &[param, title, desc] : toggle_defs) {
     if (param == "") {
       auto label = new LabelControl(title, "");
