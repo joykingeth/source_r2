@@ -52,7 +52,7 @@ DPCtrlPanel::DPCtrlPanel(QWidget *parent) : ListWidget(parent) {
       "",
     },
     {
-      "dp_auto_shutdown",
+      "dp_device_auto_shutdown",
       QString::fromUtf8("．") + tr("Enable Auto Shutdown"),
       tr("When enabled, openpilot will shutdown the device automatically.\nReboot required."),
     },
@@ -73,7 +73,7 @@ DPCtrlPanel::DPCtrlPanel(QWidget *parent) : ListWidget(parent) {
     addItem(toggle);
     toggles[param.toStdString()] = toggle;
 
-    if (param == "dp_auto_shutdown") {
+    if (param == "dp_device_auto_shutdown") {
       connect(toggle, &ToggleControl::toggleFlipped, [=]() {
         updateToggles();
       });
@@ -149,6 +149,6 @@ void DPCtrlPanel::showEvent(QShowEvent *event) {
 }
 
 void DPCtrlPanel::updateToggles() {
-  auto_shutdown_timer_toggle->setVisible(params.getBool("dp_auto_shutdown"));
+  auto_shutdown_timer_toggle->setVisible(params.getBool("dp_device_auto_shutdown"));
 //  toggles["SpeedLimitControl"]->setVisible(params.getBool("dp_mapd"));
 }

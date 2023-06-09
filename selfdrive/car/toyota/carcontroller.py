@@ -41,8 +41,8 @@ class CarController:
     self.gas = 0
     self.accel = 0
 
-    self.dp_auto_lock_gear_prev = GearShifter.park
-    self.dp_auto_lock_once = False
+    self.dp_toyota_auto_lock_gear_prev = GearShifter.park
+    self.dp_toyota_auto_lock_once = False
     p = Params()
     self.dp_toyota_auto_lock = p.get_bool("dp_toyota_auto_lock")
     self.dp_toyota_auto_unlock = p.get_bool("dp_toyota_auto_unlock")
@@ -118,15 +118,15 @@ class CarController:
     # https://github.com/AlexandreSato/animalpilot/blob/personal/doors.py
     if not CS.out.doorOpen:
       gear = CS.out.gearShifter
-      if gear == GearShifter.park and self.dp_auto_lock_gear_prev != gear:
+      if gear == GearShifter.park and self.dp_toyota_auto_lock_gear_prev != gear:
           if self.dp_toyota_auto_lock:
             can_sends.append(make_can_msg(0x750, UNLOCK_CMD, 0))
-          self.dp_auto_lock_once = False
-      elif gear == GearShifter.drive and not self.dp_auto_lock_once and CS.out.vEgo >= LOCK_AT_SPEED:
+          self.dp_toyota_auto_lock_once = False
+      elif gear == GearShifter.drive and not self.dp_toyota_auto_lock_once and CS.out.vEgo >= LOCK_AT_SPEED:
         if self.dp_toyota_auto_unlock:
           can_sends.append(make_can_msg(0x750, LOCK_CMD, 0))
-        self.dp_auto_lock_once = True
-      self.dp_auto_lock_gear_prev = gear
+        self.dp_toyota_auto_lock_once = True
+      self.dp_toyota_auto_lock_gear_prev = gear
 
     # *** control msgs ***
     # print("steer {0} {1} {2} {3}".format(apply_steer, min_lim, max_lim, CS.steer_torque_motor)
