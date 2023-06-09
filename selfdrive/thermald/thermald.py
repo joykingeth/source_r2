@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import datetime
+# import datetime
 import os
 import queue
 import threading
@@ -366,7 +366,7 @@ def thermald_thread(end_event, hw_queue):
 
     if not TICI:
       # Check if we need to disable charging (handled by boardd)
-      msg.deviceState.chargingDisabled = power_monitor.legacy_should_disable_charging(onroad_conditions["ignition"], in_car, off_ts)
+      msg.deviceState.chargingDisabled = power_monitor.legacy_should_disable_charging(onroad_conditions["ignition"], in_car, off_ts, started_seen)
 
       # Check if we need to shut down
       if power_monitor.legacy_should_shutdown(peripheralState, onroad_conditions["ignition"], in_car, off_ts, started_seen):

@@ -41,8 +41,8 @@ class PowerMonitoring:
     self.integration_lock = threading.Lock()
     self.is_oneplus = os.path.isfile('/ONEPLUS')
     self.dp_device_auto_shutdown = self.params.get_bool("dp_device_auto_shutdown")
-    self.dp_device_auto_shutdown_in = self.params.get("dp_device_auto_shutdown_in")
-    self.dp_device_auto_shutdown_voltage_prev = 0
+    self.dp_device_auto_shutdown_in = int(self.params.get("dp_device_auto_shutdown_in"))
+    self.dp_device_auto_shutdown_triggered = False
 
     car_battery_capacity_uWh = self.params.get("CarBatteryCapacity")
     if car_battery_capacity_uWh is None:
@@ -187,11 +187,15 @@ class PowerMonitoring:
     return should_shutdown
 
   # See if we need to disable charging
-  def legacy_should_disable_charging(self, ignition: bool, in_car: bool, offroad_timestamp: Optional[float]) -> bool:
+  def legacy_should_disable_charging(self, ignition: bool, in_car: bool, offroad_timestamp: Optional[float], started_seen: bool) -> bool:
     if offroad_timestamp is None:
       return False
 
     now = sec_since_boot()
+
+    if started_seen and self.dp_device_auto_shutdown and (now - offroad_timestamp) > self.dp_device_auto_shutdown_in:
+      self.dp_device_auto_shutdown_triggered = True
+      return True
 
     disable_charging = False
     disable_charging |= (now - offroad_timestamp) > MAX_TIME_OFFROAD_S
@@ -211,14 +215,8 @@ class PowerMonitoring:
     panda_charging = (peripheralState.usbPowerMode != log.PeripheralState.UsbPowerMode.client)
     # BATT_PERC_OFF = 3 if self.is_oneplus else 10
 
-    if started_seen and self.dp_device_auto_shutdown and (now - offroad_timestamp) > self.dp_device_auto_shutdown_in:
-      self.params.put_bool("ForcePowerDown", True)
-      if not panda_charging:
-        return True
-      # rick - if voltage is not updating, assuming the panda is disconnected (e.g. white panda or black w/o comma power)
-      if peripheralState.voltage == self.dp_device_auto_shutdown_voltage_prev:
-        return True
-      self.dp_device_auto_shutdown_voltage_prev = peripheralState.voltage
+    if self.dp_device_auto_shutdown_triggered and not panda_charging:
+      return True
 
     should_shutdown = False
     # Wait until we have shut down charging before powering down
