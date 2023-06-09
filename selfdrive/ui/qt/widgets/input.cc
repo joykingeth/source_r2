@@ -201,7 +201,7 @@ ConfirmationDialog::ConfirmationDialog(const QString &prompt_text, const QString
   QLabel *prompt = new QLabel(prompt_text, this);
   prompt->setWordWrap(true);
   prompt->setAlignment(rich ? Qt::AlignLeft : Qt::AlignHCenter);
-  prompt->setStyleSheet((rich ? "font-size: 42px; font-weight: light;" : "font-size: 70px; font-weight: bold;") + QString(" margin: 45px;"));
+  prompt->setStyleSheet((rich ? "font-size: 32px; font-weight: light;" : "font-size: 70px; font-weight: bold;") + QString(" margin: 45px;"));
   main_layout->addWidget(rich ? (QWidget*)new ScrollView(prompt, this) : (QWidget*)prompt, 1, Qt::AlignTop);
 
   // cancel + confirm buttons
