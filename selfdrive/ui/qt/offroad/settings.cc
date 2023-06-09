@@ -122,25 +122,6 @@ TogglesPanel::TogglesPanel(SettingsWindow *parent) : ListWidget(parent) {
       tr("Display speed in km/h instead of mph."),
       "../assets/offroad/icon_metric.png",
     },
-    {
-      "dp_alka",
-      tr("Enable ALKA"),
-      tr("When enabled, openpilot lateral Control will be always on when ACC MAIN is ON.\nReboot required."),
-      "",
-    },
-    {
-      "dp_mapd",
-      tr("Enable MapD"),
-      tr("When enabled, openpilot will display current road name and speed limit on the screen.\nReboot required."),
-      "",
-    },
-    {
-      "dp_lat_lane_priority_mode",
-      tr("Enable Lane Priority Mode"),
-      tr("When enabled, openpilot will use lane lines for lateral control, fallback to laneless mode automatically when lane lines probabilities are low.\nReboot required."),
-      "",
-    },
-
 #ifdef ENABLE_MAPS
     {
       "NavSettingTime24h",
