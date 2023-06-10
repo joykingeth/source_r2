@@ -58,9 +58,9 @@ DPCtrlPanel::DPCtrlPanel(QWidget *parent) : ListWidget(parent) {
     },
   };
 
-  std::vector<QString> display_off_mode_texts{tr("Disabled"), tr("On-Road"), tr("MAIN"), tr("OP")};
-  ButtonParamControl* display_off_mode_setting = new ButtonParamControl("dp_device_display_off_mode", tr("Display Off When:"),
-                                          tr("On-Road - When driving, the display will be off.\nMAIN - When ACC Main is on, the display will be off.\nOP - When OP is enabled, the display will be off.\nReboot required."),
+  std::vector<QString> display_off_mode_texts{tr("Standard"), tr("On-Road"), tr("MAIN"), tr("OP"), tr("Off")};
+  ButtonParamControl* display_off_mode_setting = new ButtonParamControl("dp_device_display_off_mode", tr("Display Mode:"),
+                                          tr("On-Road - When driving, the display will be off (excl. warning).\nMAIN - When ACC Main is on, the display will be off (excl. warning).\nOP - When OP is enabled, the display will be off (excl. warning).\nOff - the display will be off completely (incl. warning).\nReboot required."),
                                           "",
                                           display_off_mode_texts);
 
