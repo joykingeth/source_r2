@@ -175,6 +175,7 @@ public:
 
   bool awake;
   QString language;
+  int dp_device_display_off_mode = 0;
 
   QTransform car_space_transform;
 

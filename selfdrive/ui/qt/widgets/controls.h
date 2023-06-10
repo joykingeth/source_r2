@@ -320,6 +320,7 @@ public:
         height: 80px;
         padding: 0px;
         border-radius:40px;
+        font-size: 36px;
       }
       QSpinBox::up-button  {
         subcontrol-origin: margin;

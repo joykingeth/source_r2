@@ -300,6 +300,8 @@ UIState::UIState(QObject *parent) : QObject(parent) {
   prime_type = std::atoi(params.get("PrimeType").c_str());
   language = QString::fromStdString(params.get("LanguageSetting"));
 
+  dp_device_display_off_mode = std::atoi(params.get("dp_device_display_off_mode").c_str());
+
   // update timer
   timer = new QTimer(this);
   QObject::connect(timer, &QTimer::timeout, this, &UIState::update);
@@ -410,7 +412,23 @@ void Device::updateWakefulness(const UIState &s) {
     emit interactiveTimout();
   }
 
-  setAwake(s.scene.ignition || interactive_timeout > 0);
+  // rick - display mode
+  // tr("Disabled"), tr("On-Road") tr("MAIN"), tr("OP")}
+  if (s.scene.ignition && s.dp_device_display_off_mode > 0) {
+    const SubMaster &sm = *(s.sm);
+    auto cs = sm["carState"].getCarState().getCruiseState();
+    if (s.status == STATUS_WARNING || s.status == STATUS_ALERT) {
+      resetInteractiveTimout();
+    } else if (s.dp_device_display_off_mode == 3 && !cs.getEnabled()) {
+      resetInteractiveTimout();
+    } else if (s.dp_device_display_off_mode == 2 && !cs.getAvailable()) {
+      resetInteractiveTimout();
+    }
+    setAwake(interactive_timeout > 0);
+  } else {
+    setAwake(s.scene.ignition || interactive_timeout > 0);
+  }
+//  setAwake(s.scene.ignition || interactive_timeout > 0);
 }
 
 UIState *uiState() {

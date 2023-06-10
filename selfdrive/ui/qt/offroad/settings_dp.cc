@@ -58,7 +58,13 @@ DPCtrlPanel::DPCtrlPanel(QWidget *parent) : ListWidget(parent) {
     },
   };
 
-  auto_shutdown_timer_toggle = new ParamSpinBoxControl("dp_device_auto_shutdown_in", tr("Auto Shutdown In"), tr("Adjust your shutdown waiting period.\n0 = shutdown immediately."), "", 0, 600, 1, tr(" mins"));
+  std::vector<QString> display_off_mode_texts{tr("Disabled"), tr("On-Road"), tr("MAIN"), tr("OP")};
+  ButtonParamControl* display_off_mode_setting = new ButtonParamControl("dp_device_display_off_mode", tr("Display Off When:"),
+                                          tr("On-Road - When driving, the display will be off.\nMAIN - When ACC Main is on, the display will be off.\nOP - When OP is enabled, the display will be off.\nReboot required."),
+                                          "",
+                                          display_off_mode_texts);
+
+  auto_shutdown_timer_toggle = new ParamSpinBoxControl("dp_device_auto_shutdown_in", tr("Auto Shutdown In"), tr("Adjust your shutdown waiting period."), "", 0, 600, 1, tr(" mins"), tr("Immediately"));
   for (auto &[param, title, desc] : toggle_defs) {
     if (param == "") {
       auto label = new LabelControl(title, "");
@@ -79,6 +85,8 @@ DPCtrlPanel::DPCtrlPanel(QWidget *parent) : ListWidget(parent) {
       });
       auto_shutdown_timer_toggle->setVisible(false);
       addItem(auto_shutdown_timer_toggle);
+      // display off mode
+      addItem(display_off_mode_setting);
     }
     if (param == "dp_mapd") {
       connect(toggle, &ToggleControl::toggleFlipped, [=]() {
