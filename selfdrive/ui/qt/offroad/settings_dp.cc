@@ -8,75 +8,75 @@ DPCtrlPanel::DPCtrlPanel(QWidget *parent) : ListWidget(parent) {
   std::vector<std::tuple<QString, QString, QString>> toggle_defs{
     {
       "",
-      tr("Ctrl - Overall"),
+      QString::fromUtf8("🐉 ") + tr("Ctrl - Overall") + QString::fromUtf8(" 🐉"),
       "",
     },
     {
       "dp_0813",
-      QString::fromUtf8("．") + tr("Use 0.8.13.1 Driving Model"),
+      tr("Use 0.8.13.1 Driving Model"),
       tr("When enabled, openpilot will use the good old 0.8.13.1 driving model.\nFor safety reason, vision only openpilot longitudinal will be disabled.\nReboot required."),
     },
     {
       "",
-      tr("Ctrl - Lateral"),
+      QString::fromUtf8("🐉 ") + tr("Ctrl - Lateral") + QString::fromUtf8(" 🐉"),
       "",
     },
     {
       "dp_alka",
-      QString::fromUtf8("．") + tr("Enable ALKA"),
+      tr("Enable ALKA"),
       tr("When enabled, openpilot lateral Control will be always on when ACC MAIN is ON.\nReboot required."),
     },
     {
       "dp_lat_lane_priority_mode",
-      QString::fromUtf8("．") + tr("Enable Lane Priority Mode"),
+      tr("Enable Lane Priority Mode"),
       tr("When enabled, openpilot will use lane lines for lateral control, fallback to laneless mode automatically when lane lines probabilities are low.\nReboot required."),
     },
     {
       "",
-      tr("Ctrl - Longitudinal"),
+      QString::fromUtf8("🐉 ") + tr("Ctrl - Longitudinal") + QString::fromUtf8(" 🐉"),
       "",
     },
     {
       "dp_mapd",
-      QString::fromUtf8("．") + tr("Enable MapD"),
+      tr("Enable MapD"),
       tr("When enabled, openpilot will display current road name and speed limit on the screen.\nReboot required."),
     },
 //    {
 //      "SpeedLimitControl",
-//      QString::fromUtf8("．") + tr("MapD - Enable Speed Limit Control"),
+//      QString::fromUtf8("₯ －　") + tr("MapD - Enable Speed Limit Control"),
 //      tr("When enabled, openpilot will use speed limit signs information from map data to automatically adapt cruise speed to road limits.\nReboot required."),
 //    },
     {
       "",
-      tr("Device"),
+      QString::fromUtf8("🐉 ") + tr("Device") + QString::fromUtf8(" 🐉"),
       "",
     },
     {
       "dp_device_no_ir_ctrl",
-      QString::fromUtf8("．") + tr("Disable IR"),
+      tr("Disable IR"),
       tr("When enabled, openpilot will disable IR completely.\nReboot required."),
     },
     {
       "dp_device_auto_shutdown",
-      QString::fromUtf8("．") + tr("Enable Auto Shutdown"),
+      tr("Enable Auto Shutdown"),
       tr("When enabled, openpilot will shutdown the device automatically.\nReboot required."),
     },
   };
 
   std::vector<QString> display_off_mode_texts{tr("Standard"), tr("On-Road"), tr("MAIN"), tr("OP"), tr("Off")};
-  ButtonParamControl* display_off_mode_setting = new ButtonParamControl("dp_device_display_off_mode", QString::fromUtf8("．") + tr("Display Mode:"),
-                                          tr("On-Road - When driving, the display will be off (excl. warning).\nMAIN - When ACC Main is on, the display will be off (excl. warning).\nOP - When OP is enabled, the display will be off (excl. warning).\nOff - the display will be off completely (incl. warning).\nReboot required."),
+  ButtonParamControl* display_off_mode_setting = new ButtonParamControl("dp_device_display_off_mode", tr("Display Mode"),
+                                          tr("On-Road - When driving, the display will be off (excl. warning).\nMAIN - When ACC MAIN is on, the display will be off (excl. warning).\nOP - When OP is enabled, the display will be off (excl. warning).\nOff - the display will be off completely (incl. warning).\nReboot required."),
                                           "",
                                           display_off_mode_texts);
 
   std::vector<QString> audible_alert_mode_texts{tr("Standard"), tr("Warning"), tr("Off")};
-  ButtonParamControl* audible_alert_mode_setting = new ButtonParamControl("dp_device_audible_alert_mode", QString::fromUtf8("．") + tr("Audible Alert Mode:"),
+  ButtonParamControl* audible_alert_mode_setting = new ButtonParamControl("dp_device_audible_alert_mode", tr("Audible Alert Mode"),
                                           tr("Warning - Only emits sound when there is a warning.\nOff - Does not emit any sound at all."),
                                           "",
                                           audible_alert_mode_texts);
 
 
-  auto_shutdown_timer_toggle = new ParamSpinBoxControl("dp_device_auto_shutdown_in", QString::fromUtf8("．") + tr("Auto Shutdown In"), tr("Adjust your shutdown waiting period."), "", 0, 600, 1, tr(" mins"), tr("Immediately"));
+  auto_shutdown_timer_toggle = new ParamSpinBoxControl("dp_device_auto_shutdown_in", tr("Auto Shutdown In"), tr("Adjust your shutdown waiting period."), "", 0, 600, 1, tr(" mins"), tr("Immediately"));
   for (auto &[param, title, desc] : toggle_defs) {
     if (param == "") {
       auto label = new LabelControl(title, "");
@@ -121,22 +121,22 @@ DPCtrlPanel::DPCtrlPanel(QWidget *parent) : ListWidget(parent) {
     std::vector<std::tuple<QString, QString, QString>> toyota_toggle_defs{
       {
         "",
-        tr("Toyota / Lexus"),
+        QString::fromUtf8("🐉 ") + tr("Toyota / Lexus") + QString::fromUtf8(" 🐉"),
         "",
       },
       {
         "dp_toyota_sng",
-        QString::fromUtf8("．") + tr("Enable Stop and Go (SnG) Hack"),
+        tr("Enable Stop and Go (SnG) Hack"),
         tr("When enabled, openpilot will stop sending standstill signal when the car is fully stopped.\nONLY WORK ON SOME VEHICLES.\nReboot Required."),
       },
       {
         "dp_toyota_auto_lock",
-        QString::fromUtf8("．") + tr("Enable Door Auto Locking"),
+        tr("Enable Door Auto Locking"),
         tr("When enabled, openpilot will attempt to lock the doors when drive above 10 km/h (6.2 mph).\nReboot Required."),
       },
       {
         "dp_toyota_auto_unlock",
-        QString::fromUtf8("．") + tr("Enable Door Auto Unlocking"),
+        tr("Enable Door Auto Unlocking"),
         tr("When enabled, openpilot will attempt to unlock the doors when shift to gear P.\nReboot Required."),
       },
     };
