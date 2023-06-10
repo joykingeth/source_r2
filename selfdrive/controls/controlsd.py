@@ -37,7 +37,7 @@ TESTING_CLOSET = "TESTING_CLOSET" in os.environ
 NOSENSOR = "NOSENSOR" in os.environ
 IGNORE_PROCESSES = {"loggerd", "encoderd", "statsd", "mapd"}
 
-NO_IR_CTRL = Params().get_bool("dp_no_ir_ctrl")
+NO_IR_CTRL = Params().get_bool("dp_device_no_ir_ctrl")
 if NO_IR_CTRL:
   IGNORE_PROCESSES |= {'driverCameraState', 'driverMonitoringState'}
 NO_FAN_CTRL = Params().get_bool("dp_no_fan_ctrl")

@@ -602,7 +602,7 @@ void peripheral_control_thread(Panda *panda, bool no_fan_control) {
     no_fan_control = panda->hw_type == cereal::PandaState::PandaType::BLACK_PANDA;
     p.putBool("dp_no_fan_ctrl", no_fan_control);
   }
-  bool no_ir_ctrl = p.getBool("dp_no_ir_ctrl");
+  bool no_ir_ctrl = p.getBool("dp_device_no_ir_ctrl");
 
   SubMaster sm({"deviceState", "driverCameraState"});
 

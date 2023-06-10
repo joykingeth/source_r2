@@ -11,7 +11,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 function two_init {
   # convert to no ir ctrl param
   if [ -f /data/media/0/no_ir_ctrl ]; then
-    echo -n 1 > /data/params/d/dp_no_ir_ctrl
+    echo -n 1 > /data/params/d/dp_device_no_ir_ctrl
   fi
 
   mount -o remount,rw /system
