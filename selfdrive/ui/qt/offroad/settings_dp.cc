@@ -52,6 +52,11 @@ DPCtrlPanel::DPCtrlPanel(QWidget *parent) : ListWidget(parent) {
       "",
     },
     {
+      "dp_device_no_ir_ctrl",
+      QString::fromUtf8("．") + tr("Disable IR"),
+      tr("When enabled, openpilot will disable IR completely.\nReboot required."),
+    },
+    {
       "dp_device_auto_shutdown",
       QString::fromUtf8("．") + tr("Enable Auto Shutdown"),
       tr("When enabled, openpilot will shutdown the device automatically.\nReboot required."),
@@ -59,19 +64,19 @@ DPCtrlPanel::DPCtrlPanel(QWidget *parent) : ListWidget(parent) {
   };
 
   std::vector<QString> display_off_mode_texts{tr("Standard"), tr("On-Road"), tr("MAIN"), tr("OP"), tr("Off")};
-  ButtonParamControl* display_off_mode_setting = new ButtonParamControl("dp_device_display_off_mode", tr("Display Mode:"),
+  ButtonParamControl* display_off_mode_setting = new ButtonParamControl("dp_device_display_off_mode", QString::fromUtf8("．") + tr("Display Mode:"),
                                           tr("On-Road - When driving, the display will be off (excl. warning).\nMAIN - When ACC Main is on, the display will be off (excl. warning).\nOP - When OP is enabled, the display will be off (excl. warning).\nOff - the display will be off completely (incl. warning).\nReboot required."),
                                           "",
                                           display_off_mode_texts);
 
   std::vector<QString> audible_alert_mode_texts{tr("Standard"), tr("Warning"), tr("Off")};
-  ButtonParamControl* audible_alert_mode_setting = new ButtonParamControl("dp_device_audible_alert_mode", tr("Audible Alert Mode:"),
+  ButtonParamControl* audible_alert_mode_setting = new ButtonParamControl("dp_device_audible_alert_mode", QString::fromUtf8("．") + tr("Audible Alert Mode:"),
                                           tr("Warning - Only emits sound when there is a warning.\nOff - Does not emit any sound at all."),
                                           "",
                                           audible_alert_mode_texts);
 
 
-  auto_shutdown_timer_toggle = new ParamSpinBoxControl("dp_device_auto_shutdown_in", tr("Auto Shutdown In"), tr("Adjust your shutdown waiting period."), "", 0, 600, 1, tr(" mins"), tr("Immediately"));
+  auto_shutdown_timer_toggle = new ParamSpinBoxControl("dp_device_auto_shutdown_in", QString::fromUtf8("．") + tr("Auto Shutdown In"), tr("Adjust your shutdown waiting period."), "", 0, 600, 1, tr(" mins"), tr("Immediately"));
   for (auto &[param, title, desc] : toggle_defs) {
     if (param == "") {
       auto label = new LabelControl(title, "");
