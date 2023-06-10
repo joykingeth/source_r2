@@ -417,7 +417,7 @@ void Device::updateWakefulness(const UIState &s) {
   if (s.scene.ignition && s.dp_device_display_off_mode > 0) {
     const SubMaster &sm = *(s.sm);
     auto cs = sm["carState"].getCarState().getCruiseState();
-    if (s.dp_device_display_off_mode < 4) && (s.status == STATUS_WARNING || s.status == STATUS_ALERT) {
+    if ((s.dp_device_display_off_mode < 4) && (s.status == STATUS_WARNING || s.status == STATUS_ALERT)) {
       resetInteractiveTimout();
     } else if (s.dp_device_display_off_mode == 3 && !cs.getEnabled()) {
       resetInteractiveTimout();
