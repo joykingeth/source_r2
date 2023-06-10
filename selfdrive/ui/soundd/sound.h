@@ -26,9 +26,11 @@ public:
 protected:
   void update();
   void setAlert(const Alert &alert);
+  bool shouldPlaySound(const Alert &alert);
 
   Alert current_alert = {};
   QMap<AudibleAlert, QPair<QSoundEffect *, int>> sounds;
   SubMaster sm;
   uint64_t started_frame;
+  int dp_device_audible_alert_mode = false;
 };

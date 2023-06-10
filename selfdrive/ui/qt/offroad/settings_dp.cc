@@ -64,6 +64,13 @@ DPCtrlPanel::DPCtrlPanel(QWidget *parent) : ListWidget(parent) {
                                           "",
                                           display_off_mode_texts);
 
+  std::vector<QString> audible_alert_mode_texts{tr("Standard"), tr("Warning"), tr("Off")};
+  ButtonParamControl* audible_alert_mode_setting = new ButtonParamControl("dp_device_audible_alert_mode", tr("Audible Alert Mode:"),
+                                          tr("Warning - Only emits sound when there is a warning.\nOff - Does not emit any sound at all."),
+                                          "",
+                                          audible_alert_mode_texts);
+
+
   auto_shutdown_timer_toggle = new ParamSpinBoxControl("dp_device_auto_shutdown_in", tr("Auto Shutdown In"), tr("Adjust your shutdown waiting period."), "", 0, 600, 1, tr(" mins"), tr("Immediately"));
   for (auto &[param, title, desc] : toggle_defs) {
     if (param == "") {
@@ -87,6 +94,8 @@ DPCtrlPanel::DPCtrlPanel(QWidget *parent) : ListWidget(parent) {
       addItem(auto_shutdown_timer_toggle);
       // display off mode
       addItem(display_off_mode_setting);
+      // audible alert mode
+      addItem(audible_alert_mode_setting);
     }
     if (param == "dp_mapd") {
       connect(toggle, &ToggleControl::toggleFlipped, [=]() {

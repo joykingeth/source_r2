@@ -60,6 +60,7 @@ def manager_init() -> None:
     ("dp_toyota_auto_lock", "0"),
     ("dp_toyota_auto_unlock", "0"),
     ("dp_device_display_off_mode", "0"),
+    ("dp_device_audible_alert_mode", "0"),
   ]
   if not PC:
     default_params.append(("LastUpdateTime", datetime.datetime.utcnow().isoformat().encode('utf8')))

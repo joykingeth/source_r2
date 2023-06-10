@@ -8,6 +8,7 @@
 
 #include "cereal/messaging/messaging.h"
 #include "common/util.h"
+#include "common/params.h"
 
 // TODO: detect when we can't play sounds
 // TODO: detect when we can't display the UI
@@ -15,6 +16,7 @@
 Sound::Sound(QObject *parent) : sm({"controlsState", "deviceState", "microphone", "carState"}) {
   qInfo() << "default audio device: " << QAudioDeviceInfo::defaultOutputDevice().deviceName();
 
+  dp_device_audible_alert_mode = std::atoi(Params().get("dp_device_audible_alert_mode").c_str());
   for (auto &[alert, fn, loops] : sound_list) {
     QSoundEffect *s = new QSoundEffect(this);
     QObject::connect(s, &QSoundEffect::statusChanged, [=]() {
@@ -78,10 +80,21 @@ void Sound::setAlert(const Alert &alert) {
     }
 
     // play sound
-    if (alert.sound != AudibleAlert::NONE) {
+    if (shouldPlaySound(alert)) {
       auto &[s, loops] = sounds[alert.sound];
       s->setLoopCount(loops);
       s->play();
     }
+  }
+}
+
+bool Sound::shouldPlaySound(const Alert &alert) {
+//    tr("Standard"), tr("Warning/Alert"), tr("Off")
+  if (dp_device_audible_alert_mode == 1) {
+    return (alert.sound == AudibleAlert::WARNING_SOFT || alert.sound == AudibleAlert::WARNING_IMMEDIATE);
+  } else if (dp_device_audible_alert_mode == 2) {
+    return false;
+  } else {
+    return alert.sound != AudibleAlert::NONE;
   }
 }
