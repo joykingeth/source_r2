@@ -52,6 +52,11 @@ DPCtrlPanel::DPCtrlPanel(QWidget *parent) : ListWidget(parent) {
       "",
     },
     {
+      "dp_device_disable_temp_check",
+      tr("Disable Temp Check"),
+      tr("When enabled, openpilot will disable device temperature check.\n**NOTED** An overheated device may result in random shutdowns or lag.\nReboot required."),
+    },
+    {
       "dp_device_no_ir_ctrl",
       tr("Disable IR"),
       tr("When enabled, openpilot will disable IR completely.\nReboot required."),

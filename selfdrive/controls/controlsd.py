@@ -92,6 +92,7 @@ class Controls:
     self.dp_no_fan_ctrl = self.params.get_bool("dp_no_fan_ctrl")
     self.dp_alka = self.params.get_bool("dp_alka")
     self.dp_0813 = self.params.get_bool("dp_0813")
+    self.dp_device_disable_temp_check = self.params.get_bool("dp_device_disable_temp_check")
     self.sm = sm
     if self.sm is None:
       ignore = ['testJoystick']
@@ -276,7 +277,7 @@ class Controls:
       self.events.add_from_msg(CS.events)
 
     # Create events for temperature, disk space, and memory
-    if self.sm['deviceState'].thermalStatus >= ThermalStatus.red:
+    if not self.dp_device_disable_temp_check and self.sm['deviceState'].thermalStatus >= ThermalStatus.red:
       self.events.add(EventName.overheat)
     if self.sm['deviceState'].freeSpacePercent < 7 and not SIMULATION:
       # under 7% of space free no enable allowed

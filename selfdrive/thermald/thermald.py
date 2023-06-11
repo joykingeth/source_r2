@@ -191,6 +191,8 @@ def thermald_thread(end_event, hw_queue):
 
   fan_controller = None
 
+  dp_device_disable_temp_check = params.get_bool("dp_device_disable_temp_check")
+
   while not end_event.is_set():
     sm.update(PANDA_STATES_TIMEOUT)
 
@@ -296,8 +298,9 @@ def thermald_thread(end_event, hw_queue):
     startup_conditions["not_taking_snapshot"] = not params.get_bool("IsTakingSnapshot")
     # if any CPU gets above 107 or the battery gets above 63, kill all processes
     # controls will warn with CPU above 95 or battery above 60
-    onroad_conditions["device_temp_good"] = thermal_status < ThermalStatus.danger
-    set_offroad_alert_if_changed("Offroad_TemperatureTooHigh", (not onroad_conditions["device_temp_good"]))
+    if not dp_device_disable_temp_check:
+      onroad_conditions["device_temp_good"] = thermal_status < ThermalStatus.danger
+      set_offroad_alert_if_changed("Offroad_TemperatureTooHigh", (not onroad_conditions["device_temp_good"]))
 
     # TODO: this should move to TICI.initialize_hardware, but we currently can't import params there
     if TICI:
