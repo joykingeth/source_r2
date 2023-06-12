@@ -42,7 +42,7 @@ class PowerMonitoring:
     self.is_oneplus = os.path.isfile('/ONEPLUS')
     self.dp_device_auto_shutdown = self.params.get_bool("dp_device_auto_shutdown")
     self.dp_device_auto_shutdown_in = int(self.params.get("dp_device_auto_shutdown_in"))
-    self.dp_device_auto_shutdown_triggered = False
+    self.dp_device_auto_shutdown_voltage_prev = 0
 
     car_battery_capacity_uWh = self.params.get("CarBatteryCapacity")
     if car_battery_capacity_uWh is None:
@@ -186,27 +186,6 @@ class PowerMonitoring:
     should_shutdown &= started_seen or (now > MIN_ON_TIME_S)
     return should_shutdown
 
-  # See if we need to disable charging
-  def legacy_should_disable_charging(self, ignition: bool, in_car: bool, offroad_timestamp: Optional[float], started_seen: bool) -> bool:
-    if offroad_timestamp is None:
-      return False
-
-    now = sec_since_boot()
-
-    if started_seen and self.dp_device_auto_shutdown and (now - offroad_timestamp) > self.dp_device_auto_shutdown_in:
-      self.dp_device_auto_shutdown_triggered = True
-      return True
-
-    disable_charging = False
-    disable_charging |= (now - offroad_timestamp) > MAX_TIME_OFFROAD_S
-    disable_charging |= (self.car_voltage_mV < (VBATT_PAUSE_CHARGING * 1e3)) and (self.car_voltage_instant_mV > (VBATT_INSTANT_PAUSE_CHARGING * 1e3))
-    disable_charging |= (self.car_battery_capacity_uWh <= 0)
-    disable_charging &= not ignition
-    disable_charging &= (not self.params.get_bool("DisablePowerDown"))
-    disable_charging &= in_car
-    disable_charging |= self.params.get_bool("ForcePowerDown")
-    return disable_charging
-
   def legacy_should_shutdown(self, peripheralState, ignition, in_car, offroad_timestamp, started_seen):
     if offroad_timestamp is None:
       return False
@@ -215,12 +194,18 @@ class PowerMonitoring:
     panda_charging = (peripheralState.usbPowerMode != log.PeripheralState.UsbPowerMode.client)
     # BATT_PERC_OFF = 3 if self.is_oneplus else 10
 
-    if self.dp_device_auto_shutdown_triggered and not panda_charging:
-      return True
+    if started_seen and self.dp_device_auto_shutdown and (now - offroad_timestamp) > self.dp_device_auto_shutdown_in:
+      self.params.put_bool("ForcePowerDown", True)
+      if not panda_charging:
+        return True
+      # rick - if voltage is not updating, assuming the panda is disconnected (e.g. white panda or black w/o comma power)
+      if peripheralState.voltage == self.dp_device_auto_shutdown_voltage_prev:
+        return True
+      self.dp_device_auto_shutdown_voltage_prev = peripheralState.voltage
 
     should_shutdown = False
     # Wait until we have shut down charging before powering down
-    should_shutdown |= (not panda_charging and self.legacy_should_disable_charging(ignition, in_car, offroad_timestamp))
+    # should_shutdown |= (not panda_charging and self.legacy_should_disable_charging(ignition, in_car, offroad_timestamp))
     # should_shutdown |= ((HARDWARE.get_battery_capacity() < BATT_PERC_OFF) and (not HARDWARE.get_battery_charging()) and ((now - offroad_timestamp) > 60))
     should_shutdown &= started_seen or (now > MIN_ON_TIME_S)
     return should_shutdown
