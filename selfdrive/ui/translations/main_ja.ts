@@ -68,29 +68,6 @@
     </message>
 </context>
 <context>
-    <name>Alert</name>
-    <message>
-        <source>openpilot Unavailable</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Waiting for controls to start</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>TAKE CONTROL IMMEDIATELY</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Controls Unresponsive</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Reboot Device</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>AnnotatedCameraWidget</name>
     <message>
         <source>km/h</source>
@@ -189,11 +166,6 @@ Reboot required.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Adjust your shutdown waiting period.
-0 = shutdown immediately.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source> mins</source>
         <translation type="unfinished"></translation>
     </message>
@@ -257,6 +229,78 @@ Reboot required.</source>
     </message>
     <message>
         <source>Toyota / Lexus</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Disable Temp Check</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>When enabled, openpilot will disable device temperature check.
+**NOTED** An overheated device may result in random shutdowns or lag.
+Reboot required.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Disable IR</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>When enabled, openpilot will disable IR completely.
+Reboot required.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Standard</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>On-Road</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>MAIN</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>OP</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Off</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Display Mode</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>On-Road - When driving, the display will be off (excl. warning).
+MAIN - When ACC MAIN is on, the display will be off (excl. warning).
+OP - When OP is enabled, the display will be off (excl. warning).
+Off - the display will be off completely (incl. warning).
+Reboot required.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Warning</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Audible Alert Mode</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Warning - Only emits sound when there is a warning.
+Off - Does not emit any sound at all.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Adjust your shutdown waiting period.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Immediately</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1251,33 +1295,6 @@ This may take up to a minute.</source>
     </message>
     <message>
         <source>Allow openpilot to obey left-hand traffic conventions and perform driver monitoring on right driver seat.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Enable ALKA</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>When enabled, openpilot lateral Control will be always on when ACC MAIN is ON.
-Reboot required.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Enable MapD</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>When enabled, openpilot will display current road name and speed limit on the screen.
-Reboot required.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Enable Lane Priority Mode</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>When enabled, openpilot will use lane lines for lateral control, fallback to laneless mode automatically when lane lines probabilities are low.
-Reboot required.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

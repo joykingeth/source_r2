@@ -71,23 +71,23 @@
     <name>Alert</name>
     <message>
         <source>openpilot Unavailable</source>
-        <translation>無法使用 dragonpilot</translation>
+        <translation type="vanished">無法使用 dragonpilot</translation>
     </message>
     <message>
         <source>Waiting for controls to start</source>
-        <translation>等待控制服務開始</translation>
+        <translation type="vanished">等待控制服務開始</translation>
     </message>
     <message>
         <source>TAKE CONTROL IMMEDIATELY</source>
-        <translation>立即接管控制</translation>
+        <translation type="vanished">立即接管控制</translation>
     </message>
     <message>
         <source>Controls Unresponsive</source>
-        <translation>控制服務無回應</translation>
+        <translation type="vanished">控制服務無回應</translation>
     </message>
     <message>
         <source>Reboot Device</source>
-        <translation>重新啟動設備</translation>
+        <translation type="vanished">重新啟動設備</translation>
     </message>
 </context>
 <context>
@@ -155,7 +155,7 @@
     <message>
         <source>When enabled, openpilot lateral Control will be always on when ACC MAIN is ON.
 Reboot required.</source>
-        <translation>當啟用時，當 ACC MAIN 為 ON，openpilot 的橫向控制功能將一直保持開啟。
+        <translation>當啟用時，當 ACC MAIN 為 ON，dragonpilot 的橫向控制功能將一直保持開啟。
 需要重新啟動。</translation>
     </message>
     <message>
@@ -165,7 +165,7 @@ Reboot required.</source>
     <message>
         <source>When enabled, openpilot will display current road name and speed limit on the screen.
 Reboot required.</source>
-        <translation>當啟用時，openpilot 將在螢幕上顯示當前道路名稱和速限。
+        <translation>當啟用時，dragonpilot 將在螢幕上顯示當前道路名稱和速限。
 需要重新啟動。</translation>
     </message>
     <message>
@@ -175,7 +175,7 @@ Reboot required.</source>
     <message>
         <source>When enabled, openpilot will use lane lines for lateral control, fallback to laneless mode automatically when lane lines probabilities are low.
 Reboot required.</source>
-        <translation>當啟用時，openpilot 將使用車道線進行橫向控制，在車道線概率較低時自動切換至無車道線模式。
+        <translation>當啟用時，dragonpilot 將使用車道線進行橫向控制，在車道線概率較低時自動切換至無車道線模式。
 需要重新啟動。</translation>
     </message>
     <message>
@@ -185,7 +185,7 @@ Reboot required.</source>
     <message>
         <source>When enabled, openpilot will shutdown the device automatically.
   Reboot required.</source>
-        <translation type="vanished">啟用後，openpilot 將會自動關閉設備。
+        <translation type="vanished">啟用後，dragonpilot 將會自動關閉設備。
   需要重新啟動。</translation>
     </message>
     <message>
@@ -195,7 +195,7 @@ Reboot required.</source>
     <message>
         <source>Adjust your shutdown waiting period.
 0 = shutdown immediately.</source>
-        <translation>調整關機等待時間。
+        <translation type="vanished">調整關機等待時間。
 0 = 立即關機。</translation>
     </message>
     <message>
@@ -210,7 +210,7 @@ Reboot required.</source>
         <source>When enabled, openpilot will stop sending standstill signal when the car is fully stopped.
 ONLY WORK ON SOME VEHICLES.
 Reboot Required.</source>
-        <translation>啟用後，當車輛完全停止時，openpilot 將停止發送停止信號。
+        <translation>啟用後，當車輛完全停止時，dragonpilot 將停止發送停止信號。
 僅適用於部分車輛。
 需要重新啟動。</translation>
     </message>
@@ -221,7 +221,7 @@ Reboot Required.</source>
     <message>
         <source>When enabled, openpilot will attempt to lock the doors when driving above 10 km/h (6.2 mph).
 Reboot Required.</source>
-        <translation type="vanished">啟用後，當速度超過 10 km/h（6.2 mph）時，openpilot 將嘗試鎖定車門。
+        <translation type="vanished">啟用後，當速度超過 10 km/h（6.2 mph）時，dragonpilot 將嘗試鎖定車門。
 需要重新啟動。</translation>
     </message>
     <message>
@@ -231,15 +231,15 @@ Reboot Required.</source>
     <message>
         <source>When enabled, openpilot will attempt to unlock the doors when shifting to gear P.
 Reboot Required.</source>
-        <translation type="vanished">啟用後，當換檔至 P 檔時，openpilot 將嘗試解鎖車門。
+        <translation type="vanished">啟用後，當換檔至 P 檔時，dragonpilot 將嘗試解鎖車門。
 需要重新啟動。</translation>
     </message>
     <message>
         <source>When enabled, openpilot will use the good old 0.8.13.1 driving model.
 For safety reason, vision-only openpilot longitudinal will be disabled.
 Reboot required.</source>
-        <translation type="vanished">啟用後，openpilot 將使用舊版的0.8.13.1駕駛模型。
-出於安全考慮，僅基於視覺的 openpilot 縱向控制將被禁用。
+        <translation type="vanished">啟用後，dragonpilot 將使用舊版的0.8.13.1駕駛模型。
+出於安全考慮，僅基於視覺的 dragonpilot 縱向控制將被禁用。
 需要重新啟動。</translation>
     </message>
     <message>
@@ -274,27 +274,107 @@ Reboot required.</source>
         <source>When enabled, openpilot will use the good old 0.8.13.1 driving model.
 For safety reason, vision only openpilot longitudinal will be disabled.
 Reboot required.</source>
-        <translation>啟用後，openpilot 將使用優良的0.8.13.1駕駛模型。
-出於安全考慮，僅基於視覺的 openpilot 縱向控制將被禁用。
+        <translation>啟用後，dragonpilot 將使用優良的0.8.13.1駕駛模型。
+出於安全考慮，僅基於視覺的 dragonpilot 縱向控制將被禁用。
 需要重新啟動。</translation>
     </message>
     <message>
         <source>When enabled, openpilot will shutdown the device automatically.
 Reboot required.</source>
-        <translation>啟用後，openpilot 將自動關機。
+        <translation>啟用後，dragonpilot 將自動關機。
 需要重新啟動。</translation>
     </message>
     <message>
         <source>When enabled, openpilot will attempt to lock the doors when drive above 10 km/h (6.2 mph).
 Reboot Required.</source>
-        <translation>啟用後，當速度超過 10 km/h（6.2 mph）時，openpilot 將嘗試鎖定車門。
+        <translation>啟用後，當速度超過 10 km/h（6.2 mph）時，dragonpilot 將嘗試鎖定車門。
 需要重新啟動。</translation>
     </message>
     <message>
         <source>When enabled, openpilot will attempt to unlock the doors when shift to gear P.
 Reboot Required.</source>
-        <translation>啟用後，當換到 P 檔時，openpilot 將嘗試解鎖車門。
+        <translation>啟用後，當換到 P 檔時，dragonpilot 將嘗試解鎖車門。
 需要重新啟動。</translation>
+    </message>
+    <message>
+        <source>Disable Temp Check</source>
+        <translation>停用溫度檢查</translation>
+    </message>
+    <message>
+        <source>When enabled, openpilot will disable device temperature check.
+**NOTED** An overheated device may result in random shutdowns or lag.
+Reboot required.</source>
+        <translation>啟用時，dragonpilot 將停用設備溫度檢查。
+**請注意** 過熱的設備可能導致隨機關機或卡頓。
+需要重新啟動。</translation>
+    </message>
+    <message>
+        <source>Disable IR</source>
+        <translation>停用紅外線</translation>
+    </message>
+    <message>
+        <source>When enabled, openpilot will disable IR completely.
+Reboot required.</source>
+        <translation>啟用時，dragonpilot 將完全停用紅外線。
+需要重新啟動。</translation>
+    </message>
+    <message>
+        <source>Standard</source>
+        <translation>標準</translation>
+    </message>
+    <message>
+        <source>On-Road</source>
+        <translation>On-Road</translation>
+    </message>
+    <message>
+        <source>MAIN</source>
+        <translation>MAIN</translation>
+    </message>
+    <message>
+        <source>OP</source>
+        <translation>OP</translation>
+    </message>
+    <message>
+        <source>Off</source>
+        <translation>關閉</translation>
+    </message>
+    <message>
+        <source>Display Mode</source>
+        <translation>顯示模式</translation>
+    </message>
+    <message>
+        <source>On-Road - When driving, the display will be off (excl. warning).
+MAIN - When ACC MAIN is on, the display will be off (excl. warning).
+OP - When OP is enabled, the display will be off (excl. warning).
+Off - the display will be off completely (incl. warning).
+Reboot required.</source>
+        <translation>On-Road - 在行駛時，顯示將關閉（不包括警示）。
+MAIN - 當 ACC 主模式開啟時，顯示將關閉（不包括警示）。
+OP - 當 OP 功能啟用時，顯示將關閉（不包括警示）。
+關閉 - 顯示將完全關閉（包括警示）。
+需要重新啟動。</translation>
+    </message>
+    <message>
+        <source>Warning</source>
+        <translation>警示</translation>
+    </message>
+    <message>
+        <source>Audible Alert Mode</source>
+        <translation>提示聲模式</translation>
+    </message>
+    <message>
+        <source>Warning - Only emits sound when there is a warning.
+Off - Does not emit any sound at all.</source>
+        <translation>警示 - 只有在有警示時才發出提示聲。
+關閉 - 完全不發出任何提示聲。</translation>
+    </message>
+    <message>
+        <source>Adjust your shutdown waiting period.</source>
+        <translation>調整您的關機等待時間。</translation>
+    </message>
+    <message>
+        <source>Immediately</source>
+        <translation>馬上關機</translation>
     </message>
 </context>
 <context>
@@ -1300,50 +1380,50 @@ This may take up to a minute.</source>
     </message>
     <message>
         <source>Enable ALKA</source>
-        <translation>啟用全時置中</translation>
+        <translation type="vanished">啟用全時置中</translation>
     </message>
     <message>
         <source>When enabled, openpilot lateral Control will be always on when ACC MAIN is ON.
     Reboot required.</source>
-        <translation type="vanished">啟用後，當 ACC 系統開關開啟時，openpilot 的橫向控制將始終保持開啟狀態。
+        <translation type="vanished">啟用後，當 ACC 系統開關開啟時，dragonpilot 的橫向控制將始終保持開啟狀態。
     需要重新啟動。</translation>
     </message>
     <message>
         <source>Enable MapD</source>
-        <translation>啟用 MapD</translation>
+        <translation type="vanished">啟用 MapD</translation>
     </message>
     <message>
         <source>When enabled, openpilot will display current road name and speed limit on the screen.
     Reboot required.</source>
-        <translation type="vanished">啟用後，openpilot 將在屏幕上顯示當前道路名稱和速度限制。
+        <translation type="vanished">啟用後，dragonpilot 將在屏幕上顯示當前道路名稱和速度限制。
     需要重新啟動。</translation>
     </message>
     <message>
         <source>Enable Lane Priority Mode</source>
-        <translation>啟用車道優先模式</translation>
+        <translation type="vanished">啟用車道優先模式</translation>
     </message>
     <message>
         <source>When enabled, openpilot will use lane lines for lateral control, fallback to laneless mode automatically when lane lines probabilities are low.
     Reboot required.</source>
-        <translation type="vanished">啟用後，openpilot 將使用車道線進行橫向控制，當車道線概率較低時，將自動切換至無車道模式。
+        <translation type="vanished">啟用後，dragonpilot 將使用車道線進行橫向控制，當車道線概率較低時，將自動切換至無車道模式。
     需要重新啟動。</translation>
     </message>
     <message>
         <source>When enabled, openpilot lateral Control will be always on when ACC MAIN is ON.
 Reboot required.</source>
-        <translation>當啟用時，當 ACC MAIN 為 ON，openpilot 的橫向控制功能將一直保持開啟。
+        <translation type="vanished">當啟用時，當 ACC MAIN 為 ON，dragonpilot 的橫向控制功能將一直保持開啟。
 需要重新啟動。</translation>
     </message>
     <message>
         <source>When enabled, openpilot will display current road name and speed limit on the screen.
 Reboot required.</source>
-        <translation>當啟用時，openpilot 將在螢幕上顯示當前道路名稱和速限。
+        <translation type="vanished">當啟用時，dragonpilot 將在螢幕上顯示當前道路名稱和速限。
 需要重新啟動。</translation>
     </message>
     <message>
         <source>When enabled, openpilot will use lane lines for lateral control, fallback to laneless mode automatically when lane lines probabilities are low.
 Reboot required.</source>
-        <translation>當啟用時，openpilot 將使用車道線進行橫向控制，在車道線概率較低時自動切換至無車道線模式。
+        <translation type="vanished">當啟用時，dragonpilot 將使用車道線進行橫向控制，在車道線概率較低時自動切換至無車道線模式。
 需要重新啟動。</translation>
     </message>
 </context>
