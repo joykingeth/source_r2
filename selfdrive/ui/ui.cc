@@ -419,9 +419,9 @@ void Device::updateWakefulness(const UIState &s) {
     auto cs = sm["carState"].getCarState().getCruiseState();
     if ((s.dp_device_display_off_mode < 4) && (s.status == STATUS_WARNING || s.status == STATUS_ALERT)) {
       resetInteractiveTimout();
-    } else if (s.dp_device_display_off_mode == 3 && !cs.getEnabled()) {
+    } else if (s.dp_device_display_off_mode == 3 && cs.getEnabled()) {
       resetInteractiveTimout();
-    } else if (s.dp_device_display_off_mode == 2 && !cs.getAvailable()) {
+    } else if (s.dp_device_display_off_mode == 2 && cs.getAvailable()) {
       resetInteractiveTimout();
     }
     setAwake(interactive_timeout > 0);
