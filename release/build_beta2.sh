@@ -89,6 +89,9 @@ find selfdrive/ui/ -name '*.h' -delete
 rm -rf panda/board panda/certs panda/crypto
 rm -rf .sconsign.dblite Jenkinsfile release/
 rm -fr selfdrive/legacy_modeld/models/supercombo.dlc
+rm -fr selfdrive/hybrid_modeld/models/supercombo.dlc
+rm -fr selfdrive/hybrid_modeld/models/*.onnx
+rm -fr selfdrive/hybrid_modeld/models/*_badweights.thneed
 
 rm -fr selfdrive/ui/replay/
 # Move back signed panda fw
