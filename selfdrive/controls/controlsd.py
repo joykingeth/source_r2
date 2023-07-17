@@ -41,8 +41,6 @@ IGNORE_PROCESSES = {"loggerd", "encoderd", "statsd", "mapd"}
 NO_IR_CTRL = Params().get_bool("dp_device_no_ir_ctrl")
 if NO_IR_CTRL:
   IGNORE_PROCESSES |= {'driverCameraState', 'driverMonitoringState'}
-NO_FAN_CTRL = Params().get_bool("dp_no_fan_ctrl")
-NO_GPS_CTRL = Params().get_bool("dp_no_gps_ctrl")
 
 ThermalStatus = log.DeviceState.ThermalStatus
 State = log.ControlsState.OpenpilotState
@@ -783,9 +781,6 @@ class Controls:
                              STEER_ANGLE_SATURATION_THRESHOLD
       else:
         self.steer_limited = abs(CC.actuators.steer - CC.actuatorsOutput.steer) > 1e-2
-
-    if NO_IR_CTRL:
-      self.sm['driverMonitoringState'].awarenessStatus = 1.
 
     force_decel = (not NO_IR_CTRL and self.sm['driverMonitoringState'].awarenessStatus < 0.) or \
                   (self.state == State.softDisabling)
