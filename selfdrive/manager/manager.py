@@ -164,7 +164,7 @@ def manager_thread() -> None:
     ignore += ["mapd"]
 
   if params.get_bool("dp_no_gps_ctrl"):
-    ignore += ["ubloxd", "gpx_uploader", "gpxd", "otisserv", "mapd"]
+    ignore += ["ubloxd", "gpx_uploader", "gpxd", "mapd"]
 
   if not params.get_bool("dp_fileserv"):
     ignore += ["fileserv"]
