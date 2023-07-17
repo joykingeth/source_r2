@@ -62,6 +62,8 @@ def manager_init() -> None:
     ("dp_device_display_off_mode", "0"),
     ("dp_device_audible_alert_mode", "0"),
     ("dp_device_disable_temp_check", "0"),
+    ("dp_fileserv", "0"),
+    ("dp_otisserv", "0"),
   ]
   if not PC:
     default_params.append(("LastUpdateTime", datetime.datetime.utcnow().isoformat().encode('utf8')))
@@ -158,10 +160,17 @@ def manager_thread() -> None:
     ignore += ["logcatd", "proclogd", "loggerd"]
   ignore += [x for x in os.getenv("BLOCK", "").split(",") if len(x) > 0]
 
-  if not params.get_bool("dp_mapd") or params.get_bool("dp_no_gps_ctrl"):
+  if not params.get_bool("dp_mapd"):
     ignore += ["mapd"]
+
   if params.get_bool("dp_no_gps_ctrl"):
-    ignore += ["ubloxd", "gpx_uploader", "gpxd"]
+    ignore += ["ubloxd", "gpx_uploader", "gpxd", "otisserv", "mapd"]
+
+  if not params.get_bool("dp_fileserv"):
+    ignore += ["fileserv"]
+
+  if not params.get_bool("dp_otisserv"):
+    ignore += ["otisserv"]
 
   sm = messaging.SubMaster(['deviceState', 'carParams'], poll=['deviceState'])
   pm = messaging.PubMaster(['managerState'])

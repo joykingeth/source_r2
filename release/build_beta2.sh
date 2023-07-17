@@ -135,6 +135,10 @@ rm -fr third_party/snpe/dsp/libsnpe_dsp_v68_domains_v3_skel.so
 find . -name '*.c' -delete
 find . -name '*.cpp' -delete
 
+# make sure src is deleted
+rm selfdrive/dragonpilot/otisserv.py
+rm selfdrive/dragonpilot/fileserv.py
+
 rm -fr selfdrive/modeld/
 
 # Mark as prebuilt release
