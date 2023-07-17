@@ -102,6 +102,9 @@ void Sidebar::updateState(const UIState &s) {
     pandaStatus = {{tr("NO"), tr("PANDA")}, danger_color};
   } else if (s.scene.started && !sm["liveLocationKalman"].getLiveLocationKalman().getGpsOK()) {
     pandaStatus = {{tr("GPS"), tr("SEARCH")}, warning_color};
+  } else if (s.scene.started && sm["liveLocationKalman"].getLiveLocationKalman().getGpsOK()) {
+    float gpsAccuracy = sm["gpsLocationExternal"].getGpsLocationExternal().getAccuracy();
+    pandaStatus = {{tr("GPS"), QString("%1 m").arg(fmin(99, gpsAccuracy), 0, 'f', 2)}, good_color};
   }
   setProperty("pandaStatus", QVariant::fromValue(pandaStatus));
 }
