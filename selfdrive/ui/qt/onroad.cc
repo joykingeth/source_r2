@@ -650,7 +650,7 @@ void AnnotatedCameraWidget::drawLead(QPainter &painter, const cereal::RadarState
 }
 
 void AnnotatedCameraWidget::drawRoadName(QPainter &p) {
-  configFont(p, "Inter", 55, "Bold");
+  p.setFont(InterFont(55, QFont::Bold));
   drawText(p, rect().center().x(), rect().bottom() - 20, roadName, 200);
 }
 

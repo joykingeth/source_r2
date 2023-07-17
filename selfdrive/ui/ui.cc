@@ -410,12 +410,13 @@ void Device::updateWakefulness(const UIState &s) {
   if (s.scene.ignition && s.dp_device_display_off_mode > 0) {
     const SubMaster &sm = *(s.sm);
     auto cs = sm["carState"].getCarState().getCruiseState();
-    if ((s.dp_device_display_off_mode < 4) && (s.status == STATUS_WARNING || s.status == STATUS_ALERT)) {
-      resetInteractiveTimout();
+    Alert alert = Alert::get(*(s.sm), s.scene.started_frame);
+    if ((s.dp_device_display_off_mode < 4) && (alert.status == cereal::ControlsState::AlertStatus::USER_PROMPT || alert.status == cereal::ControlsState::AlertStatus::CRITICAL)) {
+      resetInteractiveTimeout();
     } else if (s.dp_device_display_off_mode == 3 && cs.getEnabled()) {
-      resetInteractiveTimout();
+      resetInteractiveTimeout();
     } else if (s.dp_device_display_off_mode == 2 && cs.getAvailable()) {
-      resetInteractiveTimout();
+      resetInteractiveTimeout();
     }
     setAwake(interactive_timeout > 0);
   } else {
