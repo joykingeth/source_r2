@@ -46,6 +46,8 @@ class CarInterface(CarInterfaceBase):
 
     stop_and_go = False
 
+    ret.dashcamOnly = False if ret.dashcamOnly and Params().get_bool("dp_car_dashcam_mode_removal") else ret.dashcamOnly
+
     if candidate == CAR.PRIUS:
       stop_and_go = True
       ret.wheelbase = 2.70

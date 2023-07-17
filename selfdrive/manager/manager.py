@@ -64,6 +64,7 @@ def manager_init() -> None:
     ("dp_device_disable_temp_check", "0"),
     ("dp_fileserv", "0"),
     ("dp_otisserv", "0"),
+    ("dp_car_dashcam_mode_removal", "0"),
   ]
   if not PC:
     default_params.append(("LastUpdateTime", datetime.datetime.utcnow().isoformat().encode('utf8')))

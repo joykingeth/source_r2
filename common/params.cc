@@ -226,6 +226,7 @@ std::unordered_map<std::string, uint32_t> keys = {
     {"dp_device_disable_temp_check", PERSISTENT},
     {"dp_fileserv", PERSISTENT},
     {"dp_otisserv", PERSISTENT},
+    {"dp_car_dashcam_mode_removal", PERSISTENT},
 };
 
 } // namespace

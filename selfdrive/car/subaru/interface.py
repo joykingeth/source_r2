@@ -4,7 +4,7 @@ from panda import Panda
 from selfdrive.car import STD_CARGO_KG, get_safety_config
 from selfdrive.car.interfaces import CarInterfaceBase
 from selfdrive.car.subaru.values import CAR, GLOBAL_GEN2, PREGLOBAL_CARS, SubaruFlags
-
+from common.params import Params
 
 class CarInterface(CarInterfaceBase):
 
@@ -13,6 +13,7 @@ class CarInterface(CarInterfaceBase):
     ret.carName = "subaru"
     ret.radarUnavailable = True
     ret.dashcamOnly = candidate in PREGLOBAL_CARS
+    ret.dashcamOnly = False if ret.dashcamOnly and Params().get_bool("dp_car_dashcam_mode_removal") else ret.dashcamOnly
     ret.autoResumeSng = False
 
     # Detect infotainment message sent from the camera
