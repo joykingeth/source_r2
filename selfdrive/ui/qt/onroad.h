@@ -148,6 +148,21 @@ private:
   QWidget *map = nullptr;
   QHBoxLayout* split;
   bool dp_alka = false;
+  // dp indicators
+  bool dp_blinker_left = false;
+  bool dp_blinker_right = false;
+  bool dp_bsm_left = false;
+  bool dp_bsm_right = false;
+  bool dp_indicator_left_show = false;
+  bool dp_indicator_right_show = false;
+  int dp_indicator_left_count = 0;
+  int dp_indicator_right_count = 0;
+  bool dp_repaint_prev = false;
+  void updateIndicatorState(bool blinkerState, bool bsmState, bool& indicatorShow, int& indicatorCount, QColor& indicatorColor);
+  QColor dp_indicator_left_color;
+  QColor dp_indicator_right_color;
+  QColor dp_yellow_color = QColor(0xff, 0xff, 0, 255);
+  QColor dp_green_color = QColor(0, 0xff, 0, 255);
 
 private slots:
   void offroadTransition(bool offroad);

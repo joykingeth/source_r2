@@ -53,6 +53,27 @@ OnroadWindow::OnroadWindow(QWidget *parent) : QWidget(parent) {
   dp_alka = Params().getBool("dp_alka");
 }
 
+// Function to update indicator state
+void OnroadWindow::updateIndicatorState(bool blinkerState, bool bsmState, bool& indicatorShow, int& indicatorCount, QColor& indicatorColor) {
+  if (!blinkerState && !bsmState) {
+    indicatorShow = false;
+    indicatorCount = 0;
+  } else {
+    indicatorCount += 1;
+
+    if (bsmState && blinkerState) {
+      indicatorShow = indicatorCount % 4 == 0? !indicatorShow : indicatorShow;
+      indicatorColor = dp_yellow_color;
+    } else if (blinkerState) {
+      indicatorShow = indicatorCount % 8 == 0? !indicatorShow : indicatorShow;
+      indicatorColor = dp_green_color;
+    } else {
+      indicatorShow = bsmState;
+      indicatorColor = dp_yellow_color;
+    }
+  }
+}
+
 void OnroadWindow::updateState(const UIState &s) {
   QColor bgColor = bg_colors[dp_alka && s.scene.lat_active && s.status == STATUS_DISENGAGED? STATUS_ALKA : s.status];
   Alert alert = Alert::get(*(s.sm), s.scene.started_frame);
@@ -66,9 +87,27 @@ void OnroadWindow::updateState(const UIState &s) {
 
   nvg->updateState(s);
 
-  if (bg != bgColor) {
+
+  // dp blinker & bsm
+  auto cs = (*s.sm)["carState"].getCarState();
+  dp_blinker_left = cs.getLeftBlinker();
+  dp_blinker_right = cs.getRightBlinker();
+  dp_bsm_left = cs.getLeftBlindspot();
+  dp_bsm_right = cs.getRightBlindspot();
+
+  // left
+  updateIndicatorState(dp_blinker_left, dp_bsm_left, dp_indicator_left_show, dp_indicator_left_count, dp_indicator_left_color);
+
+  // right
+  updateIndicatorState(dp_blinker_right, dp_bsm_right, dp_indicator_right_show, dp_indicator_right_count, dp_indicator_right_color);
+
+  bool dp_repaint = dp_indicator_left_show || dp_indicator_right_show;
+
+  // repaint border
+  if (bg != bgColor || dp_repaint || dp_repaint != dp_repaint_prev) {
     // repaint border
     bg = bgColor;
+    dp_repaint_prev = dp_repaint;
     update();
   }
 }
