@@ -26,7 +26,8 @@ def ublox_available() -> bool:
 
 def ublox(started, params, CP: car.CarParams) -> bool:
   use_ublox = ublox_available()
-  params.put_bool("UbloxAvailable", use_ublox)
+  if use_ublox != params.get_bool("UbloxAvailable"):
+    params.put_bool("UbloxAvailable", use_ublox)
   return started and use_ublox
 
 def qcomgps(started, params, CP: car.CarParams) -> bool:
@@ -49,12 +50,12 @@ procs = [
   NativeProcess("dmonitoringmodeld", "selfdrive/hybrid_modeld", ["./dmonitoringmodeld"], enabled=(not PC or WEBCAM) and not NO_IR_CTRL, callback=driverview),
   # NativeProcess("encoderd", "system/loggerd", ["./encoderd"]),
   NativeProcess("loggerd", "selfdrive/loggerd", ["./loggerd"], onroad=False, callback=logging),
-  NativeProcess("modeld", "selfdrive/hybrid_modeld" if not use_old_model else "selfdrive/legacy_modeld", ["./modeld"]),
-  # NativeProcess("mapsd", "selfdrive/navd", ["./map_renderer"], enabled=False),
-  # NativeProcess("navmodeld", "selfdrive/modeld", ["./navmodeld"], enabled=False),
-  NativeProcess("sensord", "system/sensord", ["./sensord"], enabled=not PC, offroad=True),
+  NativeProcess("modeld", "selfdrive/hybrid_modeld", ["./modeld"]),
+  # NativeProcess("mapsd", "selfdrive/navd", ["./mapsd"]),
+  # NativeProcess("navmodeld", "selfdrive/modeld", ["./navmodeld"]),
+  NativeProcess("sensord", "system/sensord", ["./sensord"], enabled=not PC, offroad=EON),
   NativeProcess("ui", "selfdrive/ui", ["./ui"], offroad=True, watchdog_max_dt=(5 if not PC else None)),
-  NativeProcess("soundd", "selfdrive/ui/soundd", ["./soundd"], offroad=True),
+  NativeProcess("soundd", "selfdrive/ui/soundd", ["./soundd"]),
   NativeProcess("locationd", "selfdrive/locationd", ["./locationd"]),
   NativeProcess("boardd", "selfdrive/boardd", ["./boardd"], enabled=False),
   PythonProcess("calibrationd", "selfdrive.locationd.calibrationd"),

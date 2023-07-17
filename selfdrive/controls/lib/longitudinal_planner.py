@@ -92,10 +92,9 @@ class LongitudinalPlanner:
     self.personality = log.LongitudinalPersonality.standard
 
   def read_param(self):
-    param_value = self.params.get('LongitudinalPersonality')
-    if param_value is not None:
-      self.personality = int(param_value)
-    else:
+    try:
+      self.personality = int(self.params.get('LongitudinalPersonality'))
+    except (ValueError, TypeError):
       self.personality = log.LongitudinalPersonality.standard
 
   def _set_dp_e2e_mode(self, mode, force=False):
@@ -203,7 +202,7 @@ class LongitudinalPlanner:
     if self.param_read_counter % 50 == 0:
       self.read_param()
     self.param_read_counter += 1
-    # self.mpc.mode = 'blended' if sm['controlsState'].experimentalMode else 'acc'
+    # self.mpc.mode = 'blended' if sm['controlsState'].experimentalMode and self.CP.openpilotLongitudinalControl else 'acc'
     dp_reset_state = self.conditional_e2e(sm)
 
     v_ego = sm['carState'].vEgo

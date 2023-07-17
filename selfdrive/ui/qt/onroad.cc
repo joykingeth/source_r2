@@ -3,17 +3,18 @@
 #include <cmath>
 
 #include <QDebug>
+#include <QMouseEvent>
 
 #include "common/timing.h"
 #include "selfdrive/ui/qt/util.h"
 #ifdef ENABLE_MAPS
-#include "selfdrive/ui/qt/maps/map.h"
 #include "selfdrive/ui/qt/maps/map_helpers.h"
+#include "selfdrive/ui/qt/maps/map_panel.h"
 #endif
 
 OnroadWindow::OnroadWindow(QWidget *parent) : QWidget(parent) {
   QVBoxLayout *main_layout  = new QVBoxLayout(this);
-  main_layout->setMargin(bdr_s);
+  main_layout->setMargin(UI_BORDER_SIZE);
   QStackedLayout *stacked_layout = new QStackedLayout;
   stacked_layout->setStackingMode(QStackedLayout::StackAll);
   main_layout->addLayout(stacked_layout);
@@ -55,14 +56,7 @@ OnroadWindow::OnroadWindow(QWidget *parent) : QWidget(parent) {
 void OnroadWindow::updateState(const UIState &s) {
   QColor bgColor = bg_colors[dp_alka && s.scene.lat_active && s.status == STATUS_DISENGAGED? STATUS_ALKA : s.status];
   Alert alert = Alert::get(*(s.sm), s.scene.started_frame);
-  if (s.sm->updated("controlsState") || !alert.equal({})) {
-    if (alert.type == "controlsUnresponsive") {
-      bgColor = bg_colors[STATUS_ALERT];
-    } else if (alert.type == "controlsUnresponsivePermanent") {
-      bgColor = bg_colors[STATUS_DISENGAGED];
-    }
-    alerts->updateAlert(alert, bgColor);
-  }
+  alerts->updateAlert(alert);
 
   if (s.scene.map_on_left) {
     split->setDirection(QBoxLayout::LeftToRight);
@@ -80,10 +74,14 @@ void OnroadWindow::updateState(const UIState &s) {
 }
 
 void OnroadWindow::mousePressEvent(QMouseEvent* e) {
+#ifdef ENABLE_MAPS
   if (map != nullptr) {
+    // Switch between map and sidebar when using navigate on openpilot
     bool sidebarVisible = geometry().x() > 0;
-    map->setVisible(!sidebarVisible && !map->isVisible());
+    bool show_map = uiState()->scene.navigate_on_openpilot ? sidebarVisible : !sidebarVisible;
+    map->setVisible(show_map && !map->isVisible());
   }
+#endif
   // propagation event to parent(HomeWindow)
   QWidget::mousePressEvent(e);
 }
@@ -92,21 +90,21 @@ void OnroadWindow::offroadTransition(bool offroad) {
 #ifdef ENABLE_MAPS
   if (!offroad) {
     if (map == nullptr && (uiState()->primeType() || !MAPBOX_TOKEN.isEmpty())) {
-      MapWindow * m = new MapWindow(get_mapbox_settings());
+      auto m = new MapPanel(get_mapbox_settings());
       map = m;
 
-      QObject::connect(uiState(), &UIState::offroadTransition, m, &MapWindow::offroadTransition);
+      QObject::connect(m, &MapPanel::mapPanelRequested, this, &OnroadWindow::mapPanelRequested);
 
-      m->setFixedWidth(topWidget(this)->width() / 2);
+      m->setFixedWidth(topWidget(this)->width() / 2 - UI_BORDER_SIZE);
       split->insertWidget(0, m);
 
-      // Make map visible after adding to split
-      m->offroadTransition(offroad);
+      // hidden by default, made visible when navRoute is published
+      m->setVisible(false);
     }
   }
 #endif
 
-  alerts->updateAlert({}, bg);
+  alerts->updateAlert({});
 }
 
 void OnroadWindow::paintEvent(QPaintEvent *event) {
@@ -117,10 +115,9 @@ void OnroadWindow::paintEvent(QPaintEvent *event) {
 // ***** onroad widgets *****
 
 // OnroadAlerts
-void OnroadAlerts::updateAlert(const Alert &a, const QColor &color) {
-  if (!alert.equal(a) || color != bg) {
+void OnroadAlerts::updateAlert(const Alert &a) {
+  if (!alert.equal(a)) {
     alert = a;
-    bg = color;
     update();
   }
 }
@@ -129,22 +126,28 @@ void OnroadAlerts::paintEvent(QPaintEvent *event) {
   if (alert.size == cereal::ControlsState::AlertSize::NONE) {
     return;
   }
-  static std::map<cereal::ControlsState::AlertSize, const int> alert_sizes = {
+  static std::map<cereal::ControlsState::AlertSize, const int> alert_heights = {
     {cereal::ControlsState::AlertSize::SMALL, 271},
     {cereal::ControlsState::AlertSize::MID, 420},
     {cereal::ControlsState::AlertSize::FULL, height()},
   };
-  int h = alert_sizes[alert.size];
-  QRect r = QRect(0, height() - h, width(), h);
+  int h = alert_heights[alert.size];
+
+  int margin = 40;
+  int radius = 30;
+  if (alert.size == cereal::ControlsState::AlertSize::FULL) {
+    margin = 0;
+    radius = 0;
+  }
+  QRect r = QRect(0 + margin, height() - h + margin, width() - margin*2, h - margin*2);
 
   QPainter p(this);
 
   // draw background + gradient
   p.setPen(Qt::NoPen);
   p.setCompositionMode(QPainter::CompositionMode_SourceOver);
-
-  p.setBrush(QBrush(bg));
-  p.drawRect(r);
+  p.setBrush(QBrush(alert_colors[alert.status]));
+  p.drawRoundedRect(r, radius, radius);
 
   QLinearGradient g(0, r.y(), 0, r.bottom());
   g.setColorAt(0, QColor::fromRgbF(0, 0, 0, 0.05));
@@ -152,7 +155,7 @@ void OnroadAlerts::paintEvent(QPaintEvent *event) {
 
   p.setCompositionMode(QPainter::CompositionMode_DestinationOver);
   p.setBrush(QBrush(g));
-  p.fillRect(r, g);
+  p.drawRoundedRect(r, radius, radius);
   p.setCompositionMode(QPainter::CompositionMode_SourceOver);
 
   // text
@@ -160,51 +163,46 @@ void OnroadAlerts::paintEvent(QPaintEvent *event) {
   p.setPen(QColor(0xff, 0xff, 0xff));
   p.setRenderHint(QPainter::TextAntialiasing);
   if (alert.size == cereal::ControlsState::AlertSize::SMALL) {
-    configFont(p, "Inter", 74, "SemiBold");
+    p.setFont(InterFont(74, QFont::DemiBold));
     p.drawText(r, Qt::AlignCenter, alert.text1);
   } else if (alert.size == cereal::ControlsState::AlertSize::MID) {
-    configFont(p, "Inter", 88, "Bold");
+    p.setFont(InterFont(88, QFont::Bold));
     p.drawText(QRect(0, c.y() - 125, width(), 150), Qt::AlignHCenter | Qt::AlignTop, alert.text1);
-    configFont(p, "Inter", 66, "Regular");
+    p.setFont(InterFont(66));
     p.drawText(QRect(0, c.y() + 21, width(), 90), Qt::AlignHCenter, alert.text2);
   } else if (alert.size == cereal::ControlsState::AlertSize::FULL) {
     bool l = alert.text1.length() > 15;
-    configFont(p, "Inter", l ? 132 : 177, "Bold");
+    p.setFont(InterFont(l ? 132 : 177, QFont::Bold));
     p.drawText(QRect(0, r.y() + (l ? 240 : 270), width(), 600), Qt::AlignHCenter | Qt::TextWordWrap, alert.text1);
-    configFont(p, "Inter", 88, "Regular");
+    p.setFont(InterFont(88));
     p.drawText(QRect(0, r.height() - (l ? 361 : 420), width(), 300), Qt::AlignHCenter | Qt::TextWordWrap, alert.text2);
   }
 }
 
-
-ExperimentalButton::ExperimentalButton(QWidget *parent) : QPushButton(parent) {
-  setVisible(false);
+// ExperimentalButton
+ExperimentalButton::ExperimentalButton(QWidget *parent) : experimental_mode(false), engageable(false), QPushButton(parent) {
   setFixedSize(btn_size, btn_size);
-  setCheckable(true);
 
   params = Params();
   engage_img = loadBased64Image("iVBORw0KGgoAAAANSUhEUgAAAQoAAAEKCAMAAADdFev7AAAAVFBMVEVHcEz///////////////////////////////////////////////////////////////////////////////////////////////////////////+DS+nTAAAAG3RSTlMAKEIf6zXh+gTzUBYOCM3XwoaRcHq4nVymZbCV8JeNAAAgAElEQVR42uxc2WKrOgysAe/GNmaH///PC17AEHoKSdqk5x6eWkIKlqXRaCT68fHv+Hf8O/4dv+cg/0zgD9g1Rdmm/69F86Qvmq6p2GbdbJwPs/gGgTDl+V/tKqCQ1K56xKqIjNHbc1myGExmSGr29xoi79EYHXJZ+UflznR5MFk2/9r/tZYQBXYOQb1nZMu2G3eChhNwvgIvHxPG/i4cqawlZMVg0mu7dAT9R513lEF47JgvpXCNF6wM43+NJRLr9I3bXm5wFBF57U2BW3dta50GLF+1TqJM8iutQYTYJoB8mJdXh8UI+2vmNl7IgB/afV7OP6t0Fz8jlkUifpcd0tYMWndlHOAw24S/2+mxctcrGzrTGeygsrC/h1VztWIt1eXvcY08aZDDx1H1+XK63W70h7Bw0ZE1YZSzo0h7RWM9KHyZOZBR/q9K9ksIB+zouoe4yDf5Ukfu3aw77xOGdZTZT8iwminERwbTtnPJmFb5b7AEQz5heluU4YNibwprG2SdILEJIyFzIlEgeIwJ4aaCjxDQa7z5q+9sCevqyrRJW8c46FeuojhvV9wMCcPiSRHAodjEh1+9sCk5g+8fHbNPYJO6fDljHCAxt17zY8iQbEkYk4MQ48hGimKy2Yzx4vMu9pj3zaD2qY2PZF5FmY/4IIjqkZVcu4TBvSmN846RxfEx5Btvkt69CHhT2LBLUOnnnwUKtS6xXPZd594oGbQOE8zW4m09YuMF+ZtA1bxnrFhH73aVByTRyquoXF9M4RLGMF8H5pNNG+EB2caHdyFvivnDzIA3NEUTo53z31L7QsNlhSYKEBTcJP5oRtdsiDbe4QbWJXShYI3lXCjwtPr9GCjZIRpnDVo9odlxLOvoFkfjhJHOHBxH2ab1xGrM6hJynrhCrorI/PiOqbWLSCIBlXSrkPGalsd2RYhFQ7fx/pM+LN1xENJFCkemlOMryMUEo5t8/VZl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", {img_size, img_size});
   experimental_img = loadPixmap("../assets/img_experimental.svg", {img_size, img_size});
+  QObject::connect(this, &QPushButton::clicked, this, &ExperimentalButton::changeMode);
+}
 
-  QObject::connect(this, &QPushButton::toggled, [=](bool checked) {
-    params.putBool("ExperimentalMode", checked);
-  });
+void ExperimentalButton::changeMode() {
+  if (params.getBool("ExperimentalModeConfirmed")) {
+    params.putBool("ExperimentalMode", !experimental_mode);
+  }
 }
 
 void ExperimentalButton::updateState(const UIState &s) {
-  const SubMaster &sm = *(s.sm);
-
-  // button is "visible" if engageable or enabled
-  const auto cs = sm["controlsState"].getControlsState();
-  setVisible(cs.getEngageable() || cs.getEnabled());
-
-  // button is "checked" if experimental mode is enabled
-  setChecked(sm["controlsState"].getControlsState().getExperimentalMode());
-
-  // disable button when experimental mode is not available, or has not been confirmed for the first time
-  const auto cp = sm["carParams"].getCarParams();
-  const bool experimental_mode_available = cp.getExperimentalLongitudinalAvailable() ? params.getBool("ExperimentalLongitudinalEnabled") : cp.getOpenpilotLongitudinalControl();
-  setEnabled(params.getBool("ExperimentalModeConfirmed") && experimental_mode_available);
+  const auto cs = (*s.sm)["controlsState"].getControlsState();
+  bool eng = cs.getEngageable() || cs.getEnabled();
+  if ((cs.getExperimentalMode() != experimental_mode) || (eng != engageable)) {
+    engageable = eng;
+    experimental_mode = cs.getExperimentalMode();
+    update();
+  }
 }
 
 void ExperimentalButton::paintEvent(QPaintEvent *event) {
@@ -212,22 +210,23 @@ void ExperimentalButton::paintEvent(QPaintEvent *event) {
   p.setRenderHint(QPainter::Antialiasing);
 
   QPoint center(btn_size / 2, btn_size / 2);
-  QPixmap img = isChecked() ? experimental_img : engage_img;
+  QPixmap img = experimental_mode ? experimental_img : engage_img;
 
   p.setOpacity(1.0);
   p.setPen(Qt::NoPen);
   p.setBrush(QColor(0, 0, 0, 166));
   p.drawEllipse(center, btn_size / 2, btn_size / 2);
-  p.setOpacity(isDown() ? 0.8 : 1.0);
+  p.setOpacity((isDown() || !engageable) ? 0.6 : 1.0);
   p.drawPixmap((btn_size - img_size) / 2, (btn_size - img_size) / 2, img);
 }
 
 
+// Window that shows camera view and variety of info drawn on top
 AnnotatedCameraWidget::AnnotatedCameraWidget(VisionStreamType type, QWidget* parent) : fps_filter(UI_FREQ, 3, 1. / UI_FREQ), CameraWidget("camerad", type, true, parent) {
   pm = std::make_unique<PubMaster, const std::initializer_list<const char *>>({"uiDebug"});
 
   QVBoxLayout *main_layout  = new QVBoxLayout(this);
-  main_layout->setMargin(bdr_s);
+  main_layout->setMargin(UI_BORDER_SIZE);
   main_layout->setSpacing(0);
 
   experimental_btn = new ExperimentalButton(this);
@@ -327,164 +326,110 @@ void AnnotatedCameraWidget::drawHud(QPainter &p) {
   p.save();
 
   // Header gradient
-  QLinearGradient bg(0, header_h - (header_h / 2.5), 0, header_h);
+  QLinearGradient bg(0, UI_HEADER_HEIGHT - (UI_HEADER_HEIGHT / 2.5), 0, UI_HEADER_HEIGHT);
   bg.setColorAt(0, QColor::fromRgbF(0, 0, 0, 0.45));
   bg.setColorAt(1, QColor::fromRgbF(0, 0, 0, 0));
-  p.fillRect(0, 0, width(), header_h, bg);
+  p.fillRect(0, 0, width(), UI_HEADER_HEIGHT, bg);
 
   QString speedLimitStr = (speedLimit > 1) ? QString::number(std::nearbyint(speedLimit)) : "–";
   QString speedStr = QString::number(std::nearbyint(speed));
   QString setSpeedStr = is_cruise_set ? QString::number(std::nearbyint(setSpeed)) : "–";
 
   // Draw outer box + border to contain set speed and speed limit
-  int default_rect_width = 172;
-  int rect_width = default_rect_width;
-  if (is_metric || has_eu_speed_limit) rect_width = 200;
-  if (has_us_speed_limit && speedLimitStr.size() >= 3) rect_width = 223;
+  const int sign_margin = 12;
+  const int us_sign_height = 186;
+  const int eu_sign_size = 176;
 
-  int rect_height = 204;
-  if (has_us_speed_limit) rect_height = 402;
-  else if (has_eu_speed_limit) rect_height = 392;
+  const QSize default_size = {172, 204};
+  QSize set_speed_size = default_size;
+  if (is_metric || has_eu_speed_limit) set_speed_size.rwidth() = 200;
+  if (has_us_speed_limit && speedLimitStr.size() >= 3) set_speed_size.rwidth() = 223;
+
+  if (has_us_speed_limit) set_speed_size.rheight() += us_sign_height + sign_margin;
+  else if (has_eu_speed_limit) set_speed_size.rheight() += eu_sign_size + sign_margin;
 
   int top_radius = 32;
   int bottom_radius = has_eu_speed_limit ? 100 : 32;
 
-  QRect set_speed_rect(60 + default_rect_width / 2 - rect_width / 2, 45, rect_width, rect_height);
+  QRect set_speed_rect(QPoint(60 + (default_size.width() - set_speed_size.width()) / 2, 45), set_speed_size);
   p.setPen(QPen(whiteColor(75), 6));
   p.setBrush(blackColor(166));
   drawRoundedRect(p, set_speed_rect, top_radius, top_radius, bottom_radius, bottom_radius);
 
   // Draw MAX
+  QColor max_color = QColor(0x80, 0xd8, 0xa6, 0xff);
+  QColor set_speed_color = whiteColor();
   if (is_cruise_set) {
     if (status == STATUS_DISENGAGED) {
-      p.setPen(whiteColor());
+      max_color = whiteColor();
     } else if (status == STATUS_OVERRIDE) {
-      p.setPen(QColor(0x91, 0x9b, 0x95, 0xff));
+      max_color = QColor(0x91, 0x9b, 0x95, 0xff);
     } else if (speedLimit > 0) {
-      p.setPen(interpColor(
-        setSpeed,
-        {speedLimit + 5, speedLimit + 15, speedLimit + 25},
-        {QColor(0x80, 0xd8, 0xa6, 0xff), QColor(0xff, 0xe4, 0xbf, 0xff), QColor(0xff, 0xbf, 0xbf, 0xff)}
-      ));
-    } else {
-      p.setPen(QColor(0x80, 0xd8, 0xa6, 0xff));
+      auto interp_color = [=](QColor c1, QColor c2, QColor c3) {
+        return speedLimit > 0 ? interpColor(setSpeed, {speedLimit + 5, speedLimit + 15, speedLimit + 25}, {c1, c2, c3}) : c1;
+      };
+      max_color = interp_color(max_color, QColor(0xff, 0xe4, 0xbf), QColor(0xff, 0xbf, 0xbf));
+      set_speed_color = interp_color(set_speed_color, QColor(0xff, 0x95, 0x00), QColor(0xff, 0x00, 0x00));
     }
   } else {
-    p.setPen(QColor(0xa6, 0xa6, 0xa6, 0xff));
+    max_color = QColor(0xa6, 0xa6, 0xa6, 0xff);
+    set_speed_color = QColor(0x72, 0x72, 0x72, 0xff);
   }
-  configFont(p, "Inter", 40, "SemiBold");
-  QRect max_rect = getTextRect(p, Qt::AlignCenter, tr("MAX"));
-  max_rect.moveCenter({set_speed_rect.center().x(), 0});
-  max_rect.moveTop(set_speed_rect.top() + 27);
-  p.drawText(max_rect, Qt::AlignCenter, tr("MAX"));
+  p.setFont(InterFont(40, QFont::DemiBold));
+  p.setPen(max_color);
+  p.drawText(set_speed_rect.adjusted(0, 27, 0, 0), Qt::AlignTop | Qt::AlignHCenter, tr("MAX"));
+  p.setFont(InterFont(90, QFont::Bold));
+  p.setPen(set_speed_color);
+  p.drawText(set_speed_rect.adjusted(0, 77, 0, 0), Qt::AlignTop | Qt::AlignHCenter, setSpeedStr);
 
-  // Draw set speed
-  if (is_cruise_set) {
-    if (speedLimit > 0 && status != STATUS_DISENGAGED && status != STATUS_OVERRIDE) {
-      p.setPen(interpColor(
-        setSpeed,
-        {speedLimit + 5, speedLimit + 15, speedLimit + 25},
-        {whiteColor(), QColor(0xff, 0x95, 0x00, 0xff), QColor(0xff, 0x00, 0x00, 0xff)}
-      ));
-    } else {
-      p.setPen(whiteColor());
-    }
-  } else {
-    p.setPen(QColor(0x72, 0x72, 0x72, 0xff));
-  }
-  configFont(p, "Inter", 90, "Bold");
-  QRect speed_rect = getTextRect(p, Qt::AlignCenter, setSpeedStr);
-  speed_rect.moveCenter({set_speed_rect.center().x(), 0});
-  speed_rect.moveTop(set_speed_rect.top() + 77);
-  p.drawText(speed_rect, Qt::AlignCenter, setSpeedStr);
-
-
-
+  const QRect sign_rect = set_speed_rect.adjusted(sign_margin, default_size.height(), -sign_margin, -sign_margin);
   // US/Canada (MUTCD style) sign
   if (has_us_speed_limit) {
-    const int border_width = 6;
-    const int sign_width = rect_width - 24;
-    const int sign_height = 186;
-
-    // White outer square
-    QRect sign_rect_outer(set_speed_rect.left() + 12, set_speed_rect.bottom() - 11 - sign_height, sign_width, sign_height);
     p.setPen(Qt::NoPen);
     p.setBrush(whiteColor());
-    p.drawRoundedRect(sign_rect_outer, 24, 24);
+    p.drawRoundedRect(sign_rect, 24, 24);
+    p.setPen(QPen(blackColor(), 6));
+    p.drawRoundedRect(sign_rect.adjusted(9, 9, -9, -9), 16, 16);
 
-    // Smaller white square with black border
-    QRect sign_rect(sign_rect_outer.left() + 1.5 * border_width, sign_rect_outer.top() + 1.5 * border_width, sign_width - 3 * border_width, sign_height - 3 * border_width);
-    p.setPen(QPen(speed_limit_valid? QColor(0, 100, 0) : blackColor(), border_width));
-    p.setBrush(whiteColor());
-    p.drawRoundedRect(sign_rect, 16, 16);
-
-    // "SPEED"
-    configFont(p, "Inter", 28, "SemiBold");
-    QRect text_speed_rect = getTextRect(p, Qt::AlignCenter, tr("SPEED"));
-    text_speed_rect.moveCenter({sign_rect.center().x(), 0});
-    text_speed_rect.moveTop(sign_rect_outer.top() + 22);
-    p.drawText(text_speed_rect, Qt::AlignCenter, tr("SPEED"));
-
-    // "LIMIT"
-    QRect text_limit_rect = getTextRect(p, Qt::AlignCenter, tr("LIMIT"));
-    text_limit_rect.moveCenter({sign_rect.center().x(), 0});
-    text_limit_rect.moveTop(sign_rect_outer.top() + 51);
-    p.drawText(text_limit_rect, Qt::AlignCenter, tr("LIMIT"));
-
-    // Speed limit value
-    configFont(p, "Inter", 70, "Bold");
-    QRect speed_limit_rect = getTextRect(p, Qt::AlignCenter, speedLimitStr);
-    speed_limit_rect.moveCenter({sign_rect.center().x(), 0});
-    speed_limit_rect.moveTop(sign_rect_outer.top() + 85);
-    p.drawText(speed_limit_rect, Qt::AlignCenter, speedLimitStr);
+    p.setFont(InterFont(28, QFont::DemiBold));
+    p.drawText(sign_rect.adjusted(0, 22, 0, 0), Qt::AlignTop | Qt::AlignHCenter, tr("SPEED"));
+    p.drawText(sign_rect.adjusted(0, 51, 0, 0), Qt::AlignTop | Qt::AlignHCenter, tr("LIMIT"));
+    p.setFont(InterFont(70, QFont::Bold));
+    p.drawText(sign_rect.adjusted(0, 85, 0, 0), Qt::AlignTop | Qt::AlignHCenter, speedLimitStr);
   }
 
   // EU (Vienna style) sign
   if (has_eu_speed_limit) {
-    int outer_radius = 176 / 2;
-    int inner_radius_1 = outer_radius - 6; // White outer border
-    int inner_radius_2 = inner_radius_1 - 20; // Red circle
-
-    // Draw white circle with red border
-    QPoint center(set_speed_rect.center().x() + 1, set_speed_rect.top() + 204 + outer_radius);
     p.setPen(Qt::NoPen);
     p.setBrush(whiteColor());
-    p.drawEllipse(center, outer_radius, outer_radius);
-    p.setBrush(speed_limit_valid? QColor(0, 100, 0) : QColor(255, 0, 0, 255));
-    p.drawEllipse(center, inner_radius_1, inner_radius_1);
-    p.setBrush(whiteColor());
-    p.drawEllipse(center, inner_radius_2, inner_radius_2);
+    p.drawEllipse(sign_rect);
+    p.setPen(QPen(Qt::red, 20));
+    p.drawEllipse(sign_rect.adjusted(16, 16, -16, -16));
 
-    // Speed limit value
-    int font_size = (speedLimitStr.size() >= 3) ? 60 : 70;
-    configFont(p, "Inter", font_size, "Bold");
-    QRect speed_limit_rect = getTextRect(p, Qt::AlignCenter, speedLimitStr);
-    speed_limit_rect.moveCenter(center);
-    p.setPen(speed_limit_valid? QColor(0, 100, 0) : blackColor());
-    p.drawText(speed_limit_rect, Qt::AlignCenter, speedLimitStr);
+    p.setFont(InterFont((speedLimitStr.size() >= 3) ? 60 : 70, QFont::Bold));
+    p.setPen(blackColor());
+    p.drawText(sign_rect, Qt::AlignCenter, speedLimitStr);
   }
 
   // current speed
-  configFont(p, "Inter", 176, "Bold");
+  p.setFont(InterFont(176, QFont::Bold));
   drawText(p, rect().center().x(), 210, speedStr);
-  configFont(p, "Inter", 66, "Regular");
+  p.setFont(InterFont(66));
   drawText(p, rect().center().x(), 290, speedUnit, 200);
 
   // dm icon
   if (!hideDM) {
-    drawIcon(p, radius / 2 + (bdr_s * 2), rect().bottom() - footer_h / 2,
-             dm_img, blackColor(70), dmActive ? 1.0 : 0.2);
+    int offset = UI_BORDER_SIZE + btn_size / 2;
+    int x = rightHandDM ? width() - offset : offset;
+    int y = height() - offset;
+    drawIcon(p, x, y, dm_img, blackColor(70), dmActive ? 1.0 : 0.2);
   }
 
   p.restore();
 }
 
-
-// Window that shows camera view and variety of
-// info drawn on top
-
 void AnnotatedCameraWidget::drawText(QPainter &p, int x, int y, const QString &text, int alpha) {
-  QRect real_rect = getTextRect(p, 0, text);
+  QRect real_rect = p.fontMetrics().boundingRect(text);
   real_rect.moveCenter({x, y - real_rect.height() / 2});
 
   p.setPen(QColor(0xff, 0xff, 0xff, alpha));
@@ -500,7 +445,6 @@ void AnnotatedCameraWidget::drawIcon(QPainter &p, int x, int y, QPixmap &img, QB
   p.drawPixmap(x - img.size().width() / 2, y - img.size().height() / 2, img);
   p.setOpacity(1.0);
 }
-
 
 void AnnotatedCameraWidget::initializeGL() {
   CameraWidget::initializeGL();
@@ -522,7 +466,7 @@ void AnnotatedCameraWidget::updateFrameMat() {
   s->fb_h = h;
 
   #ifdef QCOM
-  auto intrinsic_matrix = fcam_intrinsic_matrix;
+  auto intrinsic_matrix = FCAM_INTRINSIC_MATRIX;
   float zoom = ZOOM / intrinsic_matrix.v[0];
   s->car_space_transform.reset();
   s->car_space_transform.translate(w / 2, h / 2 + y_offset)
@@ -565,8 +509,10 @@ void AnnotatedCameraWidget::drawLaneLines(QPainter &painter, const UIState *s) {
 
   // paint path
   #ifndef QCOM
+  const bool show_e2e_path = (sm["controlsState"].getControlsState().getExperimentalMode() &&
+                              scene.longitudinal_control);
   QLinearGradient bg(0, height(), 0, 0);
-  if (sm["controlsState"].getControlsState().getExperimentalMode() && !sm["longitudinalPlan"].getLongitudinalPlan().getLongitudinalValid()) {
+  if (show_e2e_path) {
     // The first half of track_vertices are the points for the right side of the path
     // and the indices match the positions of accel from uiPlan
     const auto &acceleration = sm["uiPlan"].getUiPlan().getAccel();
@@ -632,8 +578,9 @@ void AnnotatedCameraWidget::drawDriverState(QPainter &painter, const UIState *s)
   painter.save();
 
   // base icon
-  int x = rightHandDM ? rect().right() -  (btn_size - 24) / 2 - (bdr_s * 2) : (btn_size - 24) / 2 + (bdr_s * 2);
-  int y = rect().bottom() - footer_h / 2;
+  int offset = UI_BORDER_SIZE + btn_size / 2;
+  int x = rightHandDM ? width() - offset : offset;
+  int y = height() - offset;
   float opacity = dmActive ? 0.65 : 0.2;
   drawIcon(painter, x, y, dm_img, blackColor(70), opacity);
 
@@ -764,9 +711,9 @@ void AnnotatedCameraWidget::paintGL() {
 
   if (s->worldObjectsVisible()) {
     if (sm.rcv_frame("modelV2") > s->scene.started_frame) {
-      update_model(s, sm["modelV2"].getModelV2(), sm["uiPlan"].getUiPlan());
+      update_model(s, model, sm["uiPlan"].getUiPlan());
       if (sm.rcv_frame("radarState") > s->scene.started_frame) {
-        update_leads(s, radar_state, sm["modelV2"].getModelV2().getPosition());
+        update_leads(s, radar_state, model.getPosition());
       }
     }
 
