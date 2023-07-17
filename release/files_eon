@@ -57,6 +57,5 @@ system/logcatd/logcatd_android.cc
 selfdrive/controls/lib/vision_turn_controller.py
 selfdrive/controls/lib/lane_planner.py
 selfdrive/controls/lib/legacy*.py
-selfdrive/dragonpilot/gpx_uploader.py
-selfdrive/dragonpilot/gpxd.py
+selfdrive/dragonpilot/*
 selfdrive/mapd/**
