@@ -32,6 +32,9 @@ def register(show_spinner=False) -> Optional[str]:
   dongle_id: Optional[str] = params.get("DongleId", encoding='utf8')
   needs_registration = None in (IMEI, HardwareSerial, dongle_id)
 
+  if not params.get_bool('dp_device_enable_comma_registration'):
+    return UNREGISTERED_DONGLE_ID if dongle_id is None else dongle_id
+
   pubkey = Path(PERSIST+"/comma/id_rsa.pub")
   if not pubkey.is_file():
     dongle_id = UNREGISTERED_DONGLE_ID
