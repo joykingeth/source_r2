@@ -40,7 +40,7 @@ WiFiPromptWidget::WiFiPromptWidget(QWidget *parent) : QFrame(parent) {
       QPushButton {
         font-size: 48px;
         font-weight: 500;
-        border-radius: 10px;
+        border-radius: 0px;
         background-color: #465BEA;
         padding: 32px;
       }
@@ -84,7 +84,7 @@ WiFiPromptWidget::WiFiPromptWidget(QWidget *parent) : QFrame(parent) {
   setStyleSheet(R"(
     WiFiPromptWidget {
       background-color: #333333;
-      border-radius: 10px;
+      border-radius: 0px;
     }
   )");
 

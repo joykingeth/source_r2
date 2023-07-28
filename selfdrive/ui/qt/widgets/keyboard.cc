@@ -82,13 +82,13 @@ KeyboardLayout::KeyboardLayout(QWidget* parent, const std::vector<QVector<QStrin
 
   setStyleSheet(QString(R"(
     QPushButton {
-      font-size: 75px;
+      font-size: 40px;
       margin-left: %1px;
       margin-right: %1px;
       margin-top: %2px;
       margin-bottom: %2px;
       padding: 0px;
-      border-radius: 10px;
+      border-radius: 0px;
       color: #dddddd;
       background-color: #444444;
     }

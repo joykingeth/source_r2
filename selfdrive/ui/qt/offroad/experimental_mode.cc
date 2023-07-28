@@ -49,7 +49,8 @@ void ExperimentalModeButton::paintEvent(QPaintEvent *event) {
   p.setRenderHint(QPainter::Antialiasing);
 
   QPainterPath path;
-  path.addRoundedRect(rect(), 10, 10);
+//  path.addRoundedRect(rect(), 10, 10);
+  path.addRect(rect());
 
   // gradient
   bool pressed = isDown();

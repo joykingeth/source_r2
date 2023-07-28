@@ -155,7 +155,7 @@ OffroadHome::OffroadHome(QWidget* parent) : QFrame(parent) {
     left_widget->addWidget(new DriveStats);
 #endif
     left_widget->addWidget(new PrimeAdWidget);
-    left_widget->setStyleSheet("border-radius: 10px;");
+    left_widget->setStyleSheet("border-radius: 0px;");
 
     left_widget->setCurrentIndex(uiState()->primeType() ? 0 : 1);
     connect(uiState(), &UIState::primeTypeChanged, [=](int prime_type) {
@@ -206,7 +206,7 @@ OffroadHome::OffroadHome(QWidget* parent) : QFrame(parent) {
     }
     OffroadHome > QPushButton {
       padding: 15px 30px;
-      border-radius: 5px;
+      border-radius: 0px;
       font-size: 40px;
       font-weight: 500;
     }

@@ -203,14 +203,14 @@ class ButtonParamControl : public AbstractControl {
   Q_OBJECT
 public:
   ButtonParamControl(const QString &param, const QString &title, const QString &desc, const QString &icon,
-                     const std::vector<QString> &button_texts, const int minimum_button_width = 225) : AbstractControl(title, desc, icon) {
+                     const std::vector<QString> &button_texts, const int minimum_button_width = 150) : AbstractControl(title, desc, icon) {
     const QString style = R"(
       QPushButton {
-        border-radius: 40px;
+        border-radius: 0px;
         font-size: 32px;
         font-weight: 500;
         height:80px;
-        padding: 0 25 0 25;
+        padding: 0 10 0 10;
         color: #E4E4E4;
         background-color: #393939;
       }
@@ -313,7 +313,7 @@ public:
         width: 300px;
         height: 80px;
         padding: 0px;
-        border-radius:40px;
+        border-radius:0px;
         font-size: 36px;
       }
       QSpinBox::up-button  {

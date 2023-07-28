@@ -13,14 +13,16 @@ void Sidebar::drawMetric(QPainter &p, const QPair<QString, QString> &label, QCol
   p.setPen(Qt::NoPen);
   p.setBrush(QBrush(c));
   p.setClipRect(rect.x() + 4, rect.y(), 18, rect.height(), Qt::ClipOperation::ReplaceClip);
-  p.drawRoundedRect(QRect(rect.x() + 4, rect.y() + 4, 100, 118), 18, 18);
+//  p.drawRoundedRect(QRect(rect.x() + 4, rect.y() + 4, 100, 118), 18, 18);
+  p.drawRect(QRect(rect.x() + 4, rect.y() + 4, 100, 118));
   p.setClipping(false);
 
   QPen pen = QPen(QColor(0xff, 0xff, 0xff, 0x55));
   pen.setWidth(2);
   p.setPen(pen);
   p.setBrush(Qt::NoBrush);
-  p.drawRoundedRect(rect, 20, 20);
+//  p.drawRoundedRect(rect, 20, 20);
+  p.drawRect(rect);
 
   p.setPen(QColor(0xff, 0xff, 0xff));
   p.setFont(InterFont(35, QFont::DemiBold));
@@ -131,7 +133,8 @@ void Sidebar::paintEvent(QPaintEvent *event) {
   const QColor gray(0x54, 0x54, 0x54);
   for (int i = 0; i < 5; ++i) {
     p.setBrush(i < net_strength ? Qt::white : gray);
-    p.drawEllipse(x, 196, 27, 27);
+    p.drawRect(x, 196, 27, 27);
+//    p.drawEllipse(x, 196, 27, 27);
     x += 37;
   }
 

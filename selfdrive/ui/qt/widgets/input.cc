@@ -26,7 +26,7 @@ QDialogBase::QDialogBase(QWidget *parent) : QDialog(parent) {
       height: 160;
       font-size: 55px;
       font-weight: 400;
-      border-radius: 10px;
+      border-radius: 0px;
       color: white;
       background-color: #333333;
     }
@@ -73,7 +73,7 @@ InputDialog::InputDialog(const QString &title, QWidget *parent, const QString &s
   cancel_btn->setStyleSheet(R"(
     QPushButton {
       font-size: 48px;
-      border-radius: 10px;
+      border-radius: 0px;
       color: #E4E4E4;
       background-color: #333333;
     }
@@ -99,7 +99,7 @@ InputDialog::InputDialog(const QString &title, QWidget *parent, const QString &s
     #textbox {
       margin-left: 50px;
       margin-right: 50px;
-      border-radius: 0;
+      border-radius: 0px;
       border-bottom: 3px solid #BDBDBD;
     }
     * {
@@ -272,7 +272,7 @@ MultiOptionDialog::MultiOptionDialog(const QString &prompt_text, const QStringLi
       text-align: left;
       font-size: 55px;
       font-weight: 300;
-      border-radius: 10px;
+      border-radius: 0px;
       background-color: #4F4F4F;
     }
     QPushButton:checked { background-color: #465BEA; }

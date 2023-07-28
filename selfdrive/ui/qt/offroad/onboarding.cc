@@ -224,7 +224,7 @@ OnboardingWindow::OnboardingWindow(QWidget *parent) : QStackedWidget(parent) {
       height: 160px;
       font-size: 55px;
       font-weight: 400;
-      border-radius: 10px;
+      border-radius: 0px;
       background-color: #4F4F4F;
     }
   )");

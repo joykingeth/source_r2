@@ -68,7 +68,7 @@ ButtonControl::ButtonControl(const QString &title, const QString &text, const QS
   btn.setStyleSheet(R"(
     QPushButton {
       padding: 0;
-      border-radius: 50px;
+      border-radius: 0px;
       font-size: 32px;
       font-weight: 500;
       color: #E4E4E4;

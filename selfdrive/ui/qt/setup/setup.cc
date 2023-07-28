@@ -176,7 +176,7 @@ QWidget * Setup::network_setup() {
 
   // wifi widget
   Networking *networking = new Networking(this, false);
-  networking->setStyleSheet("Networking {background-color: #292929; border-radius: 13px;}");
+  networking->setStyleSheet("Networking {background-color: #292929; border-radius: 0px;}");
   main_layout->addWidget(networking, 1);
 
   main_layout->addSpacing(35);
@@ -349,7 +349,7 @@ Setup::Setup(QWidget *parent) : QStackedWidget(parent) {
       height: 160;
       font-size: 55px;
       font-weight: 400;
-      border-radius: 10px;
+      border-radius: 0px;
       background-color: #333333;
     }
     QPushButton#navBtn:disabled, QPushButton[primary='true']:disabled {

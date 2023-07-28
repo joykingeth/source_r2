@@ -175,7 +175,7 @@ PrimeAdWidget::PrimeAdWidget(QWidget* parent) : QFrame(parent) {
 
   setStyleSheet(R"(
     PrimeAdWidget {
-      border-radius: 10px;
+      border-radius: 0px;
       background-color: #333333;
     }
   )");
@@ -209,7 +209,7 @@ SetupWidget::SetupWidget(QWidget* parent) : QFrame(parent) {
     QPushButton {
       font-size: 55px;
       font-weight: 500;
-      border-radius: 10px;
+      border-radius: 0px;
       background-color: #465BEA;
       padding: 64px;
     }
@@ -249,7 +249,7 @@ SetupWidget::SetupWidget(QWidget* parent) : QFrame(parent) {
 
   setStyleSheet(R"(
     #primeWidget {
-      border-radius: 10px;
+      border-radius: 0px;
       background-color: #333333;
     }
   )");
