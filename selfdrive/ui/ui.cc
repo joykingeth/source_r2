@@ -290,6 +290,8 @@ UIState::UIState(QObject *parent) : QObject(parent) {
     "lateralPlan",
     // dp - for e2e/acc detection
     "longitudinalPlan",
+    // dp - for gps accuracy in sidebar
+    "gpsLocationExternal",
   });
 
   Params params;
