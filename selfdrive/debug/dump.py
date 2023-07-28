@@ -42,6 +42,8 @@ if __name__ == "__main__":
     for sock in polld:
       msg = sock.receive()
       evt = log.Event.from_bytes(msg)
+      # with log.Event.from_bytes(msg) as log_evt:
+      #   evt = log_evt
 
       if not args.no_print:
         if args.pipe:

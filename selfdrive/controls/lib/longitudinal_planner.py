@@ -202,7 +202,7 @@ class LongitudinalPlanner:
     if self.param_read_counter % 50 == 0:
       self.read_param()
     self.param_read_counter += 1
-    # self.mpc.mode = 'blended' if sm['controlsState'].experimentalMode and self.CP.openpilotLongitudinalControl else 'acc'
+    self.mpc.mode = 'blended' if sm['controlsState'].experimentalMode else 'acc'
     dp_reset_state = self.conditional_e2e(sm)
 
     v_ego = sm['carState'].vEgo
