@@ -6,7 +6,7 @@ from common.realtime import sec_since_boot
 from common.numpy_fast import clip, interp
 from system.swaglog import cloudlog
 from selfdrive.legacy_modeld.constants import index_function
-from selfdrive.controls.lib.radar_helpers import _LEAD_ACCEL_TAU
+from selfdrive.controls.radard import _LEAD_ACCEL_TAU
 
 if __name__ == '__main__':  # generating code
   from third_party.acados.acados_template import AcadosModel, AcadosOcp, AcadosOcpSolver
