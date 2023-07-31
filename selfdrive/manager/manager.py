@@ -68,7 +68,7 @@ def manager_init() -> None:
     ("dp_device_enable_comma_registration", "0"),
     ("dp_long_use_df_tune", "0"),
     ("dp_long_de2e", "0"),
-    ("dp_mapd_turn_vision_control", "0"),
+    ("dp_mapd_vision_turn_control", "0"),
   ]
   if not PC:
     default_params.append(("LastUpdateTime", datetime.datetime.utcnow().isoformat().encode('utf8')))

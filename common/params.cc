@@ -232,7 +232,7 @@ std::unordered_map<std::string, uint32_t> keys = {
     {"dp_device_enable_comma_registration", PERSISTENT},
     {"dp_long_use_df_tune", PERSISTENT},
     {"dp_long_de2e", PERSISTENT},
-    {"dp_mapd_turn_vision_control", PERSISTENT},
+    {"dp_mapd_vision_turn_control", PERSISTENT},
 };
 
 } // namespace

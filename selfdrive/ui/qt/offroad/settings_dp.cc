@@ -52,7 +52,7 @@ DPCtrlPanel::DPCtrlPanel(QWidget *parent) : ListWidget(parent) {
       tr("When enabled, openpilot will dynamically change between End-to-End or ACC mode.\nYour vehicle must support openpilot longitudinal control.")
     },
     {
-      "dp_mapd_turn_vision_control",
+      "dp_mapd_vision_turn_control",
       tr("Enable Turn Speed Control - Vision"),
       tr("When enabled, openpilot will use path predictions from camera vision to estimate the appropriate speed to drive through turns ahead."),
     },
