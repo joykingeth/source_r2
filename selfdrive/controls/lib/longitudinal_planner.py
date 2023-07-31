@@ -16,6 +16,7 @@ from selfdrive.controls.lib.longitudinal_mpc_lib.long_mpc import T_IDXS as T_IDX
 from selfdrive.controls.lib.drive_helpers import V_CRUISE_MAX, CONTROL_N, get_speed_error
 from system.swaglog import cloudlog
 from selfdrive.controls.lib.vision_turn_controller import VisionTurnController
+from selfdrive.controls.lib.accel_controller import AccelController
 
 LON_MPC_STEP = 0.2  # first step is 0.2s
 A_CRUISE_MIN = -1.2
@@ -51,6 +52,7 @@ class LongitudinalPlanner:
     # mapd
     self.cruise_source = 'cruise'
     self.vision_turn_controller = VisionTurnController(CP)
+    self.accel_controller = AccelController()
 
     self.CP = CP
     self.mpc = LongitudinalMpc()
@@ -98,6 +100,7 @@ class LongitudinalPlanner:
     if self.param_read_counter % 50 == 0:
       self.read_param()
 
+      self.accel_controller.set_profile(self.params.get("dp_long_accel_profile", encoding='utf-8'))
       self.vision_turn_controller.set_enabled(self.params.get_bool("dp_mapd_vision_turn_control"))
 
     self.param_read_counter += 1
@@ -123,6 +126,9 @@ class LongitudinalPlanner:
     else:
       accel_limits = [MIN_ACCEL, MAX_ACCEL]
       accel_limits_turns = [MIN_ACCEL, MAX_ACCEL]
+
+    # dp - override accel using dp_long_accel_profile
+    accel_limits = self.accel_controller.get_accel_limits(v_ego, accel_limits)
 
     if reset_state:
       self.v_desired_filter.x = v_ego

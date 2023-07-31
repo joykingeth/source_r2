@@ -230,6 +230,7 @@ std::unordered_map<std::string, uint32_t> keys = {
     {"dp_otisserv", PERSISTENT},
     {"dp_car_dashcam_mode_removal", PERSISTENT},
     {"dp_device_enable_comma_registration", PERSISTENT},
+    {"dp_long_accel_profile", PERSISTENT},
     {"dp_long_use_df_tune", PERSISTENT},
     {"dp_long_de2e", PERSISTENT},
     {"dp_mapd_vision_turn_control", PERSISTENT},

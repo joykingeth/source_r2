@@ -102,6 +102,12 @@ DPCtrlPanel::DPCtrlPanel(QWidget *parent) : ListWidget(parent) {
 
 
   auto_shutdown_timer_toggle = new ParamSpinBoxControl("dp_device_auto_shutdown_in", tr("Auto Shutdown In"), tr("Adjust your shutdown waiting period."), "", 0, 600, 1, tr(" mins"), tr("Immediately"));
+
+  std::vector<QString> dp_long_accel_profile_texts{tr("OP"), tr("ECO"), tr("NOR"), tr("SPT")};
+  ButtonParamControl* dp_long_accel_profile_setting = new ButtonParamControl("dp_long_accel_profile", tr("Acceleration Profile"),
+                                          tr("OP - Stock tune.\nECO - Eco tune.\nNOR - Normal tune.\nSPT - Sport tune."),
+                                          "",
+                                          dp_long_accel_profile_texts);
   for (auto &[param, title, desc] : toggle_defs) {
     if (param == "") {
       auto label = new LabelControl(title, "");
@@ -132,9 +138,13 @@ DPCtrlPanel::DPCtrlPanel(QWidget *parent) : ListWidget(parent) {
         updateToggles();
       });
     }
-    if (param == "SpeedLimitControl") {
-      toggle->setVisible(false);
+    if (param == "dp_mapd_vision_turn_control") {
+      // accel profile
+      addItem(dp_long_accel_profile_setting);
     }
+//    if (param == "SpeedLimitControl") {
+//      toggle->setVisible(false);
+//    }
   }
 
   auto cp_bytes = params.get("CarParamsPersistent");
