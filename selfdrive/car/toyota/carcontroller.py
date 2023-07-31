@@ -67,6 +67,21 @@ class CarController:
     # *** control msgs ***
     can_sends = []
 
+    # dp - door auto lock / unlock logic
+    # thanks to AlexandreSato & cydia2020
+    # https://github.com/AlexandreSato/animalpilot/blob/personal/doors.py
+    if not CS.out.doorOpen:
+      gear = CS.out.gearShifter
+      if gear == GearShifter.park and self.dp_toyota_auto_lock_gear_prev != gear:
+        if self.dp_toyota_auto_lock:
+          can_sends.append(make_can_msg(0x750, UNLOCK_CMD, 0))
+        self.dp_toyota_auto_lock_once = False
+      elif gear == GearShifter.drive and not self.dp_toyota_auto_lock_once and CS.out.vEgo >= LOCK_AT_SPEED:
+        if self.dp_toyota_auto_unlock:
+          can_sends.append(make_can_msg(0x750, LOCK_CMD, 0))
+        self.dp_toyota_auto_lock_once = True
+      self.dp_toyota_auto_lock_gear_prev = gear
+
     # *** steer torque ***
     new_steer = int(round(actuators.steer * self.params.STEER_MAX))
     apply_steer = apply_meas_steer_torque_limits(new_steer, self.last_steer, CS.out.steeringTorqueEps, self.params)
@@ -146,36 +161,6 @@ class CarController:
       self.standstill_req = False
 
     self.last_standstill = CS.out.standstill
-
-    # dp - door auto lock / unlock logic
-    # thanks to AlexandreSato & cydia2020
-    # https://github.com/AlexandreSato/animalpilot/blob/personal/doors.py
-    if not CS.out.doorOpen:
-      gear = CS.out.gearShifter
-      if gear == GearShifter.park and self.dp_toyota_auto_lock_gear_prev != gear:
-          if self.dp_toyota_auto_lock:
-            can_sends.append(make_can_msg(0x750, UNLOCK_CMD, 0))
-          self.dp_toyota_auto_lock_once = False
-      elif gear == GearShifter.drive and not self.dp_toyota_auto_lock_once and CS.out.vEgo >= LOCK_AT_SPEED:
-        if self.dp_toyota_auto_unlock:
-          can_sends.append(make_can_msg(0x750, LOCK_CMD, 0))
-        self.dp_toyota_auto_lock_once = True
-      self.dp_toyota_auto_lock_gear_prev = gear
-
-    # *** control msgs ***
-    # print("steer {0} {1} {2} {3}".format(apply_steer, min_lim, max_lim, CS.steer_torque_motor)
-
-    # toyota can trace shows this message at 42Hz, with counter adding alternatively 1 and 2;
-    # sending it at 100Hz seem to allow a higher rate limit, as the rate limit seems imposed
-    # on consecutive messages
-    can_sends.append(create_steer_command(self.packer, apply_steer, apply_steer_req))
-    if self.frame % 2 == 0 and self.CP.carFingerprint in TSS2_CAR:
-      can_sends.append(create_lta_steer_command(self.packer, 0, 0, self.frame // 2))
-
-    # LTA mode. Set ret.steerControlType = car.CarParams.SteerControlType.angle and whitelist 0x191 in the panda
-    # if self.frame % 2 == 0:
-    #   can_sends.append(create_steer_command(self.packer, 0, 0, self.frame // 2))
-    #   can_sends.append(create_lta_steer_command(self.packer, actuators.steeringAngleDeg, apply_steer_req, self.frame // 2))
 
     # we can spam can to cancel the system even if we are using lat only control
     if (self.frame % 3 == 0 and self.CP.openpilotLongitudinalControl) or pcm_cancel_cmd:
