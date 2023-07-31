@@ -42,6 +42,21 @@ DPCtrlPanel::DPCtrlPanel(QWidget *parent) : ListWidget(parent) {
       "",
     },
     {
+      "dp_long_use_df_tune",
+      tr("Enable Dynamic Following"),
+      tr("When enabled, openpilot will dynamically adjust following distance based on your \"Driving Personality\" setting.")
+    },
+    {
+      "dp_long_de2e",
+      tr("Enable Dynamic End-to-End Longitudinal Control"),
+      tr("When enabled, openpilot will dynamically change between End-to-End or ACC mode.\nYour vehicle must support openpilot longitudinal control.")
+    },
+    {
+      "dp_mapd_turn_vision_control",
+      tr("Enable Turn Speed Control - Vision"),
+      tr("When enabled, openpilot will use path predictions from camera vision to estimate the appropriate speed to drive through turns ahead."),
+    },
+    {
       "dp_mapd",
       tr("Enable MapD"),
       tr("When enabled, openpilot will display current road name and speed limit on the screen.\nReboot required."),
