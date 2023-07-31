@@ -22,7 +22,6 @@ class CarInterface(CarInterfaceBase):
     ret.carName = "toyota"
     ret.safetyConfigs = [get_safety_config(car.CarParams.SafetyModel.toyota)]
     ret.safetyConfigs[0].safetyParam = EPS_SCALE[candidate]
-    ret.radarUnavailable = candidate in (NO_DSU_CAR | RADAR_ACC_CAR)
 
     # BRAKE_MODULE is on a different address for these cars
     if DBC[candidate]["pt"] == "toyota_new_mc_pt_generated":
@@ -241,13 +240,6 @@ class CarInterface(CarInterfaceBase):
     #  - TSS2 radar ACC cars w/ smartDSU installed
     ret.openpilotLongitudinalControl = use_sdsu or ret.enableDsu or candidate in (TSS2_CAR - RADAR_ACC_CAR)
     ret.autoResumeSng = ret.openpilotLongitudinalControl and candidate in NO_STOP_TIMER_CAR
-
-    # toyota radar acc car should consider radarUnavailable = True
-    # and when radarUnavailable, openpilot longitudinal control is allowed when smart dsu is installed and experimental_long is on
-    ret.radarUnavailable = candidate in RADAR_ACC_CAR
-    if ret.radarUnavailable:
-      ret.experimentalLongitudinalAvailable = bool(ret.flags & ToyotaFlags.SMART_DSU)
-      ret.openpilotLongitudinalControl = experimental_long and ret.experimentalLongitudinalAvailable
 
     if not ret.openpilotLongitudinalControl:
       ret.safetyConfigs[0].safetyParam |= Panda.FLAG_TOYOTA_STOCK_LONGITUDINAL
