@@ -113,7 +113,7 @@ class CarController:
       full_torque_condition = (abs(CS.out.steeringTorqueEps) < self.params.STEER_MAX and
                                abs(CS.out.steeringTorque) < MAX_DRIVER_TORQUE_ALLOWANCE)
       setme_x64 = 100 if lta_active and full_torque_condition else 0
-      can_sends.append(create_lta_steer_command(self.packer, self.last_angle, lta_active, self.frame // 2, setme_x64))
+      can_sends.append(create_lta_steer_command(self.packer, self.last_angle if lta_active else 0, lta_active, self.frame // 2, setme_x64))
 
     # *** gas and brake ***
     if self.CP.enableGasInterceptor and CC.longActive:
