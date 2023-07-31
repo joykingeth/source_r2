@@ -28,8 +28,9 @@ class LateralPlanner:
   def __init__(self, CP, debug=False):
     self.LP = LanePlanner()
     self.DH = DesireHelper()
-    self.dp_lat_lane_priority_mode = Params().get_bool("dp_lat_lane_priority_mode")
-    self.dp_lat_lane_priority_mode_active = False
+    self._dp_lat_lane_priority_mode = Params().get_bool("dp_lat_lane_priority_mode")
+    self._dp_lat_lane_priority_mode_active = False
+    self._dp_lat_lane_priority_mode_active_prev = False
 
     self.last_cloudlog_t = 0
     try:
@@ -78,9 +79,9 @@ class LateralPlanner:
 
     # dp - check laneline prob when priority is on
     use_laneline = False
-    if self.dp_lat_lane_priority_mode:
+    if self._dp_lat_lane_priority_mode:
       self._update_laneless_laneline_mode()
-      use_laneline = self.dp_lat_lane_priority_mode_active
+      use_laneline = self._dp_lat_lane_priority_mode_active
 
     # Calculate final driving path and set MPC costs
     if use_laneline:
@@ -144,7 +145,7 @@ class LateralPlanner:
     lateralPlan.solverExecutionTime = self.lat_mpc.solve_time
 
     lateralPlan.desire = self.DH.desire
-    lateralPlan.useLaneLines = self.dp_lat_lane_priority_mode and self.dp_lat_lane_priority_mode_active
+    lateralPlan.useLaneLines = self._dp_lat_lane_priority_mode and self._dp_lat_lane_priority_mode_active
     lateralPlan.laneChangeState = self.DH.lane_change_state
     lateralPlan.laneChangeDirection = self.DH.lane_change_direction
 
@@ -163,6 +164,11 @@ class LateralPlanner:
   def _update_laneless_laneline_mode(self):
     # decide what mode should we use
     if (self.LP.lll_prob + self.LP.rll_prob)/2 < 0.3:
-      self.dp_lat_lane_priority_mode_active = False
+      self._dp_lat_lane_priority_mode_active = False
     if (self.LP.lll_prob + self.LP.rll_prob)/2 > 0.5:
-      self.dp_lat_lane_priority_mode_active = True
+      self._dp_lat_lane_priority_mode_active = True
+
+    # perform reset mpc
+    if self._dp_lat_lane_priority_mode_active != self._dp_lat_lane_priority_mode_active_prev:
+      self.reset_mpc()
+    self._dp_lat_lane_priority_mode_active_prev = self._dp_lat_lane_priority_mode_active
