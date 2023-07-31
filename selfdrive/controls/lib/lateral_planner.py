@@ -38,6 +38,8 @@ class LateralPlanner:
     self.dp_lat_lane_priority_mode = params.get_bool("dp_lat_lane_priority_mode")
     self.dp_lat_lane_priority_mode_active = False
     self.LP = LanePlanner() if self.dp_lat_lane_priority_mode else None
+    # dp // mapd - for vision turn controller
+    self._d_path_w_lines_xyz = np.zeros((TRAJECTORY_SIZE, 3))
 
     # Vehicle model parameters used to calculate lateral movement of car
     self.factor1 = CP.wheelbase - CP.centerToFront
@@ -95,6 +97,7 @@ class LateralPlanner:
       d_path_xyz = self._get_laneless_laneline_d_path_xyz()
     else:
       d_path_xyz = self.path_xyz
+    self._d_path_w_lines_xyz = d_path_xyz
 
     self.lat_mpc.set_weights(PATH_COST, LATERAL_MOTION_COST,
                              LATERAL_ACCEL_COST, LATERAL_JERK_COST,
@@ -163,6 +166,15 @@ class LateralPlanner:
     lateralPlan.laneChangeDirection = self.DH.lane_change_direction
 
     pm.send('lateralPlan', plan_send)
+
+    # dp - extension
+    plan_ext_send = messaging.new_message('lateralPlanExt')
+
+    lateralPlanExt = plan_ext_send.lateralPlanExt
+    lateralPlanExt.dPathWLinesX = [float(x) for x in self._d_path_w_lines_xyz[:, 0]]
+    lateralPlanExt.dPathWLinesY = [float(y) for y in self._d_path_w_lines_xyz[:, 1]]
+
+    pm.send('lateralPlanExt', plan_ext_send)
 
   def _get_laneless_laneline_d_path_xyz(self):
     if self.dp_lat_lane_priority_mode and self.LP is not None:

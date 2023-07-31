@@ -43,6 +43,8 @@ class LateralPlanner:
     self.plan_yaw = np.zeros((TRAJECTORY_SIZE,))
     self.t_idxs = np.arange(TRAJECTORY_SIZE)
     self.y_pts = np.zeros(TRAJECTORY_SIZE)
+    # dp // mapd - for vision turn controller
+    self._d_path_w_lines_xyz = np.zeros((TRAJECTORY_SIZE, 3))
 
     self.lat_mpc = LateralMpc()
     self.reset_mpc(np.zeros(4))
@@ -90,6 +92,8 @@ class LateralPlanner:
       # Heading cost is useful at low speed, otherwise end of plan can be off-heading
       heading_cost = interp(v_ego, [5.0, 10.0], [MPC_COST_LAT.HEADING, 0.0])
       self.lat_mpc.set_weights(path_cost, heading_cost, self.steer_rate_cost)
+
+    self._d_path_w_lines_xyz = d_path_xyz
 
     y_pts = np.interp(v_ego * self.t_idxs[:LAT_MPC_N + 1], np.linalg.norm(d_path_xyz, axis=1), d_path_xyz[:, 1])
     heading_pts = np.interp(v_ego * self.t_idxs[:LAT_MPC_N + 1], np.linalg.norm(self.path_xyz, axis=1), self.plan_yaw)
@@ -146,6 +150,15 @@ class LateralPlanner:
 
     pm.send('lateralPlan', plan_send)
 
+    # dp - extension
+    plan_ext_send = messaging.new_message('lateralPlanExt')
+
+    lateralPlanExt = plan_ext_send.lateralPlanExt
+    # for vision turn controller
+    lateralPlanExt.dPathWLinesX = [float(x) for x in self._d_path_w_lines_xyz[:, 0]]
+    lateralPlanExt.dPathWLinesY = [float(y) for y in self._d_path_w_lines_xyz[:, 1]]
+
+    pm.send('lateralPlanExt', plan_ext_send)
 
   def _update_laneless_laneline_mode(self):
     # decide what mode should we use
