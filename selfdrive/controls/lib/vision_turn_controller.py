@@ -1,14 +1,15 @@
 import numpy as np
 import math
-# from cereal import log
+from cereal import custom
 from common.numpy_fast import interp
 # from common.params import Params
 # from common.realtime import sec_since_boot
 from common.conversions import Conversions as CV
-from selfdrive.controls.lib.lane_planner import TRAJECTORY_SIZE
+# from selfdrive.controls.lib.lane_planner import TRAJECTORY_SIZE
 from selfdrive.controls.lib.drive_helpers import V_CRUISE_MAX
+import cereal.messaging as messaging
 
-
+TRAJECTORY_SIZE = 33
 _MIN_V = 5.6  # Do not operate under 20km/h
 
 _ENTERING_PRED_LAT_ACC_TH = 1.3  # Predicted Lat Acc threshold to trigger entering turn state.
@@ -30,7 +31,7 @@ _NO_OVERSHOOT_TIME_HORIZON = 4.  # s. Time to use for velocity desired based on 
 
 # Lookup table for the minimum smooth deceleration during the ENTERING state
 # depending on the actual maximum absolute lateral acceleration predicted on the turn ahead.
-_ENTERING_SMOOTH_DECEL_V = [-0.2, -0.5]  # min decel value allowed on ENTERING state
+_ENTERING_SMOOTH_DECEL_V = [-0.2, -1.]  # min decel value allowed on ENTERING state
 _ENTERING_SMOOTH_DECEL_BP = [1.3, 3.]  # absolute value of lat acc ahead
 
 # Lookup table for the acceleration for the TURNING state
@@ -51,12 +52,7 @@ def _debug(msg):
   print(msg)
 
 
-# VisionTurnControllerState = log.LongitudinalPlan.VisionTurnControllerState
-class VisionTurnControllerState:
-  disabled = 0 # No predicted substancial turn on vision range or feature disabled.
-  entering = 1 # A subsantial turn is predicted ahead, adapting speed to turn confort levels.
-  turning = 2 # Actively turning. Managing acceleration to provide a roll on turn feeling.
-  leaving = 3 # Road ahead straightens. Start to allow positive acceleration.
+VisionTurnControllerState = custom.LongitudinalPlanExt.VisionTurnControllerState
 
 
 def eval_curvature(poly, x_vals):
@@ -102,7 +98,7 @@ class VisionTurnController():
     self._CP = CP
     self._op_enabled = False
     self._gas_pressed = False
-    self._is_enabled = True #self._params.get_bool("TurnVisionControl")
+    self._is_enabled = False
     self._last_params_update = 0.
     self._v_cruise_setpoint = 0.
     self._v_ego = 0.
@@ -110,6 +106,7 @@ class VisionTurnController():
     self._a_target = 0.
     self._v_overshoot = 0.
     self._state = VisionTurnControllerState.disabled
+    self._sm = messaging.SubMaster(['lateralPlanExt'])
 
     self._reset()
 
@@ -147,17 +144,10 @@ class VisionTurnController():
     self._v_overshoot_distance = 200.
     self._lat_acc_overshoot_ahead = False
 
-  # def _update_params(self):
-  #   time = sec_since_boot()
-  #   if time > self._last_params_update + 5.0:
-  #     self._is_enabled = self._params.get_bool("TurnVisionControl")
-  #     self._last_params_update = time
-
   def _update_calculations(self, sm):
     # Get path polynomial aproximation for curvature estimation from model data.
     path_poly = None
-    model_data = sm['modelV2'] if sm.valid.get('modelV2', False) else None
-    lat_planner_data = sm['lateralPlan'] if sm.valid.get('lateralPlan', False) else None
+    model_data = sm['modelV2']
 
     # 1. When the probability of lanes is good enough, compute polynomial from lanes as they are way more stable
     # on current mode than drving path.
@@ -193,8 +183,10 @@ class VisionTurnController():
 
     # 2. If not polynomial derived from lanes, then derive it from compensated driving path with lanes as
     # provided by `lateralPlanner`.
+    lat_planner_data = self._sm['lateralPlanExt']
+    self._sm.update(0)
     if path_poly is None and lat_planner_data is not None and len(lat_planner_data.dPathWLinesX) > 0 \
-       and lat_planner_data.dPathWLinesX[0] > 0:
+        and lat_planner_data.dPathWLinesX[0] > 0:
       path_poly = np.polyfit(lat_planner_data.dPathWLinesX, lat_planner_data.dPathWLinesY, 3)
 
     # 3. If no polynomial derived from lanes or driving path, then provide a straight line poly.
@@ -257,11 +249,10 @@ class VisionTurnController():
         self.state = VisionTurnControllerState.disabled
 
   def _update_solution(self):
-    a_target = self._a_ego
     # DISABLED
     if self.state == VisionTurnControllerState.disabled:
       # when not overshooting, calculate v_turn as the speed at the prediction horizon when following
-        # the smooth deceleration.
+      # the smooth deceleration.
       a_target = self._a_ego
     # ENTERING
     elif self.state == VisionTurnControllerState.entering:
@@ -296,3 +287,6 @@ class VisionTurnController():
     self._update_calculations(sm)
     self._state_transition()
     self._update_solution()
+
+  def set_enabled(self, enabled):
+    self._is_enabled = enabled
