@@ -25,7 +25,7 @@ STEER_RATE_COST = {
 }
 
 class LateralPlanner:
-  def __init__(self, CP):
+  def __init__(self, CP, debug=False):
     self.LP = LanePlanner()
     self.DH = DesireHelper()
     self.dp_lat_lane_priority_mode = Params().get_bool("dp_lat_lane_priority_mode")
