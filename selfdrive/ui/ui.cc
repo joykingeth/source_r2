@@ -289,7 +289,7 @@ UIState::UIState(QObject *parent) : QObject(parent) {
     // dp - for lane priority mode
     "lateralPlan",
     // dp - for e2e/acc detection
-    "longitudinalPlan",
+    "longitudinalPlanExt",
     // dp - for gps accuracy in sidebar
     "gpsLocationExternal",
   });

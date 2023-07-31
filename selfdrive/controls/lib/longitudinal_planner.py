@@ -291,9 +291,21 @@ class LongitudinalPlanner:
     longitudinalPlan.hasLead = sm['radarState'].leadOne.status
     longitudinalPlan.longitudinalPlanSource = self.mpc.source
     longitudinalPlan.fcw = self.fcw
-    longitudinalPlan.longitudinalValid = self.mpc.mode == 'acc'
 
     longitudinalPlan.solverExecutionTime = self.mpc.solve_time
     longitudinalPlan.personality = self.personality
 
     pm.send('longitudinalPlan', plan_send)
+
+    # dp - extension
+    plan_ext_send = messaging.new_message('longitudinalPlanExt')
+
+    longitudinalPlanExt = plan_ext_send.longitudinalPlanExt
+
+    longitudinalPlanExt.visionTurnControllerState = self.vision_turn_controller.state
+    longitudinalPlanExt.visionTurnSpeed = float(self.vision_turn_controller.v_turn)
+
+    longitudinalPlanExt.dpE2EIsBlended = self.mpc.mode == 'blended'
+
+    longitudinalPlanExt.longitudinalPlanExtSource = self.mpc.source if self.mpc.source != 'cruise' else self.cruise_source
+    pm.send('longitudinalPlanExt', plan_ext_send)
