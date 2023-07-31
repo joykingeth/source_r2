@@ -35,9 +35,10 @@ class LateralPlanner:
     self.DH = DesireHelper()
 
     params = Params()
-    self.dp_lat_lane_priority_mode = params.get_bool("dp_lat_lane_priority_mode")
-    self.dp_lat_lane_priority_mode_active = False
-    self.LP = LanePlanner() if self.dp_lat_lane_priority_mode else None
+    self._dp_lat_lane_priority_mode = params.get_bool("dp_lat_lane_priority_mode")
+    self._dp_lat_lane_priority_mode_active = False
+    self._dp_lat_lane_priority_mode_active_prev = False
+    self.LP = LanePlanner()
     # dp // mapd - for vision turn controller
     self._d_path_w_lines_xyz = np.zeros((TRAJECTORY_SIZE, 3))
 
@@ -85,7 +86,7 @@ class LateralPlanner:
       self.l_lane_change_prob = desire_state[log.LateralPlan.Desire.laneChangeLeft]
       self.r_lane_change_prob = desire_state[log.LateralPlan.Desire.laneChangeRight]
 
-    if self.dp_lat_lane_priority_mode:
+    if self._dp_lat_lane_priority_mode:
       self.LP.parse_model(md)
       lane_change_prob = self.LP.l_lane_change_prob + self.LP.r_lane_change_prob
     else:
@@ -93,7 +94,7 @@ class LateralPlanner:
 
     self.DH.update(sm['carState'], sm['carControl'].latActive, lane_change_prob)
 
-    if self.dp_lat_lane_priority_mode:
+    if self._dp_lat_lane_priority_mode:
       d_path_xyz = self._get_laneless_laneline_d_path_xyz()
     else:
       d_path_xyz = self.path_xyz
@@ -161,7 +162,7 @@ class LateralPlanner:
       lateralPlan.solverState.u = self.lat_mpc.u_sol.flatten().tolist()
 
     lateralPlan.desire = self.DH.desire
-    lateralPlan.useLaneLines = self.dp_lat_lane_priority_mode and self.dp_lat_lane_priority_mode_active
+    lateralPlan.useLaneLines = self._dp_lat_lane_priority_mode and self._dp_lat_lane_priority_mode_active
     lateralPlan.laneChangeState = self.DH.lane_change_state
     lateralPlan.laneChangeDirection = self.DH.lane_change_direction
 
@@ -177,7 +178,7 @@ class LateralPlanner:
     pm.send('lateralPlanExt', plan_ext_send)
 
   def _get_laneless_laneline_d_path_xyz(self):
-    if self.dp_lat_lane_priority_mode and self.LP is not None:
+    if self._dp_lat_lane_priority_mode and self.LP is not None:
       # Turn off lanes during lane change
       if self.DH.desire == log.LateralPlan.Desire.laneChangeRight or self.DH.desire == log.LateralPlan.Desire.laneChangeLeft:
         self.LP.lll_prob *= self.DH.lane_change_ll_prob
@@ -185,12 +186,17 @@ class LateralPlanner:
 
       # decide what mode should we use
       if (self.LP.lll_prob + self.LP.rll_prob)/2 < 0.3:
-        self.dp_lat_lane_priority_mode_active = False
+        self._dp_lat_lane_priority_mode_active = False
       if (self.LP.lll_prob + self.LP.rll_prob)/2 > 0.5:
-        self.dp_lat_lane_priority_mode_active = True
+        self._dp_lat_lane_priority_mode_active = True
+
+      # perform reset mpc
+      if self._dp_lat_lane_priority_mode_active != self._dp_lat_lane_priority_mode_active_prev:
+        self.reset_mpc()
+      self._dp_lat_lane_priority_mode_active_prev = self._dp_lat_lane_priority_mode_active
 
       # use default path if not active
-      if not self.dp_lat_lane_priority_mode_active:
+      if not self._dp_lat_lane_priority_mode_active:
         return self.path_xyz
 
       # use lane planner path
