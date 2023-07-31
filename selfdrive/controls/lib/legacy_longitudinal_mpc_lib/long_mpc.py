@@ -74,6 +74,20 @@ def get_T_FOLLOW(personality=log.LongitudinalPersonality.standard):
   else:
     raise NotImplementedError("Longitudinal personality not supported")
 
+def get_dynamic_follow(v_ego, personality=log.LongitudinalPersonality.standard):
+  if personality==log.LongitudinalPersonality.relaxed:
+    x_vel =  [0,    11,   13,   15,   25,   40]
+    y_dist = [1.75, 1.75, 1.77, 1.75, 1.8,  1.8]
+  elif personality==log.LongitudinalPersonality.standard:
+    x_vel =  [0,    11,   13,   15,   25,   40]
+    y_dist = [1.5,  1.5,  1.51,  1.5,  1.5,  1.45]
+  elif personality==log.LongitudinalPersonality.aggressive:
+    x_vel =  [0,    11,   13,   15,   25,   40]
+    y_dist = [1.12, 1.12, 1.13, 1.12, 1.22, 1.22]
+  else:
+    raise NotImplementedError("Dynamic Follow personality not supported")
+  return np.interp(v_ego, x_vel, y_dist)
+
 def get_stopped_equivalence_factor(v_lead):
   return (v_lead**2) / (2 * COMFORT_BRAKE)
 
@@ -330,9 +344,10 @@ class LongitudinalMpc:
     self.cruise_min_a = min_a
     self.cruise_max_a = max_a
 
-  def update(self, carstate, radarstate, v_cruise, personality=log.LongitudinalPersonality.standard):
-    t_follow = get_T_FOLLOW(personality)
+  def update(self, radarstate, v_cruise, x, v, a, j, personality=log.LongitudinalPersonality.standard, use_df_tune=False):
+    # t_follow = get_T_FOLLOW(personality)
     v_ego = self.x0[1]
+    t_follow = get_T_FOLLOW(personality) if not use_df_tune else get_dynamic_follow(v_ego, personality)
     self.status = radarstate.leadOne.status or radarstate.leadTwo.status
 
     lead_xv_0 = self.process_lead(radarstate.leadOne)
