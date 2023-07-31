@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import os
 import numpy as np
-from cereal import log
+
 from common.realtime import sec_since_boot
 from common.numpy_fast import clip, interp
 from system.swaglog import cloudlog
@@ -24,7 +24,7 @@ SOURCES = ['lead0', 'lead1', 'cruise']
 
 X_DIM = 3
 U_DIM = 1
-PARAM_DIM = 6
+PARAM_DIM = 4
 COST_E_DIM = 5
 COST_DIM = COST_E_DIM + 1
 CONSTR_DIM = 4
@@ -45,44 +45,24 @@ ACADOS_SOLVER_TYPE = 'SQP_RTI'
 # much better convergence of the MPC with low iterations
 N = 12
 MAX_T = 10.0
-T_IDXS_LST = [index_function(idx, max_val=MAX_T, max_idx=N+1) for idx in range(N+1)]
+T_IDXS_LST = [index_function(idx, max_val=MAX_T, max_idx=N) for idx in range(N+1)]
 
 T_IDXS = np.array(T_IDXS_LST)
 T_DIFFS = np.diff(T_IDXS, prepend=[0.])
 MIN_ACCEL = -3.5
-# T_FOLLOW = 1.45
+T_FOLLOW = 1.45
 COMFORT_BRAKE = 2.5
 STOP_DISTANCE = 6.0
-
-def get_jerk_factor(personality=log.LongitudinalPersonality.standard):
-  if personality==log.LongitudinalPersonality.relaxed:
-    return 1.0
-  elif personality==log.LongitudinalPersonality.standard:
-    return 1.0
-  elif personality==log.LongitudinalPersonality.aggressive:
-    return 0.5
-  else:
-    raise NotImplementedError("Longitudinal personality not supported")
-
-
-def get_T_FOLLOW(personality=log.LongitudinalPersonality.standard):
-  if personality==log.LongitudinalPersonality.relaxed:
-    return 1.75
-  elif personality==log.LongitudinalPersonality.standard:
-    return 1.45
-  elif personality==log.LongitudinalPersonality.aggressive:
-    return 1.25
-  else:
-    raise NotImplementedError("Longitudinal personality not supported")
 
 def get_stopped_equivalence_factor(v_lead):
   return (v_lead**2) / (2 * COMFORT_BRAKE)
 
-def get_safe_obstacle_distance(v_ego, t_follow, stop_distance):
-  return (v_ego**2) / (2 * COMFORT_BRAKE) + t_follow * v_ego + stop_distance
+def get_safe_obstacle_distance(v_ego):
+  return (v_ego**2) / (2 * COMFORT_BRAKE) + T_FOLLOW * v_ego + STOP_DISTANCE
 
-def desired_follow_distance(v_ego, v_lead, t_follow=get_T_FOLLOW(), stop_distance=STOP_DISTANCE):
-  return get_safe_obstacle_distance(v_ego, t_follow, stop_distance) - get_stopped_equivalence_factor(v_lead)
+def desired_follow_distance(v_ego, v_lead):
+  return get_safe_obstacle_distance(v_ego) - get_stopped_equivalence_factor(v_lead)
+
 
 def gen_long_model():
   model = AcadosModel()
@@ -109,9 +89,7 @@ def gen_long_model():
   a_max = SX.sym('a_max')
   x_obstacle = SX.sym('x_obstacle')
   prev_a = SX.sym('prev_a')
-  lead_t_follow = SX.sym('lead_t_follow')
-  stop_distance = SX.sym('stop_distance')
-  model.p = vertcat(a_min, a_max, x_obstacle, prev_a, lead_t_follow, stop_distance)
+  model.p = vertcat(a_min, a_max, x_obstacle, prev_a)
 
   # dynamics model
   f_expl = vertcat(v_ego, a_ego, j_ego)
@@ -145,13 +123,11 @@ def gen_long_ocp():
   a_min, a_max = ocp.model.p[0], ocp.model.p[1]
   x_obstacle = ocp.model.p[2]
   prev_a = ocp.model.p[3]
-  lead_t_follow = ocp.model.p[4]
-  stop_distance = ocp.model.p[5]
 
   ocp.cost.yref = np.zeros((COST_DIM, ))
   ocp.cost.yref_e = np.zeros((COST_E_DIM, ))
 
-  desired_dist_comfort = get_safe_obstacle_distance(v_ego, lead_t_follow, stop_distance)
+  desired_dist_comfort = get_safe_obstacle_distance(v_ego)
 
   # The main cost in normal operation is how close you are to the "desired" distance
   # from an obstacle at every timestep. This obstacle can be a lead car
@@ -177,7 +153,7 @@ def gen_long_ocp():
 
   x0 = np.zeros(X_DIM)
   ocp.constraints.x0 = x0
-  ocp.parameter_values = np.array([-1.2, 1.2, 0.0, 0.0, get_T_FOLLOW(), STOP_DISTANCE])
+  ocp.parameter_values = np.array([-1.2, 1.2, 0.0, 0.0])
 
   # We put all constraint cost weights to 0 and only set them at runtime
   cost_weights = np.zeros(CONSTR_DIM)
@@ -216,11 +192,14 @@ def gen_long_ocp():
 class LongitudinalMpc:
   def __init__(self, e2e=False):
     self.e2e = e2e
+    self.solver = AcadosOcpSolverCython(MODEL_NAME, ACADOS_SOLVER_TYPE, N)
     self.reset()
     self.source = SOURCES[2]
 
   def reset(self):
-    self.solver = AcadosOcpSolverCython(MODEL_NAME, ACADOS_SOLVER_TYPE, N)
+    # self.solver = AcadosOcpSolverCython(MODEL_NAME, ACADOS_SOLVER_TYPE, N)
+    self.solver.reset()
+    # self.solver.options_set('print_level', 2)
     self.v_solution = np.zeros(N+1)
     self.a_solution = np.zeros(N+1)
     self.prev_a = np.array(self.a_solution)
@@ -252,8 +231,6 @@ class LongitudinalMpc:
       self.params[:,0] = -10.
       self.params[:,1] = 10.
       self.params[:,2] = 1e5
-      self.params[:,4] = get_T_FOLLOW()
-      self.params[:,5] = STOP_DISTANCE
     else:
       self.set_weights_for_lead_policy(prev_accel_constraint)
 
@@ -329,8 +306,7 @@ class LongitudinalMpc:
     self.cruise_min_a = min_a
     self.cruise_max_a = max_a
 
-  def update(self, carstate, radarstate, v_cruise, personality=log.LongitudinalPersonality.standard, stop_distance=STOP_DISTANCE):
-    t_follow = get_T_FOLLOW(personality)
+  def update(self, carstate, radarstate, v_cruise):
     v_ego = self.x0[1]
     self.status = radarstate.leadOne.status or radarstate.leadTwo.status
 
@@ -354,14 +330,12 @@ class LongitudinalMpc:
     v_cruise_clipped = np.clip(v_cruise * np.ones(N+1),
                                v_lower,
                                v_upper)
-    cruise_obstacle = np.cumsum(T_DIFFS * v_cruise_clipped) + get_safe_obstacle_distance(v_cruise_clipped, t_follow, stop_distance)
+    cruise_obstacle = np.cumsum(T_DIFFS * v_cruise_clipped) + get_safe_obstacle_distance(v_cruise_clipped)
 
     x_obstacles = np.column_stack([lead_0_obstacle, lead_1_obstacle, cruise_obstacle])
     self.source = SOURCES[np.argmin(x_obstacles[0])]
     self.params[:,2] = np.min(x_obstacles, axis=1)
     self.params[:,3] = np.copy(self.prev_a)
-    self.params[:,4] = t_follow
-    self.params[:,5] = stop_distance
 
     self.run()
     if (np.any(lead_xv_0[:,0] - self.x_sol[:,0] < CRASH_DISTANCE) and
@@ -371,6 +345,11 @@ class LongitudinalMpc:
       self.crash_cnt = 0
 
   def update_with_xva(self, x, v, a):
+    # v, and a are in local frame, but x is wrt the x[0] position
+    # In >90degree turns, x goes to 0 (and may even be -ve)
+    # So, we use integral(v) + x[0] to obtain the forward-distance
+    xforward = ((v[1:] + v[:-1]) / 2) * (T_IDXS[1:] - T_IDXS[:-1])
+    x = np.cumsum(np.insert(xforward, 0, x[0]))
     self.yref[:,1] = x
     self.yref[:,2] = v
     self.yref[:,3] = a
@@ -381,6 +360,8 @@ class LongitudinalMpc:
     self.run()
 
   def run(self):
+    # t0 = sec_since_boot()
+    # reset = 0
     for i in range(N+1):
       self.solver.set(i, 'p', self.params[i])
     self.solver.constraints_set(0, "lbx", self.x0)
@@ -415,6 +396,8 @@ class LongitudinalMpc:
         self.last_cloudlog_t = t
         cloudlog.warning(f"Long mpc reset, solution_status: {self.solution_status}")
       self.reset()
+      # reset = 1
+    # print(f"long_mpc timings: total internal {self.solve_time:.2e}, external: {(sec_since_boot() - t0):.2e} qp {self.time_qp_solution:.2e}, lin {self.time_linearization:.2e} qp_iter {qp_iter}, reset {reset}")
 
 
 if __name__ == "__main__":
