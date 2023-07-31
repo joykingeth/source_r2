@@ -90,12 +90,15 @@ class LongitudinalPlanner:
     self.param_read_counter = 0
     self.read_param()
     self.personality = log.LongitudinalPersonality.standard
+    self.dp_long_use_df_tune = False
 
   def read_param(self):
     try:
       self.personality = int(self.params.get('LongitudinalPersonality'))
+      self.dp_long_use_df_tune = self.params.get_bool('dp_long_use_df_tune')
     except (ValueError, TypeError):
       self.personality = log.LongitudinalPersonality.standard
+      self.dp_long_use_df_tune = False
 
   def _set_dp_e2e_mode(self, mode, force=False):
     reset_state = False
@@ -254,9 +257,7 @@ class LongitudinalPlanner:
     self.mpc.set_accel_limits(accel_limits_turns[0], accel_limits_turns[1])
     self.mpc.set_cur_state(self.v_desired_filter.x, self.a_desired)
     x, v, a, j = self.parse_model(sm['modelV2'], self.v_model_error)
-    # dynamic stopping distance ONLY when on radarUnavailable vehicles (e.g. Toyota C-HR, VW)
-    stop_distance = STOP_DISTANCE if not self.CP.radarUnavailable else interp(sm['carState'].vEgo, [0., 2.78, 5.55, 22.], [3.7, 4., 5, STOP_DISTANCE])
-    self.mpc.update(sm['radarState'], v_cruise, x, v, a, j, personality=self.personality, stop_distance=stop_distance)
+    self.mpc.update(sm['radarState'], v_cruise, x, v, a, j, personality=self.personality, use_df_tune=self.dp_long_use_df_tune)
 
     self.v_desired_trajectory_full = np.interp(T_IDXS, T_IDXS_MPC, self.mpc.v_solution)
     self.a_desired_trajectory_full = np.interp(T_IDXS, T_IDXS_MPC, self.mpc.a_solution)

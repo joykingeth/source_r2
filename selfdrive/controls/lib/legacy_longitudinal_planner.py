@@ -62,13 +62,15 @@ class LongitudinalPlanner:
     self.param_read_counter = 0
     self.read_param()
     self.personality = log.LongitudinalPersonality.standard
+    self.dp_long_use_df_tune = False
 
   def read_param(self):
-    param_value = self.params.get('LongitudinalPersonality')
-    if param_value is not None:
-      self.personality = int(param_value)
-    else:
+    try:
+      self.personality = int(self.params.get('LongitudinalPersonality'))
+      self.dp_long_use_df_tune = self.params.get_bool('dp_long_use_df_tune')
+    except (ValueError, TypeError):
       self.personality = log.LongitudinalPersonality.standard
+      self.dp_long_use_df_tune = False
 
   def update(self, sm):
     if self.param_read_counter % 50 == 0:
@@ -107,11 +109,10 @@ class LongitudinalPlanner:
     accel_limits_turns[0] = min(accel_limits_turns[0], self.a_desired + 0.05)
     accel_limits_turns[1] = max(accel_limits_turns[1], self.a_desired - 0.05)
 
-    self.mpc.set_weights(prev_accel_constraint)
+    self.mpc.set_weights(prev_accel_constraint, personality=self.personality)
     self.mpc.set_accel_limits(accel_limits_turns[0], accel_limits_turns[1])
     self.mpc.set_cur_state(self.v_desired_filter.x, self.a_desired)
-    stop_distance = STOP_DISTANCE if not self.CP.radarUnavailable else interp(sm['carState'].vEgo, [0., 2.78, 5.55, 22.], [3.7, 4., 5, STOP_DISTANCE])
-    self.mpc.update(sm['carState'], sm['radarState'], v_cruise, personality=self.personality, stop_distance=stop_distance)
+    self.mpc.update(sm['carState'], sm['radarState'], v_cruise, personality=self.personality, use_df_tune=self.dp_long_use_df_tune)
 
     self.v_desired_trajectory = np.interp(T_IDXS[:CONTROL_N], T_IDXS_MPC, self.mpc.v_solution)
     self.a_desired_trajectory = np.interp(T_IDXS[:CONTROL_N], T_IDXS_MPC, self.mpc.a_solution)
