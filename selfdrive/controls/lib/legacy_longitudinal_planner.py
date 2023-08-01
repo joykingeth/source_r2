@@ -83,8 +83,9 @@ class LongitudinalPlanner:
     if self.param_read_counter % 50 == 0:
       self.read_param()
 
-      self.accel_controller.set_profile(self.params.get("dp_long_accel_profile", encoding='utf-8'))
-      self.vision_turn_controller.set_enabled(self.params.get_bool("dp_mapd_vision_turn_control"))
+      if self.param_read_counter % 300 == 0:
+        self.accel_controller.set_profile(self.params.get("dp_long_accel_profile", encoding='utf-8'))
+        self.vision_turn_controller.set_enabled(self.params.get_bool("dp_mapd_vision_turn_control"))
 
     self.param_read_counter += 1
     v_ego = sm['carState'].vEgo
@@ -115,6 +116,10 @@ class LongitudinalPlanner:
                                                                         self.a_desired, v_cruise, sm)
 
     accel_limits = [A_CRUISE_MIN, get_max_accel(v_ego)]
+
+    # dp - override accel using dp_long_accel_profile
+    accel_limits = self.accel_controller.get_accel_limits(v_ego, accel_limits)
+
     accel_limits_turns = limit_accel_in_turns(v_ego, sm['carState'].steeringAngleDeg, accel_limits, self.CP)
     if force_slow_decel:
       # if required so, force a smooth deceleration
