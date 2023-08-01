@@ -108,8 +108,10 @@ class LongitudinalPlanner:
         self.dynamic_endtoend_controller.set_enabled(self.params.get_bool("dp_long_de2e"))
 
     self.param_read_counter += 1
-    self.mpc.mode = self.dynamic_endtoend_controller.get_mpc_mode(self.mpc.mode, self.CP.radarUnavailable, sm['carState'], sm['radarState'].leadOne, sm['modelV2']) if sm['controlsState'].experimentalMode else 'acc'
-    # self.mpc.mode = 'blended' if sm['controlsState'].experimentalMode else 'acc'
+    if self.dynamic_endtoend_controller.is_enabled():
+      self.mpc.mode = self.dynamic_endtoend_controller.get_mpc_mode(self.mpc.mode, self.CP.radarUnavailable, sm['carState'], sm['radarState'].leadOne, sm['modelV2'])
+    else:
+      self.mpc.mode = 'blended' if sm['controlsState'].experimentalMode else 'acc'
 
     v_ego = sm['carState'].vEgo
     v_cruise_kph = sm['controlsState'].vCruise

@@ -86,14 +86,10 @@ class DynamicEndtoEndController:
     # voacc cars only
     if radar_unavailable and self.dp_e2e_has_lead:
       if lead_one.dRel <= car_state.vEgo * 1.22:
-      # ttc = lead_one.dRel / lead_one.vRel
-      # if ttc <= interp(car_state.vEgo, [0., 22.2, 25.], [.85, 1., 1.22]):
-        print("----------------------------")
         self.dp_e2e_tf_count += 1
       else:
         self.dp_e2e_tf_count = 0
       if self.dp_e2e_tf_count > _DP_E2E_TF_COUNT:
-        print("4: blended")
         return self._set_dp_e2e_mode('blended', True)
 
     # stop sign detection
@@ -119,3 +115,6 @@ class DynamicEndtoEndController:
 
   def set_enabled(self, enabled):
     self._is_enabled = enabled
+
+  def is_enabled(self):
+    return self._is_enabled
