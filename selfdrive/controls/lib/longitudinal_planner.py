@@ -17,6 +17,7 @@ from selfdrive.controls.lib.drive_helpers import V_CRUISE_MAX, CONTROL_N, get_sp
 from system.swaglog import cloudlog
 from selfdrive.controls.lib.vision_turn_controller import VisionTurnController
 from selfdrive.controls.lib.accel_controller import AccelController
+from selfdrive.controls.lib.dynamic_endtoend_controller import DynamicEndtoEndController
 
 LON_MPC_STEP = 0.2  # first step is 0.2s
 A_CRUISE_MIN = -1.2
@@ -53,6 +54,7 @@ class LongitudinalPlanner:
     self.cruise_source = 'cruise'
     self.vision_turn_controller = VisionTurnController(CP)
     self.accel_controller = AccelController()
+    self.dynamic_endtoend_controller = DynamicEndtoEndController()
 
     self.CP = CP
     self.mpc = LongitudinalMpc()
@@ -100,11 +102,14 @@ class LongitudinalPlanner:
     if self.param_read_counter % 50 == 0:
       self.read_param()
 
-      self.accel_controller.set_profile(self.params.get("dp_long_accel_profile", encoding='utf-8'))
-      self.vision_turn_controller.set_enabled(self.params.get_bool("dp_mapd_vision_turn_control"))
+      if self.param_read_counter % 300 == 0:
+        self.accel_controller.set_profile(self.params.get("dp_long_accel_profile", encoding='utf-8'))
+        self.vision_turn_controller.set_enabled(self.params.get_bool("dp_mapd_vision_turn_control"))
+        self.dynamic_endtoend_controller.set_enabled(self.params.get_bool("dp_long_de2e"))
 
     self.param_read_counter += 1
-    self.mpc.mode = 'blended' if sm['controlsState'].experimentalMode else 'acc'
+    self.mpc.mode = self.dynamic_endtoend_controller.get_mpc_mode(self.mpc.mode, self.CP.radarUnavailable, sm['carState'], sm['radarState'].leadOne, sm['modelV2']) if sm['controlsState'].experimentalMode else 'acc'
+    # self.mpc.mode = 'blended' if sm['controlsState'].experimentalMode else 'acc'
 
     v_ego = sm['carState'].vEgo
     v_cruise_kph = sm['controlsState'].vCruise
