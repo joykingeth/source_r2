@@ -176,10 +176,26 @@ DPCtrlPanel::DPCtrlPanel(QWidget *parent) : ListWidget(parent) {
       },
     };
 
+    std::vector<std::tuple<QString, QString, QString>> hyundai_toggle_defs{
+      {
+        "",
+        QString::fromUtf8("🐉 ") + tr("Hyundai / Kia / Genesis") + QString::fromUtf8(" 🐉"),
+        "",
+      },
+      {
+        "dp_hkg_min_steer_speed_bypass",
+        tr("Enable Minimum Steer Speed Bypass"),
+        tr("When enabled, openpilot will control the steering to 0 kph/mph.\nMDPS harness may required.\nReboot Required."),
+      },
+    };
+
     std::vector<std::tuple<QString, QString, QString>> model_specific_toggle_defs;
     auto car_name = CP.getCarName();
     if (car_name == "toyota") {
       model_specific_toggle_defs = toyota_toggle_defs;
+    }
+    else if (car_name == "hyundai") {
+      model_specific_toggle_defs = hyundai_toggle_defs;
     }
 
     for (auto& [param, title, desc] : model_specific_toggle_defs) {
