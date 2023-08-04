@@ -72,7 +72,7 @@ class Controls:
     self.pm = pm
     if self.pm is None:
       self.pm = messaging.PubMaster(['sendcan', 'controlsState', 'carState',
-                                     'carControl', 'carEvents', 'carParams'])
+                                     'carControl', 'carEvents', 'carParams', 'controlsStateExt'])
 
     if NO_IR_CTRL:
       self.camera_packets = ["roadCameraState"]
@@ -89,7 +89,11 @@ class Controls:
     self.params = Params()
     self.dp_no_gps_ctrl = self.params.get_bool("dp_no_gps_ctrl")
     self.dp_no_fan_ctrl = self.params.get_bool("dp_no_fan_ctrl")
-    self.dp_alka = self.params.get_bool("dp_alka")
+    self.params = Params()
+    self._dp_alka = self.params.get_bool("dp_alka")
+    self._dp_alka_active = True
+    self._dp_alka_trigger_count = 0
+    self._dp_alka_btn_block_frame = 0
     self.dp_0813 = self.params.get_bool("dp_0813")
     self.dp_device_disable_temp_check = self.params.get_bool("dp_device_disable_temp_check")
     self.sm = sm
@@ -123,7 +127,7 @@ class Controls:
     if not self.disengage_on_accelerator:
       self.CP.alternativeExperience |= ALTERNATIVE_EXPERIENCE.DISABLE_DISENGAGE_ON_GAS
 
-    if self.dp_alka:
+    if self._dp_alka:
       self.CP.alternativeExperience |= ALTERNATIVE_EXPERIENCE.ALKA
 
     # read params
@@ -250,6 +254,25 @@ class Controls:
     # no more events while in dashcam mode
     if self.read_only:
       return
+
+    # ALKA combination
+    if self._dp_alka and CS.brakePressed:
+      # rick - allow ALKA to be enabled/disabled when brake + main pressed twice in 0.5 secs
+      if self.CP.pcmCruise and CS.cruiseState.available != self.CS_prev.cruiseState.available:
+        self._dp_alka_trigger_count += 1
+      if self._dp_alka_trigger_count == 2:
+        self._dp_alka_active = not self._dp_alka_active
+      if self.sm.frame % 50 == 0:
+        self._dp_alka_trigger_count = 0
+
+      # rick - allow ALKA to be enabled/disabled when brake + set is pressed
+      # some HKGs doesnt have main buttons like other cars (e.g. EV6)
+      if not self.CP.pcmCruise and self._dp_alka_btn_block_frame < self.sm.frame:
+        # set/- is pressed
+        if any(be.type in (ButtonType.decelCruise, ButtonType.setCruise) for be in CS.buttonEvents):
+          self._dp_alka_active = not self._dp_alka_active
+          # block activity for a sec
+          self._dp_alka_btn_block_frame = self.sm.frame + 100
 
     # Block resume if cruise never previously enabled
     resume_pressed = any(be.type in (ButtonType.accelCruise, ButtonType.resumeCruise) for be in CS.buttonEvents)
@@ -609,7 +632,7 @@ class Controls:
                    (not standstill or self.joystick_mode)
     CC.longActive = self.enabled and not self.events.any(ET.OVERRIDE_LONGITUDINAL) and self.CP.openpilotLongitudinalControl
 
-    if self.dp_alka and not standstill and CS.cruiseState.available:
+    if self._dp_alka_active and not standstill and CS.cruiseState.available:
       if self.sm['liveCalibration'].calStatus != log.LiveCalibrationData.Status.calibrated:
         pass
       elif CS.steerFaultTemporary or CS.steerFaultPermanent:
@@ -841,6 +864,13 @@ class Controls:
       controlsState.lateralControlState.indiState = lac_log
 
     self.pm.send('controlsState', dat)
+
+    # controlsState
+    dat = messaging.new_message('controlsStateExt')
+    dat.valid = CS.canValid
+    controlsStateExt = dat.controlsStateExt
+    controlsStateExt.alkaActive = CC.latActive and self._dp_alka_active
+    self.pm.send('controlsStateExt', dat)
 
     # carState
     car_events = self.events.to_msg()

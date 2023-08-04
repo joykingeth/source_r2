@@ -161,8 +161,8 @@ typedef struct UIScene {
   bool started, ignition, is_metric, map_on_left, longitudinal_control;
   uint64_t started_frame;
 
-  bool lat_active = false;
-} UIScene;
+  bool alka_active = false;
+ UIScene;
 
 class UIState : public QObject {
   Q_OBJECT

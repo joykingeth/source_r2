@@ -75,7 +75,7 @@ void OnroadWindow::updateIndicatorState(bool blinkerState, bool bsmState, bool& 
 }
 
 void OnroadWindow::updateState(const UIState &s) {
-  QColor bgColor = bg_colors[dp_alka && s.scene.lat_active && s.status == STATUS_DISENGAGED? STATUS_ALKA : s.status];
+  QColor bgColor = bg_colors[s.scene.alka_active && s.status == STATUS_DISENGAGED? STATUS_ALKA : s.status];
   Alert alert = Alert::get(*(s.sm), s.scene.started_frame);
   alerts->updateAlert(alert);
 
