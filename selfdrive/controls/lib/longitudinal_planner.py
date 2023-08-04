@@ -73,6 +73,7 @@ class LongitudinalPlanner:
     self.read_param()
     self.personality = log.LongitudinalPersonality.standard
     self.dp_long_use_df_tune = False
+    self.dp_taco = self.params.get_bool('dp_taco')
 
   def read_param(self):
     try:
@@ -83,7 +84,7 @@ class LongitudinalPlanner:
       self.dp_long_use_df_tune = False
 
   @staticmethod
-  def parse_model(model_msg, model_error):
+  def parse_model(model_msg, model_error, v_ego, taco=False):
     if (len(model_msg.position.x) == 33 and
        len(model_msg.velocity.x) == 33 and
        len(model_msg.acceleration.x) == 33):
@@ -96,6 +97,13 @@ class LongitudinalPlanner:
       v = np.zeros(len(T_IDXS_MPC))
       a = np.zeros(len(T_IDXS_MPC))
       j = np.zeros(len(T_IDXS_MPC))
+
+    # rick - taco tune
+    if taco:
+      max_lat_accel = interp(v_ego, [5, 10, 20], [1.5, 2.0, 3.0])
+      curvatures = np.interp(T_IDXS_MPC, T_IDXS, model_msg.orientationRate.z) / np.clip(v, 0.3, 100.0)
+      max_v = np.sqrt(max_lat_accel / (np.abs(curvatures) + 1e-3)) - 2.0
+      v = np.minimum(max_v, v)
     return x, v, a, j
 
   def update(self, sm):
@@ -159,7 +167,7 @@ class LongitudinalPlanner:
     self.mpc.set_weights(prev_accel_constraint, personality=self.personality)
     self.mpc.set_accel_limits(accel_limits_turns[0], accel_limits_turns[1])
     self.mpc.set_cur_state(self.v_desired_filter.x, self.a_desired)
-    x, v, a, j = self.parse_model(sm['modelV2'], self.v_model_error)
+    x, v, a, j = self.parse_model(sm['modelV2'], self.v_model_error, v_ego, taco=True)
     self.mpc.update(sm['radarState'], v_cruise_sol, x, v, a, j, personality=self.personality, use_df_tune=self.dp_long_use_df_tune)
 
     self.v_desired_trajectory_full = np.interp(T_IDXS, T_IDXS_MPC, self.mpc.v_solution)
