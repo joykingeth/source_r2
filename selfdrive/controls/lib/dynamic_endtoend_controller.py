@@ -85,7 +85,8 @@ class DynamicEndtoEndController:
     # when we see a lead
     # voacc cars only
     if radar_unavailable and self.dp_e2e_has_lead:
-      if lead_one.dRel <= car_state.vEgo * 1.22:
+      # 1.35 = mean of 1.45 (standard) + 1.25 (aggressive)
+      if lead_one.dRel <= car_state.vEgo * 1.33:
         self.dp_e2e_tf_count += 1
       else:
         self.dp_e2e_tf_count = 0
