@@ -162,7 +162,7 @@ typedef struct UIScene {
   uint64_t started_frame;
 
   bool alka_active = false;
- UIScene;
+} UIScene;
 
 class UIState : public QObject {
   Q_OBJECT

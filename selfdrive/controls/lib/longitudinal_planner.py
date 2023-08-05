@@ -73,7 +73,6 @@ class LongitudinalPlanner:
     self.read_param()
     self.personality = log.LongitudinalPersonality.standard
     self.dp_long_use_df_tune = False
-    self.dp_taco = self.params.get_bool('dp_taco')
 
   def read_param(self):
     try:
