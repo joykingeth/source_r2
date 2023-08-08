@@ -33,15 +33,21 @@ class AccelController:
 
   def _dp_calc_cruise_accel_limits(self, v_ego):
     if self._profile == DP_ACCEL_ECO:
-      a_cruise_min = interp(v_ego, _DP_CRUISE_MIN_BP, _DP_CRUISE_MIN_V_ECO)
-      a_cruise_max = interp(v_ego, _DP_CRUISE_MAX_BP, _DP_CRUISE_MAX_V_ECO)
+      min_v = _DP_CRUISE_MIN_V_ECO
+      max_v = _DP_CRUISE_MAX_V_ECO
     elif self._profile == DP_ACCEL_SPORT:
-      a_cruise_min = interp(v_ego, _DP_CRUISE_MIN_BP, _DP_CRUISE_MIN_V_SPORT)
-      a_cruise_max = interp(v_ego, _DP_CRUISE_MAX_BP, _DP_CRUISE_MAX_V_SPORT)
+      min_v = _DP_CRUISE_MIN_V_SPORT
+      max_v = _DP_CRUISE_MAX_V_SPORT
     else:
-      a_cruise_min = interp(v_ego, _DP_CRUISE_MIN_BP, _DP_CRUISE_MIN_V)
-      a_cruise_max = interp(v_ego, _DP_CRUISE_MAX_BP, _DP_CRUISE_MAX_V)
+      min_v = _DP_CRUISE_MIN_V
+      max_v = _DP_CRUISE_MAX_V
+
+    a_cruise_min = interp(v_ego, _DP_CRUISE_MIN_BP, min_v)
+    a_cruise_max = interp(v_ego, _DP_CRUISE_MAX_BP, max_v)
     return a_cruise_min, a_cruise_max
 
   def get_accel_limits(self, v_ego, accel_limits):
     return accel_limits if self._profile == DP_ACCEL_STOCK else self._dp_calc_cruise_accel_limits(v_ego)
+
+  def is_enabled(self):
+    return self._profile != DP_ACCEL_STOCK
