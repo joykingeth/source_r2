@@ -75,12 +75,8 @@ class LongitudinalPlanner:
     self.dp_long_use_df_tune = False
 
   def read_param(self):
-    try:
-      self.personality = int(self.params.get('LongitudinalPersonality'))
-      self.dp_long_use_df_tune = self.params.get_bool('dp_long_use_df_tune')
-    except (ValueError, TypeError):
-      self.personality = log.LongitudinalPersonality.standard
-      self.dp_long_use_df_tune = False
+    self.personality = int(self.params.get('LongitudinalPersonality'))
+    self.dp_long_use_df_tune = self.params.get_bool('dp_long_use_df_tune')
 
   @staticmethod
   def parse_model(model_msg, model_error, v_ego, taco=False):
@@ -109,10 +105,10 @@ class LongitudinalPlanner:
     if self.param_read_counter % 50 == 0:
       self.read_param()
 
-      if self.param_read_counter % 300 == 0:
-        self.accel_controller.set_profile(self.params.get("dp_long_accel_profile", encoding='utf-8'))
-        self.vision_turn_controller.set_enabled(self.params.get_bool("dp_mapd_vision_turn_control"))
-        self.dynamic_endtoend_controller.set_enabled(self.params.get_bool("dp_long_de2e"))
+    if self.param_read_counter % 100 == 0:
+      self.accel_controller.set_profile(self.params.get("dp_long_accel_profile", encoding='utf-8'))
+      self.vision_turn_controller.set_enabled(self.params.get_bool("dp_mapd_vision_turn_control"))
+      self.dynamic_endtoend_controller.set_enabled(self.params.get_bool("dp_long_de2e"))
 
     self.param_read_counter += 1
     if self.dynamic_endtoend_controller.is_enabled():
