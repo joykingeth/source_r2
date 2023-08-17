@@ -235,6 +235,7 @@ std::unordered_map<std::string, uint32_t> keys = {
     {"dp_long_de2e", PERSISTENT},
     {"dp_mapd_vision_turn_control", PERSISTENT},
     {"dp_hkg_min_steer_speed_bypass", PERSISTENT},
+    {"dp_lat_lane_priority_mode_speed_based", PERSISTENT},
 };
 
 } // namespace

@@ -34,7 +34,7 @@ DPCtrlPanel::DPCtrlPanel(QWidget *parent) : ListWidget(parent) {
     {
       "dp_lat_lane_priority_mode",
       tr("Enable Lane Priority Mode"),
-      tr("When enabled, openpilot will use lane lines for lateral control, fallback to laneless mode automatically when lane lines probabilities are low.\nReboot required."),
+      tr("When enabled, openpilot will use lane lines for lateral control, fallback to laneless mode automatically when lane lines probabilities are low."),
     },
     {
       "",
@@ -88,6 +88,10 @@ DPCtrlPanel::DPCtrlPanel(QWidget *parent) : ListWidget(parent) {
     },
   };
 
+  ParamSpinBoxControl* speed_based_lane_priority_toggle new ParamSpinBoxControl("dp_lat_lane_priority_mode_speed_based", tr("Only When Drive Above"),
+                                                  tr("All Speed - Use Lane Line when available.\n*Number* - Use Lane Line when available and drive speed is above the *number*."),
+                                                  "", 0, 120, 1, tr(" kph"), tr("All Speed"));
+
   std::vector<QString> display_off_mode_texts{tr("Standard"), tr("On-Road"), tr("MAIN"), tr("OP"), tr("Off")};
   ButtonParamControl* display_off_mode_setting = new ButtonParamControl("dp_device_display_off_mode", tr("Display Mode"),
                                           tr("On-Road - When driving, the display will be off (excl. warning).\nMAIN - When ACC MAIN is on, the display will be off (excl. warning).\nOP - When OP is enabled, the display will be off (excl. warning).\nOff - the display will be off completely (incl. warning).\nReboot required."),
@@ -132,6 +136,9 @@ DPCtrlPanel::DPCtrlPanel(QWidget *parent) : ListWidget(parent) {
       addItem(display_off_mode_setting);
       // audible alert mode
       addItem(audible_alert_mode_setting);
+    }
+    if (param == "dp_lat_lane_priority_mode") {
+      addItem(speed_based_lane_priority_toggle);
     }
     if (param == "dp_mapd") {
       connect(toggle, &ToggleControl::toggleFlipped, [=]() {
@@ -223,5 +230,6 @@ void DPCtrlPanel::showEvent(QShowEvent *event) {
 
 void DPCtrlPanel::updateToggles() {
   auto_shutdown_timer_toggle->setVisible(params.getBool("dp_device_auto_shutdown"));
+  speed_based_lane_priority_toggle->setVisible(params.getBool("dp_lat_lane_priority_mode"))
 //  toggles["SpeedLimitControl"]->setVisible(params.getBool("dp_mapd"));
 }

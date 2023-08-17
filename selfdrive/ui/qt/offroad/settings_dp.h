@@ -24,6 +24,7 @@ private:
   Params params;
   std::map<std::string, ParamControl*> toggles;
   ParamSpinBoxControl* auto_shutdown_timer_toggle;
+  ParamSpinBoxControl* speed_based_lane_priority_toggle;
 //  bool model_specific_toggles_added = false;
 
   void updateToggles();

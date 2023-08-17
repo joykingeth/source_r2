@@ -34,13 +34,15 @@ class LateralPlanner:
   def __init__(self, CP, debug=False):
     self.DH = DesireHelper()
 
-    params = Params()
-    self._dp_lat_lane_priority_mode = params.get_bool("dp_lat_lane_priority_mode")
+    self.params = Params()
+    self._dp_lat_lane_priority_mode = self.params.get_bool("dp_lat_lane_priority_mode")
     self._dp_lat_lane_priority_mode_active = False
     self._dp_lat_lane_priority_mode_active_prev = False
     self.LP = LanePlanner()
     # dp // mapd - for vision turn controller
     self._d_path_w_lines_xyz = np.zeros((TRAJECTORY_SIZE, 3))
+    self._dp_lat_lane_priority_mode_speed_based = int(self.params.get("self.dp_lat_lane_priority_mode_speed_based", encoding="utf-8")) if self._dp_lat_lane_priority_mode else 0
+    self.param_read_counter = 0
 
     # Vehicle model parameters used to calculate lateral movement of car
     self.factor1 = CP.wheelbase - CP.centerToFront
@@ -71,6 +73,12 @@ class LateralPlanner:
     # clip speed , lateral planning is not possible at 0 speed
     self.v_ego = max(MIN_SPEED, sm['carState'].vEgo)
     measured_curvature = sm['controlsState'].curvature
+
+    if self.param_read_counter % 50 == 0:
+      self._dp_lat_lane_priority_mode = self.params.get_bool("dp_lat_lane_priority_mode")
+      if self._dp_lat_lane_priority_mode:
+        self._dp_lat_lane_priority_mode_speed_based = int(self.params.get("dp_lat_lane_priority_mode_speed_based", encoding="utf-8"))
+    self.param_read_counter += 1
 
     # Parse model predictions
     md = sm['modelV2']
@@ -189,6 +197,10 @@ class LateralPlanner:
         self._dp_lat_lane_priority_mode_active = False
       if (self.LP.lll_prob + self.LP.rll_prob)/2 > 0.5:
         self._dp_lat_lane_priority_mode_active = True
+
+      # when drive speed is below set speed, we set it to False
+      if self._dp_lat_lane_priority_mode_active and self._dp_lat_lane_priority_mode_speed_based > 0 and self.v_ego * 3.6 < self._dp_lat_lane_priority_mode_speed_based:
+        self._dp_lat_lane_priority_mode_active = False
 
       # perform reset mpc
       if self._dp_lat_lane_priority_mode_active != self._dp_lat_lane_priority_mode_active_prev:
