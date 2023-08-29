@@ -49,6 +49,7 @@ source_list = ['lat_mpc.py',
   f'{acados_dir}/aarch64/lib/libacados.so',
   f'{acados_dir}/x86_64/lib/libacados.so',
   f'{acados_dir}/larch64/lib/libacados.so',
+  f'{acados_dir}/earch64/lib/libacados.so',
 ]
 
 lenv = env.Clone()
