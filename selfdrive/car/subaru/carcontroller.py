@@ -3,7 +3,7 @@ from opendbc.can.packer import CANPacker
 from openpilot.selfdrive.car import apply_driver_steer_torque_limits
 from openpilot.selfdrive.car.subaru import subarucan
 from openpilot.selfdrive.car.subaru.values import DBC, GLOBAL_GEN2, PREGLOBAL_CARS, CanBus, CarControllerParams, SubaruFlags
-from selfdrive.car.subaru.values import HYBRID_CARS
+from openpilot.selfdrive.car.subaru.values import HYBRID_CARS
 
 
 class CarController:

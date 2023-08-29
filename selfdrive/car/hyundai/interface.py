@@ -11,7 +11,7 @@ from openpilot.selfdrive.car import create_button_event, get_safety_config
 from openpilot.selfdrive.car.interfaces import CarInterfaceBase
 from openpilot.selfdrive.car.disable_ecu import disable_ecu
 
-from common.params import Params
+from openpilot.common.params import Params
 
 Ecu = car.CarParams.Ecu
 ButtonType = car.CarState.ButtonEvent.Type

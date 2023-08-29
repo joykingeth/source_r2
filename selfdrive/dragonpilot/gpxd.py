@@ -25,8 +25,8 @@
 import cereal.messaging as messaging
 import os
 import datetime
-from common.realtime import set_core_affinity, set_realtime_priority
-from system.swaglog import cloudlog
+from openpilot.common.realtime import set_core_affinity, set_realtime_priority
+from openpilot.system.swaglog import cloudlog
 from pathlib import Path
 
 # customisable values

@@ -23,15 +23,16 @@
 # THE SOFTWARE.
 
 import cereal.messaging as messaging
-from common.realtime import Ratekeeper, set_core_affinity, set_realtime_priority, sec_since_boot
-from common.params import Params
+from openpilot.common.realtime import Ratekeeper, set_core_affinity, set_realtime_priority
+from openpilot.common.params import Params
 import json
 from cereal import log
 import overpy
 import os
 import subprocess
-from common.conversions import Conversions as CV
+from openpilot.common.conversions import Conversions as CV
 import re
+import time
 
 OSM_QUERY = ["/data/media/0/osm/bin/osm3s_query", "--db-dir=/data/media/0/osm/db/"]
 
@@ -89,7 +90,7 @@ class OSM():
 
     # use remote OSM when local osm is not enabled or failed too many times
     if not self.local_osm_enabled or self._local_osm_query_fail_count >= OSM_LOCAL_QUERY_THRESHOLD:
-      fetch_time = sec_since_boot()
+      fetch_time = time.monotonic()
       if fetch_time - self._fetch_time_prev < OSM_ONLINE_QUERY_THRESHOLD:
         return
       try:

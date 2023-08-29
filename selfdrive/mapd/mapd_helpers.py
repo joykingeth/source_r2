@@ -2,9 +2,9 @@ import math
 import json
 import numpy as np
 from datetime import datetime
-from common.basedir import BASEDIR
-from selfdrive.config import Conversions as CV
-from common.transformations.coordinates import LocalCoord, geodetic2ecef
+from openpilot.common.basedir import BASEDIR
+from openpilot.selfdrive.config import Conversions as CV
+from openpilot.common.transformations.coordinates import LocalCoord, geodetic2ecef
 
 LOOKAHEAD_TIME = 10.
 MAPS_LOOKAHEAD_DISTANCE = 50 * LOOKAHEAD_TIME

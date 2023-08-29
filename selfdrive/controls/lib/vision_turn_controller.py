@@ -1,12 +1,12 @@
 import numpy as np
 import math
 from cereal import custom
-from common.numpy_fast import interp
-# from common.params import Params
+from openpilot.common.numpy_fast import interp
+# from openpilot.common.params import Params
 # from common.realtime import sec_since_boot
-from common.conversions import Conversions as CV
+from openpilot.common.conversions import Conversions as CV
 # from selfdrive.controls.lib.lane_planner import TRAJECTORY_SIZE
-from selfdrive.controls.lib.drive_helpers import V_CRUISE_MAX
+from openpilot.selfdrive.controls.lib.drive_helpers import V_CRUISE_MAX
 import cereal.messaging as messaging
 
 TRAJECTORY_SIZE = 33

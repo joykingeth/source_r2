@@ -1,9 +1,9 @@
 import overpy
 import subprocess
 import numpy as np
-from selfdrive.mapd.lib.geo import R
+from openpilot.selfdrive.mapd.lib.geo import R
 import os
-from selfdrive.mapd.config import QUERY_RADIUS
+from openpilot.selfdrive.mapd.config import QUERY_RADIUS
 
 OSM_QUERY = ["/data/media/0/osm/bin/osm3s_query", "--db-dir=/data/media/0/osm/db/"]
 

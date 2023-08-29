@@ -1,17 +1,18 @@
 #!/usr/bin/env python3
 import os
+import time
 import numpy as np
 from cereal import log
-from common.realtime import sec_since_boot
-from common.numpy_fast import clip, interp
-from system.swaglog import cloudlog
-from selfdrive.legacy_modeld.constants import index_function
-from selfdrive.controls.radard import _LEAD_ACCEL_TAU
+
+from openpilot.common.numpy_fast import clip, interp
+from openpilot.system.swaglog import cloudlog
+from openpilot.selfdrive.legacy_modeld.constants import index_function
+from openpilot.selfdrive.controls.radard import _LEAD_ACCEL_TAU
 
 if __name__ == '__main__':  # generating code
-  from third_party.acados.acados_template import AcadosModel, AcadosOcp, AcadosOcpSolver
+  from openpilot.third_party.acados.acados_template import AcadosModel, AcadosOcp, AcadosOcpSolver
 else:
-  from selfdrive.controls.lib.legacy_longitudinal_mpc_lib.c_generated_code.acados_ocp_solver_pyx import AcadosOcpSolverCython  # pylint: disable=no-name-in-module, import-error
+  from openpilot.selfdrive.controls.lib.legacy_longitudinal_mpc_lib.c_generated_code.acados_ocp_solver_pyx import AcadosOcpSolverCython  # pylint: disable=no-name-in-module, import-error
 
 from casadi import SX, vertcat
 
@@ -431,7 +432,7 @@ class LongitudinalMpc:
 
     self.prev_a = np.interp(T_IDXS + 0.05, T_IDXS, self.a_solution)
 
-    t = sec_since_boot()
+    t = time.monotonic()
     if self.solution_status != 0:
       if t > self.last_cloudlog_t + 5.0:
         self.last_cloudlog_t = t
