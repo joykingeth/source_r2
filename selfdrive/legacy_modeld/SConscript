@@ -42,7 +42,7 @@ if arch == "larch64":
     dlsym_offset = get_dlsym_offset()
     lenv['CXXFLAGS'].append("-DUSE_THNEED")
     lenv['CXXFLAGS'].append(f"-DDLSYM_OFFSET={dlsym_offset}")
-elif arch == "aarch64":
+elif arch == "earch64":
   libs += ['gsl', 'CB', 'gnustl_shared']
 
   if use_thneed:
