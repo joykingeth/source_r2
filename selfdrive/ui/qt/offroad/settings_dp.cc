@@ -230,6 +230,6 @@ void DPCtrlPanel::showEvent(QShowEvent *event) {
 
 void DPCtrlPanel::updateToggles() {
   auto_shutdown_timer_toggle->setVisible(params.getBool("dp_device_auto_shutdown"));
-  speed_based_lane_priority_toggle->setVisible(params.getBool("dp_lat_lane_priority_mode"))
+  speed_based_lane_priority_toggle->setVisible(params.getBool("dp_lat_lane_priority_mode"));
 //  toggles["SpeedLimitControl"]->setVisible(params.getBool("dp_mapd"));
 }
