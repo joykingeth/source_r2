@@ -15,13 +15,13 @@
 # Year: 2023
 # -----------------------------------------------------------------------------
 
-from common.realtime import Ratekeeper, set_core_affinity, set_realtime_priority
-from common.params import Params
-from common.basedir import PERSIST, BASEDIR
+from openpilot.common.realtime import Ratekeeper, set_core_affinity, set_realtime_priority
+from openpilot.common.params import Params
+from openpilot.common.basedir import PERSIST, BASEDIR
 from datetime import datetime, timedelta
 import jwt
 import json
-from system.hardware import HARDWARE, PC, TICI
+from openpilot.system.hardware import HARDWARE, PC, TICI
 from cereal import car
 import os
 import base64
@@ -294,9 +294,9 @@ class OtisApi:
       _debug(f"[otisserv] _process_snapshots_non_blocking() begin")
       if not PC:
         if TICI:
-          from system.camerad.snapshot.snapshot import jpeg_write, snapshot
+          from openpilot.system.camerad.snapshot.snapshot import jpeg_write, snapshot
         else:
-          from selfdrive.camerad.snapshot.snapshot import jpeg_write, snapshot
+          from openpilot.selfdrive.camerad.snapshot.snapshot import jpeg_write, snapshot
         ret = snapshot()
 
         files = []

@@ -41,18 +41,19 @@ I encourage users to consider purchasing a [comma 3](https://shop.comma.ai) for 
 * Navigation On Openpilot (NOO) is not supported, as it requires a newer driving model that is not currently available in legacypilot.
 * Services are not optimized for resource usage, and using all services may result in overheating issues.
 * Language files can only be generated in a PC due to missing Qt5 tools.
+* webjoystick is disabled as it requires additional python modules. (aiohttp and others)
+* Starting from August 7th, 2023, comma has removed ESP/GPS support from Pandas. You can find more details about this change in this link. 
+  * Going forward, I will focus solely on maintaining the safety aspects of the code, ensuring that vehicle support and safety declarations remain up to date.
+
 
 ## Configuration
 
 * Considering performance issues, I have turned off all logging-related services. If anyone needs to use them, they can use `dp_logging` parameter to enable them.
 * If you are not a Comma Two device, you can use the `dp_no_fan_ctrl` parameter to disable fan-related detection and control.
+
 =======================
 
-
-
-
-
-![](https://i.imgur.com/b0ZyIx5.jpg)
+![openpilot on the comma 3X](https://github.com/commaai/openpilot/assets/4038174/f1081737-8718-4241-a22a-3ceba526361a)
 
 Table of Contents
 =======================
@@ -93,9 +94,9 @@ Running on a dedicated device in a car
 ------
 
 To use openpilot in a car, you need four things
-* A supported device to run this software: a [comma three](https://comma.ai/shop/products/three).
-* This software. The setup procedure of the comma three allows the user to enter a URL for custom software.
-  The URL, openpilot.comma.ai will install the release version of openpilot. To install openpilot master, you can use installer.comma.ai/commaai/master, and replacing commaai with another GitHub username can install a fork.
+* A supported device to run this software: a [comma 3X](https://comma.ai/shop/comma-3x) or comma three.
+* This software. The setup procedure of the comma 3/3X allows the user to enter a URL for custom software.
+The URL, openpilot.comma.ai will install the release version of openpilot. To install openpilot master, you can use installer.comma.ai/commaai/master, and replacing commaai with another GitHub username can install a fork.
 * One of [the 250+ supported cars](docs/CARS.md). We support Honda, Toyota, Hyundai, Nissan, Kia, Chrysler, Lexus, Acura, Audi, VW, Ford and more. If your car is not supported but has adaptive cruise control and lane-keeping assist, it's likely able to run openpilot.
 * A [car harness](https://comma.ai/shop/products/car-harness) to connect to your car.
 

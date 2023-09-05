@@ -1,5 +1,5 @@
-from common.numpy_fast import interp
-from common.params import Params
+from openpilot.common.numpy_fast import interp
+from openpilot.common.params import Params
 
 # d-e2e, from modeldata.h
 TRAJECTORY_SIZE = 33

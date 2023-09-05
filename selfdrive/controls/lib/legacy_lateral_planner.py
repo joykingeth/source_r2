@@ -1,14 +1,15 @@
 import numpy as np
-from common.realtime import sec_since_boot, DT_MDL
-from common.numpy_fast import interp
-from system.swaglog import cloudlog
-from selfdrive.controls.lib.legacy_lateral_mpc_lib.lat_mpc import LateralMpc
-from selfdrive.controls.lib.drive_helpers import CONTROL_N, MPC_COST_LAT, LAT_MPC_N, CAR_ROTATION_RADIUS
-from selfdrive.controls.lib.lane_planner import LanePlanner, TRAJECTORY_SIZE
-from selfdrive.controls.lib.desire_helper import DesireHelper
+import time
+from openpilot.common.realtime import DT_MDL
+from openpilot.common.numpy_fast import interp
+from openpilot.system.swaglog import cloudlog
+from openpilot.selfdrive.controls.lib.legacy_lateral_mpc_lib.lat_mpc import LateralMpc
+from openpilot.selfdrive.controls.lib.drive_helpers import CONTROL_N, MPC_COST_LAT, LAT_MPC_N, CAR_ROTATION_RADIUS
+from openpilot.selfdrive.controls.lib.lane_planner import LanePlanner, TRAJECTORY_SIZE
+from openpilot.selfdrive.controls.lib.desire_helper import DesireHelper
 import cereal.messaging as messaging
 from cereal import log
-from common.params import Params
+from openpilot.common.params import Params
 
 STEER_RATE_COST = {
   "chrysler": 0.7,
@@ -113,7 +114,7 @@ class LateralPlanner:
 
     #  Check for infeasible MPC solution
     mpc_nans = np.isnan(self.lat_mpc.x_sol[:, 3]).any()
-    t = sec_since_boot()
+    t = time.monotonic()
     if mpc_nans or self.lat_mpc.solution_status != 0:
       self.reset_mpc()
       self.x0[3] = measured_curvature

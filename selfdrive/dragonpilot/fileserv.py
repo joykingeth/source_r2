@@ -27,7 +27,7 @@ import os
 import signal
 import threading
 import socket
-from common.realtime import set_core_affinity, set_realtime_priority
+from openpilot.common.realtime import set_core_affinity, set_realtime_priority
 
 
 HOST = '0.0.0.0'

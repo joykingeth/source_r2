@@ -1,4 +1,4 @@
-from common.numpy_fast import interp
+from openpilot.common.numpy_fast import interp
 
 DP_ACCEL_STOCK = 0
 DP_ACCEL_ECO = 1

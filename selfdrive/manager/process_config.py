@@ -1,9 +1,9 @@
 import os
 
 from cereal import car
-from common.params import Params
-from system.hardware import PC, TICI, EON
-from selfdrive.manager.process import PythonProcess, NativeProcess, DaemonProcess
+from openpilot.common.params import Params
+from openpilot.system.hardware import PC, TICI, EON
+from openpilot.selfdrive.manager.process import PythonProcess, NativeProcess, DaemonProcess
 
 NO_IR_CTRL = os.path.isfile('/data/media/0/no_ir_ctrl')
 
@@ -14,6 +14,9 @@ def driverview(started: bool, params: Params, CP: car.CarParams) -> bool:
 
 def notcar(started: bool, params: Params, CP: car.CarParams) -> bool:
   return CP.notCar  # type: ignore
+
+def iscar(started: bool, params: Params, CP: car.CarParams) -> bool:
+  return not CP.notCar
 
 def logging(started, params, CP: car.CarParams) -> bool:
   run = (not CP.notCar) or not params.get_bool("DisableLogging")
@@ -37,18 +40,18 @@ def qcomgps(started, params, CP: car.CarParams) -> bool:
 use_old_model = Params().get_bool("dp_0813")
 
 procs = [
-  # due to qualcomm kernel bugs SIGKILLing camerad sometimes causes page table corruption
-  NativeProcess("camerad", "selfdrive/camerad", ["./camerad"], unkillable=True, callback=driverview),
+  NativeProcess("camerad", "selfdrive/camerad", ["./camerad"], callback=driverview),
   NativeProcess("clocksd", "system/clocksd", ["./clocksd"]),
   NativeProcess("logcatd", "system/logcatd", ["./logcatd"]),
   NativeProcess("proclogd", "system/proclogd", ["./proclogd"]),
   PythonProcess("logmessaged", "system.logmessaged", offroad=True),
-  # PythonProcess("micd", "system.micd"),
+  # PythonProcess("micd", "system.micd", callback=iscar),
   # PythonProcess("timezoned", "system.timezoned", enabled=not PC, offroad=True),
 
   DaemonProcess("manage_athenad", "selfdrive.athena.manage_athenad", "AthenadPid"),
   NativeProcess("dmonitoringmodeld", "selfdrive/hybrid_modeld", ["./dmonitoringmodeld"], enabled=(not PC or WEBCAM) and not NO_IR_CTRL, callback=driverview),
   # NativeProcess("encoderd", "system/loggerd", ["./encoderd"]),
+  # NativeProcess("stream_encoderd", "system/loggerd", ["./encoderd", "--stream"], onroad=False, callback=notcar),
   NativeProcess("loggerd", "selfdrive/loggerd", ["./loggerd"], onroad=False, callback=logging),
   NativeProcess("modeld", "selfdrive/hybrid_modeld", ["./modeld"]),
   # NativeProcess("mapsd", "selfdrive/navd", ["./mapsd"]),
@@ -80,7 +83,8 @@ procs = [
 
   # debug procs
   NativeProcess("bridge", "cereal/messaging", ["./bridge"], onroad=False, callback=notcar),
-  PythonProcess("webjoystick", "tools.joystick.web", onroad=False, callback=notcar),
+  # rick - webjoystick needs aiohttp, install additional modules manually: pip install aiohttp aiortc
+  # PythonProcess("webjoystick", "tools.bodyteleop.web", onroad=False, callback=notcar),
 
   # EON only
   PythonProcess("rtshield", "selfdrive.rtshield", enabled=EON),

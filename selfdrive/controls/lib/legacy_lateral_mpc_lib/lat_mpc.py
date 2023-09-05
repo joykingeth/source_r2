@@ -1,18 +1,19 @@
 #!/usr/bin/env python3
 import os
+import time
 import numpy as np
 
 from casadi import SX, vertcat, sin, cos
 
-from common.realtime import sec_since_boot
+# from common.realtime import sec_since_boot
 # from selfdrive.controls.lib.drive_helpers import LAT_MPC_N as N
 N = 16
-from selfdrive.legacy_modeld.constants import T_IDXS
+from openpilot.selfdrive.legacy_modeld.constants import T_IDXS
 
 if __name__ == '__main__':  # generating code
-  from third_party.acados.acados_template import AcadosModel, AcadosOcp, AcadosOcpSolver
+  from openpilot.third_party.acados.acados_template import AcadosModel, AcadosOcp, AcadosOcpSolver
 else:
-  from selfdrive.controls.lib.legacy_lateral_mpc_lib.c_generated_code.acados_ocp_solver_pyx import AcadosOcpSolverCython  # pylint: disable=no-name-in-module, import-error
+  from openpilot.selfdrive.controls.lib.legacy_lateral_mpc_lib.c_generated_code.acados_ocp_solver_pyx import AcadosOcpSolverCython  # pylint: disable=no-name-in-module, import-error
 
 LAT_MPC_DIR = os.path.dirname(os.path.abspath(__file__))
 EXPORT_DIR = os.path.join(LAT_MPC_DIR, "c_generated_code")
@@ -163,9 +164,9 @@ class LateralMpc():
     self.solver.set(N, "p", p_cp)
     self.solver.cost_set(N, "yref", self.yref[N][:2])
 
-    t = sec_since_boot()
+    t = time.monotonic()
     self.solution_status = self.solver.solve()
-    self.solve_time = sec_since_boot() - t
+    self.solve_time = time.monotonic() - t
 
     for i in range(N+1):
       self.x_sol[i] = self.solver.get(i, 'x')
