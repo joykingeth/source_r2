@@ -603,7 +603,7 @@ class Controls:
     # Check if openpilot is engaged and actuators are enabled
     self.enabled = self.state in ENABLED_STATES
     self.active = self.state in ACTIVE_STATES
-    if self.active:
+    if self.active or self._dp_alka_active:
       self.current_alert_types.append(ET.WARNING)
 
   def state_control(self, CS):
