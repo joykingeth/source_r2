@@ -111,7 +111,6 @@ rm -fr cereal/messaging/*.pyx
 rm -fr cereal/visionipc/*.pyx
 rm -fr cereal/messaging/tests
 rm -fr selfdrive/manager/test
-rm -fr third_party/libyuv/larch64
 rm -fr third_party/libyuv/x86_64
 rm -fr opendbc/can/*.pyx
 rm -fr opendbc/can/*.hpp
