@@ -62,3 +62,4 @@ selfdrive/mapd/**
 selfdrive/controls/lib/accel_controller.py
 selfdrive/controls/lib/dynamic_endtoend_controller.py
 third_party/libyuv/earch64**
+third_party/libyuv/larch64**
