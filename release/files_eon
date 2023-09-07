@@ -8,7 +8,7 @@ common/hybrid_modeldata.h
 common/xattr.py
 
 third_party/snpe/include/**
-third_party/snpe/aarch64**
+third_party/snpe/earch64**
 third_party/snpe/dsp**
 
 third_party/android_frameworks_native/**
@@ -19,7 +19,7 @@ third_party/libgralloc/**
 third_party/bzip2/**
 third_party/openmax/**
 
-third_party/acados/aarch64/**
+third_party/acados/earch64/**
 
 selfdrive/boardd/pigeon.cc
 selfdrive/boardd/pigeon.h
@@ -45,8 +45,8 @@ selfdrive/controls/lib/legacy_longitudinal_mpc_lib/**
 
 selfdrive/legacy_monitoring/**
 
-selfdrive/ui/qt/spinner_aarch64
-selfdrive/ui/qt/text_aarch64
+selfdrive/ui/qt/spinner_earch64
+selfdrive/ui/qt/text_earch64
 
 system/hardware/eon/**
 
