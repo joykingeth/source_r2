@@ -1,113 +1,189 @@
-from openpilot.common.numpy_fast import interp
-from openpilot.common.params import Params
+from common.numpy_fast import interp
 
 # d-e2e, from modeldata.h
 TRAJECTORY_SIZE = 33
 
-_DP_E2E_LEAD_COUNT = 5
+LEAD_WINDOW_SIZE = 5
+LEAD_PROB = 0.6
 
-_DP_E2E_STOP_BP = [0., 10., 20., 30., 40., 50., 55.]
-_DP_E2E_STOP_DIST = [10, 30., 50., 70., 80., 90., 120.]
-_DP_E2E_STOP_COUNT = 3
+SLOW_DOWN_WINDOW_SIZE = 5
+SLOW_DOWN_PROB = 0.6
+SLOW_DOWN_BP = [0., 10., 20., 30., 40., 50., 55.]
+SLOW_DOWN_DIST = [10, 30., 50., 70., 80., 90., 120.]
 
-_DP_E2E_SNG_COUNT = 3
-_DP_E2E_SNG_ACC_COUNT = 3
-_DP_E2E_SWAP_COUNT = 5
+STANDSTILL_SIZE = 5
+STANDSTILL_PROB = 0.4
 
-_DP_E2E_TF_COUNT = 5
+SLOWNESS_WINDOW_SIZE = 20
+SLOWNESS_PROB = 0.6
+SLOWNESS_CRUISE_OFFSET = 1.05
+
+DANGEROUS_TTC_WINDOW_SIZE = 5
+DANGEROUS_TTC = 1.6
+
+
+class GenericMovingAverageCalculator:
+  def __init__(self, window_size):
+    self.window_size = window_size
+    self.data = []
+    self.total = 0
+
+  def add_data(self, value):
+    if len(self.data) == self.window_size:
+      self.total -= self.data.pop(0)
+    self.data.append(value)
+    self.total += value
+
+  def get_moving_average(self):
+    if len(self.data) == 0:
+      return None
+    return self.total / len(self.data)
+
+  def reset_data(self):
+    self.data = []
+    self.total = 0
 
 
 class DynamicEndtoEndController:
 
   def __init__(self):
-    self._params = Params()
     self._is_enabled = False
     self._mode = 'acc'
 
-    # conditional e2e
-    self.dp_e2e_has_lead = False
-    self.dp_e2e_lead_last = False
-    self.dp_e2e_lead_count = 0
-    self.dp_e2e_sng = False
-    self.dp_e2e_sng_count = 0
-    self.dp_e2e_standstill_last = False
-    self.dp_e2e_swap_count = 0
-    self.dp_e2e_stop_count = 0
-    self.dp_e2e_tf_count = 0
+    self._lead_gmac = GenericMovingAverageCalculator(window_size=LEAD_WINDOW_SIZE)
+    self._has_lead_filtered = False
+    self._has_lead_filtered_prev = False
+
+    self._slow_down_gmac = GenericMovingAverageCalculator(window_size=SLOW_DOWN_WINDOW_SIZE)
+    self._has_slow_down = False
+    self._has_slow_down_prev = False
+
+    self._has_blinkers = False
+    self._has_blinkers_prev = False
+
+    self._standstill_gmac = GenericMovingAverageCalculator(window_size=STANDSTILL_SIZE)
+    self._has_standstill_filtered = False
+    self._has_standstill_filtered_prev = False
+
+    self._slowness_gmac = GenericMovingAverageCalculator(window_size=SLOWNESS_WINDOW_SIZE)
+    self._has_slowness = False
+    self._has_slowness_prev = False
+
+    self._has_nav_enabled = False
+    self._has_nav_enabled_prev = False
+
+    self._dangerous_ttc_gmac = GenericMovingAverageCalculator(window_size=DANGEROUS_TTC_WINDOW_SIZE)
+    self._has_dangerous_ttc = False
+    self._has_dangerous_ttc_prev = False
+
+    self._v_ego_kph = 0.
+    self._v_cruise_kph = 0.
+
+    self._has_lead = False
+    self._has_lead_prev = False
+
+    self._has_standstill = False
+    self._has_standstill_prev = False
     pass
 
-  def _set_dp_e2e_mode(self, mode, force=False):
-    if force:
-      self.dp_e2e_swap_count = 0
-      self._mode = mode
+  def _update(self, car_state, lead_one, md, controls_state, radar_unavailable):
+    self._v_ego_kph = car_state.vEgo * 3.6
+    self._v_cruise_kph = controls_state.vCruise
+    self._has_lead = lead_one.status
+    self._has_standstill = car_state.standstill
+
+    # nav enable detection
+    self._has_nav_enabled = md.navEnabled
+
+    # lead detection
+    self._lead_gmac.add_data(lead_one.status)
+    self._has_lead_filtered = self._lead_gmac.get_moving_average() >= LEAD_PROB
+
+    # slow down detection
+    self._slow_down_gmac.add_data(len(md.orientation.x) == len(md.position.x) == TRAJECTORY_SIZE and md.position.x[TRAJECTORY_SIZE - 1] < interp(self._v_ego_kph, SLOW_DOWN_BP, SLOW_DOWN_DIST))
+    self._has_slow_down = self._slow_down_gmac.get_moving_average() >= SLOW_DOWN_PROB
+
+    # blinker detection
+    self._has_blinkers = car_state.leftBlinker or car_state.rightBlinker
+
+    # standstill detection
+    self._standstill_gmac.add_data(car_state.standstill)
+    self._has_standstill_filtered = self._standstill_gmac.get_moving_average() >= STANDSTILL_PROB
+
+    # slowness detection
+    self._slowness_gmac.add_data(self._v_ego_kph <= (self._v_cruise_kph*SLOWNESS_CRUISE_OFFSET))
+    self._has_slowness = self._slowness_gmac.get_moving_average() >= SLOWNESS_PROB
+
+    # dangerous TTC detection
+    if not self._has_lead_filtered and self._has_lead_filtered_prev:
+      self._dangerous_ttc_gmac.reset_data()
+      self._has_dangerous_ttc = False
+
+    if self._has_lead and car_state.vEgo >= 0.01:
+      self._dangerous_ttc_gmac.add_data(lead_one.dRel/car_state.vEgo)
+
+    self._has_dangerous_ttc = self._dangerous_ttc_gmac.get_moving_average() is not None and self._dangerous_ttc_gmac.get_moving_average() <= DANGEROUS_TTC
+
+
+    # keep prev values
+    self._has_slowness_prev = self._has_slowness
+    self._has_standstill_filtered_prev = self._has_standstill_filtered
+    self._has_slow_down_prev = self._has_slow_down
+    self._has_lead_filtered_prev = self._has_lead_filtered
+
+  def _blended_priority_mode(self):
+    if self._has_blinkers and self._v_ego_kph < 60:
+      self._mode = 'blended'
       return
 
-    else:
-      # prevent switching in a short period of time.
-      if self._mode == mode:
-        self.dp_e2e_swap_count = 0
-      else:
-        self.dp_e2e_swap_count += 1
+    if self._has_standstill:
+      self._mode = 'blended'
+      return
 
-      if self.dp_e2e_swap_count >= _DP_E2E_SWAP_COUNT:
-        self._mode = mode
+    if self._has_slow_down:
+      self._mode = 'blended'
+      return
 
-  def _process_conditional_e2e(self, radar_unavailable, car_state, lead_one, md):
-    v_ego_kph = car_state.vEgo * 3.6
+    if self._has_dangerous_ttc:
+      self._mode = 'blended'
+      return
 
-    # make sure it see lead enough time
-    if lead_one.status != self.dp_e2e_lead_last:
-      self.dp_e2e_lead_count = 0
-    else:
-      self.dp_e2e_lead_count += 1
-      if self.dp_e2e_lead_count >= _DP_E2E_LEAD_COUNT:
-        self.dp_e2e_has_lead = lead_one.status
-    self.dp_e2e_lead_last = lead_one.status
+    if self._has_slowness:
+      self._mode = 'acc'
+      return
 
-    # when standstill, always e2e
-    if car_state.standstill:
-      self.dp_e2e_sng_count = 0
-      self.dp_e2e_sng = False
-      return self._set_dp_e2e_mode('blended')
+    self._mode = 'blended'
 
-    if self.dp_e2e_standstill_last and not car_state.standstill:
-      self.dp_e2e_sng = True
+  def _acc_priority_mode(self):
+    if self._has_lead_filtered:
+      self._mode = 'acc'
+      return
 
-    # when sng, we e2e for 0.5 secs
-    if self.dp_e2e_sng:
-      self.dp_e2e_sng_count += 1
-      if self.dp_e2e_sng_count > _DP_E2E_SNG_COUNT:
-        if self.dp_e2e_sng_count > _DP_E2E_SNG_ACC_COUNT:
-          self.dp_e2e_sng = False
-        return self._set_dp_e2e_mode('acc', True)
-      return self._set_dp_e2e_mode('blended')
+    if self._has_blinkers:
+      self._mode = 'blended'
+      return
 
-    # when we see a lead
-    # voacc cars only
-    if radar_unavailable and self.dp_e2e_has_lead:
-      # 1.35 = mean of 1.45 (standard) + 1.25 (aggressive)
-      if lead_one.dRel <= car_state.vEgo * 1.33:
-        self.dp_e2e_tf_count += 1
-      else:
-        self.dp_e2e_tf_count = 0
-      if self.dp_e2e_tf_count > _DP_E2E_TF_COUNT:
-        return self._set_dp_e2e_mode('blended', True)
+    if self._has_standstill:
+      self._mode = 'blended'
+      return
 
-    # slow/stop detection
-    if len(md.orientation.x) == len(md.position.x) == TRAJECTORY_SIZE and md.position.x[TRAJECTORY_SIZE - 1] < interp(v_ego_kph, _DP_E2E_STOP_BP, _DP_E2E_STOP_DIST):
-      self.dp_e2e_stop_count += 1
-    else:
-      self.dp_e2e_stop_count = 0
+    if self._has_slow_down:
+      self._mode = 'blended'
+      return
 
-    if self.dp_e2e_stop_count >= _DP_E2E_STOP_COUNT:
-      return self._set_dp_e2e_mode('blended', True)
+    if self._has_slowness:
+      self._mode = 'acc'
+      return
 
-    return self._set_dp_e2e_mode('acc')
+    self._mode = 'acc'
 
-  def get_mpc_mode(self, mode, radar_unavailable, car_state, lead_one, md):
-    self._mode = mode
+  def get_mpc_mode(self, radar_unavailable, car_state, lead_one, md, controls_state):
     if self._is_enabled:
-      self._process_conditional_e2e(radar_unavailable, car_state, lead_one, md)
+      self._update(car_state, lead_one, md, controls_state, radar_unavailable)
+      if radar_unavailable:
+        self._blended_priority_mode()
+      else:
+        self._acc_priority_mode()
 
     return self._mode
 
