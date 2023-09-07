@@ -156,6 +156,8 @@ class OtisApi:
     self._last_event = None
     self._last_event_prev = None
     self._is_offline = False
+    self._language = None
+    self._language_prev = None
 
     # use threads for these process
     self._snapshot_thread = None
@@ -167,24 +169,24 @@ class OtisApi:
     self._frame += 1
 
   def _set_variables(self):
-    if not PC and self._frame % (9. if self._is_offline else 3.) == 0:
-      self._is_offroad = self._params.get_bool("IsOffroad")
-
-    if self._frame % (9. if self._is_offroad else 3.) != 0:
+    if self._frame % 3 != 0:
       self._allow_sync = False
-      return
 
-    if self._frame % 3 == 0:
-      if self._device_id is None:
-        self._register()
-      if self._username is None:
-        self._set_username()
+    if not PC:
+      if self._frame % 3 == 0:
+        self._is_offroad = self._params.get_bool("IsOffroad")
 
-    if self._device_id is not None and self._username is not None:
+    if self._frame % 3 == 0 and self._device_id is None:
+      self._register()
+
+    if self._frame % 3 == 0 and self._username is None:
+      self._set_username()
+
+    if self._frame % 3 == 0 and self._language is None:
+      self._set_language()
+
+    if self._frame % 3 == 0 and self._device_id is not None and self._username is not None:
       self._allow_sync = True
-      return
-
-    self._allow_sync = False
 
   def _get_mapbox_token(self):
     if os.path.isfile(f"/data/media/0/{MAPBOX_TOKEN_PARAM}"):
@@ -198,6 +200,14 @@ class OtisApi:
 
   def _has_device_id(self):
     return os.path.isfile(f"{PERSIST}/{DP_DEVICE_ID}")
+
+  def _set_language(self):
+    self._language = self._params.get('LanguageSetting', encoding='utf8')
+    self._language = self._language.replace('main_', '')
+    if self._language == "zh-CHT":
+      self._language = "zh-TW"
+    elif self._language == "zh-CHS":
+      self._language = "zh-CN"
 
   def _get_device_name(self):
     if PC:
@@ -352,22 +362,22 @@ class OtisApi:
       req = request.Request(url, data=data, headers=HEADERS, method=method)
       resp = request.urlopen(req, timeout=timeout)
       response = resp.read().decode('utf-8')
-      json_object = None if response in ['{}', '[]', ''] else json.loads(response)
+      json_object = json.loads('{}') if response == '' else json.loads(response)
       self._is_offline = False
       return resp.status, json_object
     except error.HTTPError as e:
       if e.code == 500:
         self._allow_sync = False
         self._is_offline = True
-      _debug(f"[otisserv] error.HTTPError: {e.code}: {e.reason}")
-      return e.code, e.reason
+      # _debug(f"[otisserv] error.HTTPError: {e.code}: {e.reason}")
+      return e.code, json.loads('{ "message": "error.HTTPError" }')
     except Exception as e:
       # OSError: [Errno 101] Network is unreachable
       # urllib.error.URLError: <urlopen error [Errno 101] Network is unreachable>
       # socket.gaierror: [Errno 7] No address associated with hostname
       self._allow_sync = False
       self._is_offline = True
-      return 500, None
+      return 500, json.loads('{ "message": "Exception" }')
 
   def _get_status_params(self):
     token_payloads = {}
@@ -381,14 +391,16 @@ class OtisApi:
         token_payloads["longitude"] = longitude
 
     # update offroad/onroad status
-    if self._is_offroad != self._is_offroad_prev:
-      token_payloads["is_offroad"] = self._is_offroad
-    self._is_offroad_prev = self._is_offroad
+    token_payloads["is_offroad"] = self._is_offroad
 
     # only update username when there is a change
     if self._username != self._username_prev:
       token_payloads["username"] = self._username
     self._username_prev = self._username
+
+    if self._language != self._language_prev:
+      token_payloads["language"] = self._language
+    self._language_prev = self._language
 
     # only update name + device_type + origin if it's not been sent once
     if not self._device_name_sent and (device_name := self._get_device_name()) is not None:
@@ -439,15 +451,16 @@ class OtisApi:
 
     if self._last_updated_prev is None or self._last_updated != self._last_updated_prev:
       code, json_obj = self._send_request(main_id=self._device_id)
-      self._process_updates(json_obj)
+      if code < 300 and len(json_obj):
+        self._process_updates(json_obj)
+    self._last_updated_prev = self._last_updated
 
     if self._last_event_prev is None or self._last_event != self._last_event_prev:
       self._process_destination_non_blocking()
       self._process_snapshots_non_blocking()
-    _debug(f"[otisserv] sync() end: {code}")
-
-    self._last_updated_prev = self._last_updated
     self._last_event_prev = self._last_event
+
+    _debug(f"[otisserv] sync() end: {code}")
 
 def otisserv_thread():
   set_core_affinity([1,])
