@@ -218,7 +218,7 @@ DPCtrlPanel::DPCtrlPanel(QWidget *parent) : ListWidget(parent) {
       toggles[param.toStdString()] = toggle;
     }
   }
-  auto resetBtn = new ButtonControl(tr("Reset Configuration");
+  auto resetBtn = new ButtonControl(tr("Reset Configuration"));
   connect(resetBtn, &ButtonControl::clicked, [&]() {
     if (ConfirmationDialog::confirm(tr("Are you sure you want to reset all dp configurations?"), tr("Reset"), this)) {
       params.putBool("dp_reset_conf", true);
