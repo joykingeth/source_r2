@@ -53,8 +53,7 @@ generated_files = [
 acados_dir = '#third_party/acados'
 source_list = ['long_mpc.py',
   f'{acados_dir}/include/acados_c/ocp_nlp_interface.h',
-  f'{acados_dir}/earch64/lib/libacados.so',
-  f'{acados_dir}/x86_64/lib/libacados.so',
+  f'{acados_dir}/{arch}/lib/libacados.so',
 ]
 
 lenv = env.Clone()
