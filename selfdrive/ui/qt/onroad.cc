@@ -169,6 +169,27 @@ void OnroadWindow::offroadTransition(bool offroad) {
 void OnroadWindow::paintEvent(QPaintEvent *event) {
   QPainter p(this);
   p.fillRect(rect(), QColor(bg.red(), bg.green(), bg.blue(), 255));
+
+  // dp - draw brake
+  if (dp_brake_pressed) {
+    p.fillRect(
+      QRect(0, height() - UI_BORDER_SIZE, width(), 30),
+      QColor(0xff, 0, 0, 255)
+    );
+  }
+  // dp - draw indicators
+  if (dp_indicator_left_show) {
+    p.fillRect(
+      QRect(0, 0, width()*0.2, height()),
+      dp_indicator_left_color
+    );
+  }
+  if (dp_indicator_right_show) {
+    p.fillRect(
+      QRect(width()*0.8, 0, width()*0.2, height()),
+      dp_indicator_right_color
+    );
+  }
 }
 
 // ***** onroad widgets *****
