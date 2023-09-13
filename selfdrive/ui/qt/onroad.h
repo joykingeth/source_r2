@@ -166,6 +166,7 @@ private:
   QHBoxLayout* split;
   bool dp_alka = false;
   // dp indicators
+  bool dp_brake_pressed = false;
   bool dp_blinker_left = false;
   bool dp_blinker_right = false;
   bool dp_bsm_left = false;

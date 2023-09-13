@@ -108,6 +108,7 @@ void OnroadWindow::updateState(const UIState &s) {
 
   // dp blinker & bsm
   auto cs = (*s.sm)["carState"].getCarState();
+  dp_brake_pressed = cs.getBrakePressed();
   dp_blinker_left = cs.getLeftBlinker();
   dp_blinker_right = cs.getRightBlinker();
   dp_bsm_left = cs.getLeftBlindspot();
@@ -119,7 +120,7 @@ void OnroadWindow::updateState(const UIState &s) {
   // right
   updateIndicatorState(dp_blinker_right, dp_bsm_right, dp_indicator_right_show, dp_indicator_right_count, dp_indicator_right_color);
 
-  bool dp_repaint = dp_indicator_left_show || dp_indicator_right_show;
+  bool dp_repaint = dp_indicator_left_show || dp_indicator_right_show || dp_brake_pressed;
 
   // repaint border
   if (bg != bgColor || dp_repaint || dp_repaint != dp_repaint_prev) {
