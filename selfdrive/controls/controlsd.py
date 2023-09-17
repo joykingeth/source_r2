@@ -603,7 +603,7 @@ class Controls:
     # Check if openpilot is engaged and actuators are enabled
     self.enabled = self.state in ENABLED_STATES
     self.active = self.state in ACTIVE_STATES
-    if self.active or self._dp_alka_active:
+    if self.active or (self._dp_alka and self._dp_alka_active):
       self.current_alert_types.append(ET.WARNING)
 
   def state_control(self, CS):
@@ -634,7 +634,7 @@ class Controls:
                    (not standstill or self.joystick_mode)
     CC.longActive = self.enabled and not self.events.contains(ET.OVERRIDE_LONGITUDINAL) and self.CP.openpilotLongitudinalControl
 
-    if self._dp_alka_active and not standstill and CS.cruiseState.available:
+    if (self._dp_alka and self._dp_alka_active) and not standstill and CS.cruiseState.available:
       if self.sm['liveCalibration'].calStatus != log.LiveCalibrationData.Status.calibrated:
         pass
       elif CS.steerFaultTemporary or CS.steerFaultPermanent:
@@ -871,7 +871,7 @@ class Controls:
     dat = messaging.new_message('controlsStateExt')
     dat.valid = CS.canValid
     controlsStateExt = dat.controlsStateExt
-    controlsStateExt.alkaActive = CC.latActive and self._dp_alka_active
+    controlsStateExt.alkaActive = CC.latActive and (self._dp_alka and self._dp_alka_active)
     self.pm.send('controlsStateExt', dat)
 
     # carState
