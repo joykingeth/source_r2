@@ -59,7 +59,7 @@ DPCtrlPanel::DPCtrlPanel(QWidget *parent) : ListWidget(parent) {
     {
       "dp_mapd",
       tr("Enable MapD"),
-      tr("When enabled, openpilot will display current road name and speed limit on the screen.\nReboot required."),
+      tr("When enabled, openpilot will display current road name and speed limit on the screen.\nNote: YOUR DRIVING ROUTE DATA WILL BE UPLOADED to openstreetmap server to help to improve map accuracy.\nReboot required."),
     },
 //    {
 //      "SpeedLimitControl",
