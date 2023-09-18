@@ -43,7 +43,7 @@ class LateralPlanner:
     self.LP = LanePlanner()
     # dp // mapd - for vision turn controller
     self._d_path_w_lines_xyz = np.zeros((TRAJECTORY_SIZE, 3))
-    self._dp_lat_lane_priority_mode_speed_based = int(self.params.get("self.dp_lat_lane_priority_mode_speed_based", encoding="utf-8")) if self._dp_lat_lane_priority_mode else 0
+    self._dp_lat_lane_priority_mode_speed_based = int(self.params.get("dp_lat_lane_priority_mode_speed_based", encoding="utf-8")) if self._dp_lat_lane_priority_mode else 0
     self.param_read_counter = 0
 
     # Vehicle model parameters used to calculate lateral movement of car
