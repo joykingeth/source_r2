@@ -871,7 +871,8 @@ class Controls:
     dat = messaging.new_message('controlsStateExt')
     dat.valid = CS.canValid
     controlsStateExt = dat.controlsStateExt
-    controlsStateExt.alkaActive = CC.latActive and (self._dp_alka and self._dp_alka_active)
+    controlsStateExt.alkaActive = self._dp_alka_active
+    controlsStateExt.alkaEnabled = self._dp_alka
     self.pm.send('controlsStateExt', dat)
 
     # carState

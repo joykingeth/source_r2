@@ -21,6 +21,10 @@ DANGEROUS_TTC = 1.55
 HIGHWAY_CRUISE_KPH = 75
 
 STOP_AND_GO_FRAME = 500
+
+MODE_SWITCH_DELAY_FRAME = 500
+
+
 class SNG_State:
   off = 0
   stopped = 1
@@ -53,6 +57,10 @@ class DynamicEndtoEndController:
   def __init__(self):
     self._is_enabled = False
     self._mode = 'acc'
+    self._mode_prev = 'acc'
+    self._mode_switch_allowed = True
+    self._mode_switch_frame = 0
+    self._frame = 0
 
     self._lead_gmac = GenericMovingAverageCalculator(window_size=LEAD_WINDOW_SIZE)
     self._has_lead_filtered = False
@@ -143,6 +151,7 @@ class DynamicEndtoEndController:
     self._has_slowness_prev = self._has_slowness
     self._has_slow_down_prev = self._has_slow_down
     self._has_lead_filtered_prev = self._has_lead_filtered
+    self._frame += 1
 
   def _blended_priority_mode(self):
     # when blinker is on and speed is driving below highway cruise speed: blended
@@ -209,11 +218,14 @@ class DynamicEndtoEndController:
   def get_mpc_mode(self, radar_unavailable, car_state, lead_one, md, controls_state):
     if self._is_enabled:
       self._update(car_state, lead_one, md, controls_state, radar_unavailable)
+      if self._frame > self._mode_switch_frame:
+        self._mode_switch_allowed = True
       if radar_unavailable:
         self._blended_priority_mode()
       else:
         self._acc_priority_mode()
 
+    self._mode_prev = self._mode
     return self._mode
 
   def set_enabled(self, enabled):
