@@ -245,7 +245,9 @@ static void update_state(UIState *s) {
   }
   #endif
   scene.started = sm["deviceState"].getDeviceState().getStarted() && scene.ignition;
+  scene.lat_active = sm["carControl"].getCarControl().getLatActive();
   scene.alka_active = sm["controlsStateExt"].getControlsStateExt().getAlkaActive();
+  scene.alka_enabled = sm["controlsStateExt"].getControlsStateExt().getAlkaEnabled();
 }
 
 void ui_update_params(UIState *s) {
@@ -284,7 +286,7 @@ UIState::UIState(QObject *parent) : QObject(parent) {
     // legacy - eon/c2, for touch
     "sensorEvents",
     // dp - for alka detection
-    "controlsStateExt",
+    "carControl", "controlsStateExt",
     // dp - for mapd
     "liveMapData",
     // dp - for lane priority mode
