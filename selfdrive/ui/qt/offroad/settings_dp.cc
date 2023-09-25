@@ -47,6 +47,11 @@ DPCtrlPanel::DPCtrlPanel(QWidget *parent) : ListWidget(parent) {
       tr("When enabled, openpilot will dynamically adjust following distance based on your \"Driving Personality\" setting.")
     },
     {
+      "dp_long_use_krkeegen_tune",
+      tr("Enable krkeegan Tune (SNG Boost)"),
+      tr("When enabled, it will apply an offset to get_stopped_equivalence_factor in longitudinal MPC resulting in an early demand for acceleration.\nCredit to krkeegen: https://github.com/krkeegan/")
+    },
+    {
       "dp_long_de2e",
       tr("Enable Dynamic End-to-End Longitudinal Control"),
       tr("When enabled, openpilot will dynamically change between End-to-End or ACC mode.\nYour vehicle must support openpilot longitudinal control.")
