@@ -93,7 +93,7 @@ void OnroadWindow::updateState(const UIState &s) {
     return;
   }
 
-  QColor bgColor = bg_colors[s.scene.alka_enabled && s.scene.alka_active && s.scene.lat_active && s.status == STATUS_DISENGAGED? STATUS_ALKA : s.status];
+  QColor bgColor = bg_colors[s.scene.lat_active && s.scene.alka_active && s.status == STATUS_DISENGAGED? STATUS_ALKA : s.status];
   Alert alert = Alert::get(*(s.sm), s.scene.started_frame);
   alerts->updateAlert(alert);
 
