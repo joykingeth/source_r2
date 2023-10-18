@@ -165,6 +165,8 @@ typedef struct UIScene {
   bool lat_active = false;
   bool alka_active = false;
   bool alka_enabled = false;
+
+  float dpAccel = 0.0;
   bool dp_long_personality_btn = false;
   bool dp_long_accel_btn = false;
 } UIScene;

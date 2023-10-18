@@ -183,6 +183,9 @@ protected:
   double prev_draw_t = 0;
   FirstOrderFilter fps_filter;
   const int radius = 192;
+
+  //dp
+  void drawKnightScanner(QPainter &p);
 };
 
 // container for all onroad widgets

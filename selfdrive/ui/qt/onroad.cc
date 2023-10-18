@@ -812,8 +812,29 @@ void AnnotatedCameraWidget::drawLaneLines(QPainter &painter, const UIState *s) {
 
   painter.setBrush(bg);
   painter.drawPolygon(scene.track_vertices);
+  drawKnightScanner(painter);
 
   painter.restore();
+}
+
+void AnnotatedCameraWidget::drawKnightScanner(QPainter &painter) {
+    UIState *s = uiState();
+    int widgetHeight = rect().height();
+    float halfHeightAbs = std::abs(s->scene.dpAccel) * widgetHeight;
+    const float scannerWidth = 15;
+    QRect scannerRect;
+
+    if (s->scene.dpAccel > 0) {
+        painter.setBrush(QColor(0, 245, 0, 200));
+        // Move scanner to the left side
+        scannerRect = QRect(0, widgetHeight / 2 - halfHeightAbs / 2, scannerWidth, halfHeightAbs / 2);
+    } else {
+        painter.setBrush(QColor(245, 0, 0, 200));
+        // Move scanner to the left side
+        scannerRect = QRect(0, widgetHeight / 2, scannerWidth, halfHeightAbs / 2);
+    }
+
+    painter.drawRect(scannerRect);
 }
 
 #ifndef QCOM

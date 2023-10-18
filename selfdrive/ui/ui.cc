@@ -248,6 +248,14 @@ static void update_state(UIState *s) {
   scene.lat_active = sm["carControl"].getCarControl().getLatActive();
   scene.alka_active = sm["controlsStateExt"].getControlsStateExt().getAlkaActive();
   scene.alka_enabled = sm["controlsStateExt"].getControlsStateExt().getAlkaEnabled();
+  if (scene.started && sm.updated("carControl")) {
+    auto car_control = sm["carControl"].getCarControl();
+    if (car_control.getLongActive()) {
+      scene.dpAccel = car_control.getActuatorsOutput().getAccel();
+    } else {
+      scene.dpAccel = 0.0;
+    }
+  }
 }
 
 void ui_update_params(UIState *s) {
