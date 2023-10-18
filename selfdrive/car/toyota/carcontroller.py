@@ -32,6 +32,22 @@ UNLOCK_CMD = b'\x40\x05\x30\x11\x00\x40\x00\x00'
 LOCK_CMD = b'\x40\x05\x30\x11\x00\x80\x00\x00'
 LOCK_AT_SPEED = 10 * CV.KPH_TO_MS
 
+# Blindspot codes
+LEFT_BLINDSPOT = b'\x41'
+RIGHT_BLINDSPOT = b'\x42'
+
+def set_blindspot_debug_mode(lr,enable):
+  if enable:
+    m = lr + b'\x02\x10\x60\x00\x00\x00\x00'
+  else:
+    m = lr + b'\x02\x10\x01\x00\x00\x00\x00'
+  return make_can_msg(0x750, m, 0)
+
+
+def poll_blindspot_status(lr):
+  m = lr + b'\x02\x21\x69\x00\x00\x00\x00'
+  return make_can_msg(0x750, m, 0)
+
 class CarController:
   def __init__(self, dbc_name, CP, VM):
     self.CP = CP

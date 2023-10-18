@@ -44,6 +44,19 @@ class CarState(CarStateBase):
     self.acc_type = 1
     self.lkas_hud = {}
 
+    # bsm
+    self.dp_toyota_enhanced_bsm = params.get_bool('dp_toyota_enhanced_bsm')
+    self._left_blindspot = False
+    self._left_blindspot_d1 = 0
+    self._left_blindspot_d2 = 0
+    self._left_blindspot_counter = 0
+
+    self._right_blindspot = False
+    self._right_blindspot_d1 = 0
+    self._right_blindspot_d2 = 0
+    self._right_blindspot_counter = 0
+
+
   def update(self, cp, cp_cam):
     ret = car.CarState.new_message()
 
