@@ -254,6 +254,8 @@ void ui_update_params(UIState *s) {
   auto params = Params();
   s->scene.is_metric = params.getBool("IsMetric");
   s->scene.map_on_left = params.getBool("NavSettingLeftSide");
+  s->scene.dp_long_personality_btn = params.getBool("dp_long_personality_btn");
+  s->scene.dp_long_accel_btn = params.getBool("dp_long_accel_btn");
 }
 
 void UIState::updateStatus() {

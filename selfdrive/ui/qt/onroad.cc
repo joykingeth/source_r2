@@ -311,6 +311,139 @@ void MapSettingsButton::paintEvent(QPaintEvent *event) {
   drawIcon(p, QPoint(btn_size / 2, btn_size / 2), settings_img, QColor(0, 0, 0, 166), isDown() ? 0.6 : 1.0);
 }
 
+static void drawOnScreenButton(QPainter &p, const QPoint &center, const QBrush &bg, float opacity, QString main, QString bottom, QString top) {
+  p.setRenderHint(QPainter::Antialiasing);
+  p.setOpacity(0.65);  // bg dictates opacity of ellipse
+  p.setPen(Qt::NoPen);
+  p.setBrush(bg);
+  p.drawEllipse(center, btn_size / 2, btn_size / 2);
+  p.setOpacity(opacity);
+
+  p.setFont(InterFont(32, QFont::DemiBold));
+  p.setPen(Qt::white);
+
+  // Calculate the bounding rectangle for the text
+  QRect textRect(center.x() - btn_size / 2, center.y() - btn_size * 0.45, btn_size, btn_size);
+
+  // Draw the main text in the center of the button
+  p.drawText(textRect, Qt::AlignCenter, main);
+
+  // Optionally, draw subtext below the main text
+  if (!bottom.isEmpty()) {
+    p.setFont(InterFont(20, QFont::DemiBold));
+    p.setPen(Qt::white);
+
+    QRect bottomTextRect(center.x() - btn_size / 2, center.y() - btn_size * 0.2, btn_size, btn_size);
+    p.drawText(bottomTextRect, Qt::AlignCenter, bottom);
+  }
+
+  if (!top.isEmpty()) {
+    p.setFont(InterFont(56, QFont::DemiBold));
+    p.setPen(Qt::white);
+
+   QRect topTextRect(center.x() - btn_size / 2, center.y() - btn_size * 0.7, btn_size, btn_size);
+    p.drawText(topTextRect, Qt::AlignCenter, top);
+  }
+
+  p.setOpacity(1.0);
+}
+
+PersonalityButton::PersonalityButton(QWidget *parent) : QPushButton(parent) {
+  setFixedSize(btn_size, btn_size);
+  setVisible(false);
+
+  val = std::atoi(Params().get("LongitudinalPersonality").c_str());
+  updateText();
+  QObject::connect(this, &QPushButton::clicked, this, &PersonalityButton::changeMode);
+}
+
+void PersonalityButton::changeMode() {
+  val += 1;
+  val = val > VAL_MAX ? VAL_MIN : val;
+  updateText();
+  Params().put("LongitudinalPersonality", std::to_string(val));
+}
+
+void PersonalityButton::updateState(const UIState &s) {
+  const auto cp = (*uiState()->sm)["carParams"].getCarParams();
+  bool available = cp.getOpenpilotLongitudinalControl() && s.scene.dp_long_personality_btn;
+  setVisible(available);
+  if (available) {
+    update();
+  }
+}
+
+void PersonalityButton::updateText() {
+  switch (val) {
+    case 0:
+      top = "A";
+      main = tr("Aggressive");
+      return;
+    case 1:
+      top = "S";
+      main = tr("Standard");
+      return;
+    case 2:
+      top = "R";
+      main = tr("Relaxed");
+      return;
+  }
+}
+
+void PersonalityButton::paintEvent(QPaintEvent *event) {
+  QPainter p(this);
+  drawOnScreenButton(p, QPoint(btn_size / 2, btn_size / 2), QColor(0, 0, 0, 166), isDown() ? 0.6 : 1.0, main, "PERSNLY", top);
+}
+
+AccelButton::AccelButton(QWidget *parent) : QPushButton(parent) {
+  setFixedSize(btn_size, btn_size);
+  setVisible(false);
+
+  val = std::atoi(Params().get("dp_long_accel_profile").c_str());
+  updateText();
+  QObject::connect(this, &QPushButton::clicked, this, &AccelButton::changeMode);
+}
+
+void AccelButton::changeMode() {
+  val += 1;
+  val = val > VAL_MAX ? VAL_MIN : val;
+  Params().put("dp_long_accel_profile", std::to_string(val));
+  updateText();
+}
+
+void AccelButton::updateState(const UIState &s) {
+  const auto cp = (*uiState()->sm)["carParams"].getCarParams();
+  bool available = cp.getOpenpilotLongitudinalControl() && s.scene.dp_long_accel_btn;
+  setVisible(available);
+  if (available) {
+    update();
+  }
+}
+
+void AccelButton::updateText() {
+  switch (val) {
+    case 0:
+      top = "O";
+      main = tr("OP");
+      return;
+    case 1:
+      top = "E";
+      main = tr("ECO");
+      return;
+    case 2:
+      top = "N";
+      main = tr("NOR");
+      return;
+    default:
+      top = "S";
+      main = tr("SPT");
+  }
+}
+
+void AccelButton::paintEvent(QPaintEvent *event) {
+  QPainter p(this);
+  drawOnScreenButton(p, QPoint(btn_size / 2, btn_size / 2), QColor(0, 0, 0, 166), isDown() ? 0.6 : 1.0, main, "ACCEL", top);
+}
 
 // Window that shows camera view and variety of info drawn on top
 AnnotatedCameraWidget::AnnotatedCameraWidget(VisionStreamType type, QWidget* parent) : fps_filter(UI_FREQ, 3, 1. / UI_FREQ), CameraWidget("camerad", type, true, parent) {
@@ -322,6 +455,25 @@ AnnotatedCameraWidget::AnnotatedCameraWidget(VisionStreamType type, QWidget* par
 
   experimental_btn = new ExperimentalButton(this);
   main_layout->addWidget(experimental_btn, 0, Qt::AlignTop | Qt::AlignRight);
+
+  // Create a spacer item to push the following layout to the bottom
+  QSpacerItem* vSpacer = new QSpacerItem(1, 1, QSizePolicy::Minimum, QSizePolicy::Expanding);
+  main_layout->addSpacerItem(vSpacer);
+
+  // Create a horizontal layout for map_settings_btn, accel_btn, and personality_btn
+  QHBoxLayout* horizontalLayout = new QHBoxLayout();
+
+  // Add the spacer item to push the buttons to the right
+  QSpacerItem* hSpacer = new QSpacerItem(1, 1, QSizePolicy::Expanding);
+  horizontalLayout->addItem(hSpacer);
+
+  accel_btn = new AccelButton(this);
+  horizontalLayout->addWidget(accel_btn);
+  horizontalLayout->addSpacing(UI_BORDER_SIZE);
+
+  personality_btn = new PersonalityButton(this);
+  horizontalLayout->addWidget(personality_btn);
+  horizontalLayout->addSpacing(UI_BORDER_SIZE);
 
   map_settings_btn = new MapSettingsButton(this);
   main_layout->addWidget(map_settings_btn, 0, Qt::AlignBottom | Qt::AlignRight);
@@ -390,6 +542,8 @@ void AnnotatedCameraWidget::updateState(const UIState &s) {
 
   // update engageability/experimental mode button
   experimental_btn->updateState(s);
+  accel_btn->updateState(s);
+  personality_btn->updateState(s);
 
   #ifndef QCOM
   // update DM icon

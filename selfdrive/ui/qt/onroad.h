@@ -52,6 +52,45 @@ private:
   bool engageable;
 };
 
+class PersonalityButton : public QPushButton {
+  Q_OBJECT
+  const int VAL_MIN = 0;
+  const int VAL_MAX = 2;
+
+public:
+  explicit PersonalityButton(QWidget *parent = 0);
+  void updateState(const UIState &s);
+  void updateText();
+
+private:
+  void paintEvent(QPaintEvent *event) override;
+  void changeMode();
+
+  Params params;
+  QString main;
+  QString top;
+  int val;
+};
+
+class AccelButton : public QPushButton {
+  Q_OBJECT
+  const int VAL_MIN = 0;
+  const int VAL_MAX = 3;
+
+public:
+  explicit AccelButton(QWidget *parent = 0);
+  void updateState(const UIState &s);
+
+private:
+  void paintEvent(QPaintEvent *event) override;
+  void changeMode();
+  void updateText();
+
+  Params params;
+  QString main;
+  QString top;
+  int val;
+};
 
 class MapSettingsButton : public QPushButton {
   Q_OBJECT
@@ -122,6 +161,8 @@ private:
   bool dp_device_no_ir_ctrl_checked = false;
   bool use_lanelines = false;
   bool speed_limit_valid = false;
+  AccelButton *accel_btn;
+  PersonalityButton *personality_btn;
 
 protected:
   void paintGL() override;
