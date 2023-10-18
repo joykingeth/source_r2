@@ -20,6 +20,29 @@ from openpilot.system.swaglog import cloudlog
 WATCHDOG_FN = "/dev/shm/wd_"
 ENABLE_WATCHDOG = os.getenv("NO_WATCHDOG") is None
 
+def mapd_is_enabled():
+  try:
+    return Params().get_bool("dp_mapd")
+  except Exception:
+    return False
+
+def scipy_is_valid():
+  try:
+    import scipy
+    return True
+  except (ImportError, AttributeError) as e:
+    return False
+
+
+def overpy_is_valid():
+  try:
+    import overpy
+    return True
+  except (ImportError, AttributeError) as e:
+    return False
+
+MAPD_ACTIVATED = mapd_is_enabled() and scipy_is_valid() and overpy_is_valid()
+
 
 def launcher(proc: str, name: str) -> None:
   try:
@@ -217,6 +240,8 @@ class PythonProcess(ManagerProcess):
 
   def prepare(self) -> None:
     if self.enabled:
+      if self.module == "selfdrive.mapd.mapd" and not MAPD_ACTIVATED:
+        return
       cloudlog.info(f"preimporting {self.module}")
       importlib.import_module(self.module)
 

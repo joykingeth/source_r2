@@ -508,6 +508,3 @@ if (arch in ['x86_64', 'aarch64', 'Darwin'] and Dir('#tools/cabana/').exists()) 
 external_sconscript = GetOption('external_sconscript')
 if external_sconscript:
   SConscript([external_sconscript])
-
-SConscript(['selfdrive/controls/lib/legacy_lateral_mpc_lib/SConscript'])
-SConscript(['selfdrive/controls/lib/legacy_longitudinal_mpc_lib/SConscript'])

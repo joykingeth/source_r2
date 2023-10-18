@@ -85,3 +85,6 @@ class Pc(HardwareBase):
 
   def get_networks(self):
     return None
+
+  def get_usb_present(self):
+    return False

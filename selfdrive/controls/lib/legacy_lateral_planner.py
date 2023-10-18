@@ -80,7 +80,6 @@ class LateralPlanner:
 
     use_laneline = False
     # dp - check laneline prob when priority is on
-    use_laneline = False
     if self._dp_lat_lane_priority_mode:
       self._update_laneless_laneline_mode()
       use_laneline = self._dp_lat_lane_priority_mode_active

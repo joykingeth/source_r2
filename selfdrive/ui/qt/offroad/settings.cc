@@ -420,7 +420,6 @@ void DevicePanel::poweroff() {
   }
 }
 
-#ifdef QCOM
 C2NetworkPanel::C2NetworkPanel(QWidget *parent) : QWidget(parent) {
   QVBoxLayout *layout = new QVBoxLayout(this);
 //  layout->setContentsMargins(50, 0, 50, 0);
@@ -467,7 +466,6 @@ QString C2NetworkPanel::getIPAddress() {
 
   return result.substr(begin, end - begin).c_str();
 }
-#endif
 
 void SettingsWindow::showEvent(QShowEvent *event) {
   setCurrentPanel(0);

@@ -191,9 +191,9 @@ class LocKalman():
 
     # Observation matrix modifier
     H_mod_sym = sp.Matrix(np.zeros((dim_state, dim_state_err)))
-    for p_idx, p_err_idx in zip(p_idxs, p_err_idxs\):
+    for p_idx, p_err_idx in zip(p_idxs, p_err_idxs):
       H_mod_sym[p_idx[0]:p_idx[1], p_err_idx[0]:p_err_idx[1]] = np.eye(p_idx[1] - p_idx[0])
-    for q_idx, q_err_idx in zip(q_idxs, q_err_idxs\):
+    for q_idx, q_err_idx in zip(q_idxs, q_err_idxs):
       H_mod_sym[q_idx[0]:q_idx[1], q_err_idx[0]:q_err_idx[1]] = 0.5 * quat_matrix_r(state[q_idx[0]:q_idx[1]])[:, 1:]
 
     # these error functions are defined so that say there
