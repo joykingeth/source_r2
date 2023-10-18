@@ -11,10 +11,11 @@ from openpilot.common.realtime import DT_MDL
 from openpilot.selfdrive.legacy_modeld.constants import T_IDXS
 from openpilot.common.conversions import Conversions as CV
 from openpilot.selfdrive.controls.lib.longcontrol import LongCtrlState
-from openpilot.selfdrive.controls.lib.legacy_longitudinal_mpc_lib.long_mpc import LongitudinalMpc, STOP_DISTANCE
+from openpilot.selfdrive.controls.lib.legacy_longitudinal_mpc_lib.long_mpc import LongitudinalMpc
 from openpilot.selfdrive.controls.lib.legacy_longitudinal_mpc_lib.long_mpc import T_IDXS as T_IDXS_MPC
 from openpilot.selfdrive.controls.lib.drive_helpers import V_CRUISE_MAX, CONTROL_N
 from openpilot.system.swaglog import cloudlog
+from openpilot.selfdrive.controls.lib.legacy_longitudinal_mpc_lib.long_mpc import STOP_DISTANCE
 from openpilot.selfdrive.controls.lib.vision_turn_controller import VisionTurnController
 from openpilot.selfdrive.controls.lib.accel_controller import AccelController
 
@@ -81,9 +82,9 @@ class LongitudinalPlanner:
     if self.param_read_counter % 50 == 0:
       self.read_param()
 
-      if self.param_read_counter % 300 == 0:
-        self.accel_controller.set_profile(self.params.get("dp_long_accel_profile", encoding='utf-8'))
-        self.vision_turn_controller.set_enabled(self.params.get_bool("dp_mapd_vision_turn_control"))
+    if self.param_read_counter % 300 == 0:
+      self.accel_controller.set_profile(self.params.get("dp_long_accel_profile", encoding='utf-8'))
+      self.vision_turn_controller.set_enabled(self.params.get_bool("dp_mapd_vision_turn_control"))
 
     self.param_read_counter += 1
     v_ego = sm['carState'].vEgo

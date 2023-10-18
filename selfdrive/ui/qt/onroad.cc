@@ -105,7 +105,6 @@ void OnroadWindow::updateState(const UIState &s) {
 
   nvg->updateState(s);
 
-
   // dp blinker & bsm
   auto cs = (*s.sm)["carState"].getCarState();
   dp_brake_pressed = cs.getBrakePressed();
@@ -377,6 +376,7 @@ void AnnotatedCameraWidget::updateState(const UIState &s) {
   setProperty("speed", cur_speed);
   setProperty("setSpeed", set_speed);
   setProperty("speedUnit", s.scene.is_metric ? tr("km/h") : tr("mph"));
+//  setProperty("hideBottomIcons", (cs.getAlertSize() != cereal::ControlsState::AlertSize::NONE));
   if (!dp_device_no_ir_ctrl_checked) {
     dp_device_no_ir_ctrl_checked = true;
     dp_device_no_ir_ctrl = Params().getBool("dp_device_no_ir_ctrl");
