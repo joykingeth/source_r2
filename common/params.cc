@@ -242,6 +242,8 @@ std::unordered_map<std::string, uint32_t> keys = {
     {"dp_reset_conf", CLEAR_ON_MANAGER_START},
     {"dp_long_use_krkeegen_tune", PERSISTENT},
     {"dp_toyota_zss", PERSISTENT},
+    {"dp_long_accel_btn", PERSISTENT},
+    {"dp_long_personality_btn", PERSISTENT},
 };
 
 } // namespace
