@@ -879,7 +879,7 @@ void AnnotatedCameraWidget::drawDriverState(QPainter &painter, const UIState *s)
   painter.restore();
 }
 #endif
-void AnnotatedCameraWidget::drawLead(QPainter &painter, const cereal::RadarState::LeadData::Reader &lead_data, const QPointF &vd) {
+void AnnotatedCameraWidget::drawLead(QPainter &painter, const cereal::RadarState::LeadData::Reader &lead_data, const QPointF &vd, float v_ego) {
   painter.save();
 
   const float speedBuff = 10.;
@@ -911,6 +911,16 @@ void AnnotatedCameraWidget::drawLead(QPainter &painter, const cereal::RadarState
   QPointF chevron[] = {{x + (sz * 1.25), y + sz}, {x, y}, {x - (sz * 1.25), y + sz}};
   painter.setBrush(redColor(fillAlpha));
   painter.drawPolygon(chevron, std::size(chevron));
+
+  // DP: Chevron detailed info.
+  QString dist = is_metric? QString::number((v_rel + v_ego) * 3.6,'f', 0) + "kmh | " + QString::number(d_rel,'f',1) + "m" : QString::number((v_rel + v_ego) * 2.236936,'f', 0) + "mph | " + QString::number(d_rel*3.2808,'f',1) + "ft";
+  int str_w = 350;
+  painter.setFont(InterFont(42, QFont::Bold));
+  painter.setPen(QColor(0x0, 0x0, 0x0 , 200)); //Shadow
+  painter.drawText(QRect(x+4-(str_w/2), y+62, str_w, 50), Qt::AlignVCenter | Qt::AlignCenter, dist);
+  painter.setPen(QColor(0xff, 0xff, 0xff));
+  painter.drawText(QRect(x+2-(str_w/2), y+60, str_w, 50), Qt::AlignVCenter | Qt::AlignCenter, dist);
+  painter.setPen(Qt::NoPen);
 
   painter.restore();
 }
@@ -986,13 +996,15 @@ void AnnotatedCameraWidget::paintGL() {
     drawLaneLines(painter, s);
 
     if (s->scene.longitudinal_control) {
+      const cereal::CarState::Reader &car_state = sm["carState"].getCarState();
+      float v_ego = car_state.getVEgo();
       auto lead_one = radar_state.getLeadOne();
       auto lead_two = radar_state.getLeadTwo();
       if (lead_one.getStatus()) {
-        drawLead(painter, lead_one, s->scene.lead_vertices[0]);
+        drawLead(painter, lead_one, s->scene.lead_vertices[0], v_ego); //, 0, radar_state.getLeadOne().getDRel(), v_ego, radar_state.getLeadOne().getVRel(), s->scene.is_metric);
       }
       if (lead_two.getStatus() && (std::abs(lead_one.getDRel() - lead_two.getDRel()) > 3.0)) {
-        drawLead(painter, lead_two, s->scene.lead_vertices[1]);
+        drawLead(painter, lead_two, s->scene.lead_vertices[1], v_ego); //, 1, radar_state.getLeadOne().getDRel(), v_ego, radar_state.getLeadTwo().getVRel(), s->scene.is_metric);
       }
     }
   }
