@@ -55,6 +55,18 @@ class CarController:
     self.dp_toyota_auto_unlock = p.get_bool("dp_toyota_auto_unlock")
     self.dp_toyota_sng = p.get_bool("dp_toyota_sng")
 
+    # dp - bsm
+    self.dp_toyota_enhanced_bsm = p.get_bool("dp_toyota_enhanced_bsm")
+    self._blindspot_debug_enabled_left = False
+    self._blindspot_debug_enabled_right = False
+    self._blindspot_frame = 0
+    if self.CP.carFingerprint in TSS2_CAR: # tss2 can do higher hz then tss1 and can be on at all speed/standstill
+      self._blindspot_rate = 2
+      self._blindspot_always_on = True
+    else:
+      self._blindspot_rate = 20
+      self._blindspot_always_on = False
+
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
@@ -79,6 +91,45 @@ class CarController:
           can_sends.append(make_can_msg(0x750, LOCK_CMD, 0))
         self.dp_toyota_auto_lock_once = True
       self.dp_toyota_auto_lock_gear_prev = gear
+
+    # Enable blindspot debug mode once (@arne182)
+    # let's keep all the commented out code for easy debug purpose for future.
+    if self.dp_toyota_enhanced_bsm:
+      #if self.frame > 200:
+      #left bsm
+      if not self._blindspot_debug_enabled_left:
+        if (self._blindspot_always_on or (CS.out.leftBlinker and CS.out.vEgo > 6)): # eagle eye camera will stop working if right bsm is switched on under 6m/s
+          can_sends.append(set_blindspot_debug_mode(LEFT_BLINDSPOT, True))
+          self._blindspot_debug_enabled_left = True
+          # print("bsm debug left, on")
+      else:
+        if not self._blindspot_always_on and not CS.out.leftBlinker and self.frame - self._blindspot_frame > 50:
+          can_sends.append(set_blindspot_debug_mode(LEFT_BLINDSPOT, False))
+          self._blindspot_debug_enabled_left = False
+          # print("bsm debug left, off")
+        if self.frame % self._blindspot_rate == 0:
+          can_sends.append(poll_blindspot_status(LEFT_BLINDSPOT))
+          if CS.out.leftBlinker:
+            self._blindspot_frame = self.frame
+            # print(self._blindspot_frame)
+          # print("bsm poll left")
+      #right bsm
+      if not self._blindspot_debug_enabled_right:
+        if (self._blindspot_always_on or (CS.out.rightBlinker and CS.out.vEgo > 6)): # eagle eye camera will stop working if right bsm is switched on under 6m/s
+          can_sends.append(set_blindspot_debug_mode(RIGHT_BLINDSPOT, True))
+          self._blindspot_debug_enabled_right = True
+          # print("bsm debug right, on")
+      else:
+        if not self._blindspot_always_on and not CS.out.rightBlinker and self.frame - self._blindspot_frame > 50:
+          can_sends.append(set_blindspot_debug_mode(RIGHT_BLINDSPOT, False))
+          self._blindspot_debug_enabled_right = False
+          # print("bsm debug right, off")
+        if self.frame % self._blindspot_rate == self._blindspot_rate/2:
+          can_sends.append(poll_blindspot_status(RIGHT_BLINDSPOT))
+          if CS.out.rightBlinker:
+            self._blindspot_frame = self.frame
+            # print(self._blindspot_frame)
+          # print("bsm poll right")
 
     # *** steer torque ***
     new_steer = int(round(actuators.steer * self.params.STEER_MAX))

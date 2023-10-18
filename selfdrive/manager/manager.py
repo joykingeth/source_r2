@@ -59,6 +59,7 @@ def manager_init() -> None:
     ("dp_device_auto_shutdown", "0"),
     ("dp_device_auto_shutdown_in", "30"),
     ("dp_toyota_sng", "0"),
+    ("dp_toyota_enhanced_bsm", "0"),
     ("dp_toyota_auto_lock", "0"),
     ("dp_toyota_auto_unlock", "0"),
     ("dp_device_display_off_mode", "0"),

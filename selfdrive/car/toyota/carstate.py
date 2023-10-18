@@ -161,6 +161,50 @@ class CarState(CarStateBase):
     if self.CP.carFingerprint != CAR.PRIUS_V:
       self.lkas_hud = copy.copy(cp_cam.vl["LKAS_HUD"])
 
+    # Enable blindspot debug mode once (@arne182)
+    # let's keep all the commented out code for easy debug purpose for future.
+    if self.dp_toyota_enhanced_bsm and self.frame > 199: #self.CP.carFingerprint == CAR.PRIUS_TSS2: #not (self.CP.carFingerprint in TSS2_CAR or self.CP.carFingerprint == CAR.CAMRY or self.CP.carFingerprint == CAR.CAMRYH):
+      distance_1 = cp.vl["DEBUG"].get('BLINDSPOTD1')
+      distance_2 = cp.vl["DEBUG"].get('BLINDSPOTD2')
+      side = cp.vl["DEBUG"].get('BLINDSPOTSIDE')
+
+      if distance_1 is not None and distance_2 is not None and side is not None:
+        if side == 65: # Left blind spot
+          if distance_1 != self._left_blindspot_d1:
+            self._left_blindspot_d1 = distance_1
+            self._left_blindspot_counter = 100
+          if distance_2 != self._left_blindspot_d2:
+            self._left_blindspot_d2 = distance_2
+            self._left_blindspot_counter = 100
+          if self._left_blindspot_d1 > 10 or self._left_blindspot_d2 > 10:
+            self._left_blindspot = True
+        elif side == 66: # Right blind spot
+          if distance_1 != self._right_blindspot_d1:
+            self._right_blindspot_d1 = distance_1
+            self._right_blindspot_counter = 100
+          if distance_2 != self._right_blindspot_d2:
+            self._right_blindspot_d2 = distance_2
+            self._right_blindspot_counter = 100
+          if self._right_blindspot_d1 > 10 or self._right_blindspot_d2 > 10:
+            self._right_blindspot = True
+
+        if self._left_blindspot_counter > 0:
+          self._left_blindspot_counter -= 1
+        else:
+          self._left_blindspot = False
+          self._left_blindspot_d1 = 0
+          self._left_blindspot_d2 = 0
+
+        if self._right_blindspot_counter > 0:
+          self._right_blindspot_counter -= 1
+        else:
+          self._right_blindspot = False
+          self._right_blindspot_d1 = 0
+          self._right_blindspot_d2 = 0
+
+        ret.leftBlindspot = self._left_blindspot
+        ret.rightBlindspot = self._right_blindspot
+
     return ret
 
   @staticmethod
@@ -207,6 +251,10 @@ class CarState(CarStateBase):
       messages += [
         ("PRE_COLLISION", 33),
       ]
+
+    params = Params()
+    if params.get_bool('dp_toyota_enhanced_bsm'):
+      messages.append(("DEBUG", 65))
 
     return CANParser(DBC[CP.carFingerprint]["pt"], messages, 0)
 
