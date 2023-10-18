@@ -12,11 +12,6 @@ DPCtrlPanel::DPCtrlPanel(QWidget *parent) : ListWidget(parent) {
       "",
     },
     {
-      "dp_0813",
-      tr("Use 0.8.13.1 Driving Model"),
-      tr("When enabled, openpilot will use the good old 0.8.13.1 driving model.\nFor safety reason, vision only openpilot longitudinal will be disabled.\nReboot required."),
-    },
-    {
       "dp_car_dashcam_mode_removal",
       tr("Dashcam Mode Removal"),
       tr("If you see 'Dashcam Mode' while onroad, enable this will force enable openpilot control.\nDashcam Mode usually means your vehicle is not fully supported.\nUSE AT YOUR OWN RISK!\nReboot required."),
