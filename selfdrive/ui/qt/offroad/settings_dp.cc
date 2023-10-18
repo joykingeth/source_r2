@@ -2,9 +2,26 @@
 
 #include "common/params.h"
 #include "selfdrive/ui/ui.h"
+#include "selfdrive/ui/qt/util.h"
 
-DPCtrlPanel::DPCtrlPanel(QWidget *parent) : ListWidget(parent) {
-  // param, title, desc, icon, confirm
+void DPCtrlPanel::add_generic_toggles(std::vector<std::tuple<QString, QString, QString>> &toggle_defs) {
+  for (auto &[param, title, desc] : toggle_defs) {
+    if (param == "") {
+      auto label = new LabelControl(title, "");
+      addItem(label);
+      continue;
+    }
+    auto toggle = new ParamControl(param, title, desc, "", this);
+
+    bool locked = params.getBool((param + "Lock").toStdString());
+    toggle->setEnabled(!locked);
+
+    addItem(toggle);
+    toggles[param.toStdString()] = toggle;
+  }
+}
+
+void DPCtrlPanel::add_overall_toggles() {
   std::vector<std::tuple<QString, QString, QString>> toggle_defs{
     {
       "",
@@ -16,6 +33,25 @@ DPCtrlPanel::DPCtrlPanel(QWidget *parent) : ListWidget(parent) {
       tr("Dashcam Mode Removal"),
       tr("If you see 'Dashcam Mode' while onroad, enable this will force enable openpilot control.\nDashcam Mode usually means your vehicle is not fully supported.\nUSE AT YOUR OWN RISK!\nReboot required."),
     },
+  };
+  for (auto &[param, title, desc] : toggle_defs) {
+    if (param == "") {
+      auto label = new LabelControl(title, "");
+      addItem(label);
+      continue;
+    }
+    auto toggle = new ParamControl(param, title, desc, "", this);
+
+    bool locked = params.getBool((param + "Lock").toStdString());
+    toggle->setEnabled(!locked);
+
+    addItem(toggle);
+    toggles[param.toStdString()] = toggle;
+  }
+}
+
+void DPCtrlPanel::add_lateral_toggles() {
+  std::vector<std::tuple<QString, QString, QString>> toggle_defs{
     {
       "",
       QString::fromUtf8("🐉 ") + tr("Ctrl - Lateral") + QString::fromUtf8(" 🐉"),
@@ -31,6 +67,34 @@ DPCtrlPanel::DPCtrlPanel(QWidget *parent) : ListWidget(parent) {
       tr("Enable Lane Priority Mode"),
       tr("When enabled, openpilot will use lane lines for lateral control, fallback to laneless mode automatically when lane lines probabilities are low."),
     },
+  };
+  speed_based_lane_priority_toggle = new ParamSpinBoxControl("dp_lat_lane_priority_mode_speed_based", tr("Only When Drive Above"),
+                                                  tr("All Speed - Use Lane Line when available.\n*Number* - Use Lane Line when available and drive speed is above the *number*."),
+                                                  "", 0, 120, 1, tr(" kph"), tr("All Speed"));
+  for (auto &[param, title, desc] : toggle_defs) {
+    if (param == "") {
+      auto label = new LabelControl(title, "");
+      addItem(label);
+      continue;
+    }
+    auto toggle = new ParamControl(param, title, desc, "", this);
+
+    bool locked = params.getBool((param + "Lock").toStdString());
+    toggle->setEnabled(!locked);
+
+    addItem(toggle);
+    toggles[param.toStdString()] = toggle;
+    if (param == "dp_lat_lane_priority_mode") {
+      connect(toggle, &ToggleControl::toggleFlipped, [=]() {
+        updateToggles();
+      });
+      addItem(speed_based_lane_priority_toggle);
+    }
+  }
+}
+
+void DPCtrlPanel::add_longitudinal_toggles() {
+  std::vector<std::tuple<QString, QString, QString>> toggle_defs{
     {
       "",
       QString::fromUtf8("🐉 ") + tr("Ctrl - Longitudinal") + QString::fromUtf8(" 🐉"),
@@ -67,6 +131,44 @@ DPCtrlPanel::DPCtrlPanel(QWidget *parent) : ListWidget(parent) {
 //      tr("When enabled, openpilot will use speed limit signs information from map data to automatically adapt cruise speed to road limits.\nReboot required."),
 //    },
     {
+      "dp_long_personality_btn",
+      tr("On-Screen Personality Button"),
+      tr("When enabled, openpilot will display an on-screen personality button."),
+    },
+    {
+      "dp_long_accel_btn",
+      tr("On-Screen Accel Button"),
+      tr("When enabled, openpilot will display an on-screen accel profile button."),
+    },
+  };
+  std::vector<QString> dp_long_accel_profile_texts{tr("OP"), tr("ECO"), tr("NOR"), tr("SPT")};
+  ButtonParamControl* dp_long_accel_profile_setting = new ButtonParamControl("dp_long_accel_profile", tr("Acceleration Profile"),
+                                          tr("OP - Stock tune.\nECO - Eco tune.\nNOR - Normal tune.\nSPT - Sport tune."),
+                                          "",
+                                          dp_long_accel_profile_texts);
+  for (auto &[param, title, desc] : toggle_defs) {
+    if (param == "") {
+      auto label = new LabelControl(title, "");
+      addItem(label);
+      continue;
+    }
+    auto toggle = new ParamControl(param, title, desc, "", this);
+
+    bool locked = params.getBool((param + "Lock").toStdString());
+    toggle->setEnabled(!locked);
+
+    addItem(toggle);
+    toggles[param.toStdString()] = toggle;
+    if (param == "dp_mapd_vision_turn_control") {
+      // add accel profile after it
+      addItem(dp_long_accel_profile_setting);
+    }
+  }
+}
+
+void DPCtrlPanel::add_device_toggles() {
+  std::vector<std::tuple<QString, QString, QString>> toggle_defs{
+    {
       "",
       QString::fromUtf8("🐉 ") + tr("Device") + QString::fromUtf8(" 🐉"),
       "",
@@ -88,10 +190,6 @@ DPCtrlPanel::DPCtrlPanel(QWidget *parent) : ListWidget(parent) {
     },
   };
 
-  speed_based_lane_priority_toggle = new ParamSpinBoxControl("dp_lat_lane_priority_mode_speed_based", tr("Only When Drive Above"),
-                                                  tr("All Speed - Use Lane Line when available.\n*Number* - Use Lane Line when available and drive speed is above the *number*."),
-                                                  "", 0, 120, 1, tr(" kph"), tr("All Speed"));
-
   std::vector<QString> display_off_mode_texts{tr("Standard"), tr("On-Road"), tr("MAIN"), tr("OP"), tr("Off")};
   ButtonParamControl* display_off_mode_setting = new ButtonParamControl("dp_device_display_off_mode", tr("Display Mode"),
                                           tr("On-Road - When driving, the display will be off (excl. warning).\nMAIN - When ACC MAIN is on, the display will be off (excl. warning).\nOP - When OP is enabled, the display will be off (excl. warning).\nOff - the display will be off completely (incl. warning).\nReboot required."),
@@ -106,12 +204,6 @@ DPCtrlPanel::DPCtrlPanel(QWidget *parent) : ListWidget(parent) {
 
 
   auto_shutdown_timer_toggle = new ParamSpinBoxControl("dp_device_auto_shutdown_in", tr("Auto Shutdown In"), tr("Adjust your shutdown waiting period."), "", 0, 600, 1, tr(" mins"), tr("Immediately"));
-
-  std::vector<QString> dp_long_accel_profile_texts{tr("OP"), tr("ECO"), tr("NOR"), tr("SPT")};
-  ButtonParamControl* dp_long_accel_profile_setting = new ButtonParamControl("dp_long_accel_profile", tr("Acceleration Profile"),
-                                          tr("OP - Stock tune.\nECO - Eco tune.\nNOR - Normal tune.\nSPT - Sport tune."),
-                                          "",
-                                          dp_long_accel_profile_texts);
   for (auto &[param, title, desc] : toggle_defs) {
     if (param == "") {
       auto label = new LabelControl(title, "");
@@ -137,87 +229,122 @@ DPCtrlPanel::DPCtrlPanel(QWidget *parent) : ListWidget(parent) {
       // audible alert mode
       addItem(audible_alert_mode_setting);
     }
-    if (param == "dp_lat_lane_priority_mode") {
-      addItem(speed_based_lane_priority_toggle);
-    }
-    if (param == "dp_mapd") {
-      connect(toggle, &ToggleControl::toggleFlipped, [=]() {
-        updateToggles();
-      });
-    }
-    if (param == "dp_mapd_vision_turn_control") {
-      // accel profile
-      addItem(dp_long_accel_profile_setting);
-    }
-//    if (param == "SpeedLimitControl") {
-//      toggle->setVisible(false);
-//    }
   }
+}
 
+void DPCtrlPanel::add_misc_toggles() {
+  std::vector<std::tuple<QString, QString, QString>> toggle_defs{
+    {
+      "",
+      QString::fromUtf8("🐉 ") + tr("Miscellaneous") + QString::fromUtf8(" 🐉"),
+      "",
+    },
+    {
+      "dp_fileserv",
+      tr("Enable File server"),
+      tr("When enabled, you will be able to access log data using browser through port 9000.\nNeeds to be in the same network. (e.g. LAN)\nReboot required."),
+    },
+  };
+  add_generic_toggles(toggle_defs);
+}
+
+void DPCtrlPanel::add_toyota_toggles() {
+  std::vector<std::tuple<QString, QString, QString>> toggle_defs{
+    {
+      "",
+      QString::fromUtf8("🐉 ") + tr("Toyota / Lexus") + QString::fromUtf8(" 🐉"),
+      "",
+    },
+    {
+      "dp_toyota_sng",
+      tr("Enable Stop and Go (SnG) Hack"),
+      tr("When enabled, openpilot will stop sending standstill signal when the car is fully stopped.\nONLY WORK ON SOME VEHICLES.\nReboot Required."),
+    },
+    {
+      "dp_toyota_enhanced_bsm",
+      tr("Enable Enhanced BSM"),
+      tr("When enabled, openpilot will use debugging CAN messages to receive unfiltered BSM signals, allowing detection of more objects.\nTested on Prius TSS2 and RAV4 TSS1.\nONLY WORK ON SOME VEHICLES.\nReboot Required."),
+    },
+    {
+      "dp_toyota_auto_lock",
+      tr("Enable Door Auto Locking"),
+      tr("When enabled, openpilot will attempt to lock the doors when drive above 10 km/h (6.2 mph).\nReboot Required."),
+    },
+    {
+      "dp_toyota_auto_unlock",
+      tr("Enable Door Auto Unlocking"),
+      tr("When enabled, openpilot will attempt to unlock the doors when shift to gear P.\nReboot Required."),
+    },
+    {
+      "dp_toyota_zss",
+      tr("Enable Zorro-Steering-Sensor (ZSS) Support"),
+      tr("When enabled, openpilot will use sensor outputs from ZSS for more accurate steering control.\nDO NOT ENABLE unless you have ZSS installed.\nReboot Required."),
+    },
+  };
+  for (auto &[param, title, desc] : toggle_defs) {
+    if (param == "") {
+      auto label = new LabelControl(title, "");
+      addItem(label);
+      continue;
+    }
+    auto toggle = new ParamControl(param, title, desc, "", this);
+
+    bool locked = params.getBool((param + "Lock").toStdString());
+    toggle->setEnabled(!locked);
+
+    addItem(toggle);
+    toggles[param.toStdString()] = toggle;
+    // when a car does not have a radar, we dont need to include these toggles. (because no op long available)
+    if (!car_has_long_ctrl && param == "dp_toyota_sng") {
+      toggle->setVisible(false);
+    }
+  }
+}
+
+void DPCtrlPanel::add_hkg_toggles() {
+  std::vector<std::tuple<QString, QString, QString>> toggle_defs{
+    {
+      "",
+      QString::fromUtf8("🐉 ") + tr("Hyundai / Kia / Genesis") + QString::fromUtf8(" 🐉"),
+      "",
+    },
+    {
+      "dp_hkg_min_steer_speed_bypass",
+      tr("Enable Minimum Steer Speed Bypass"),
+      tr("When enabled, openpilot will control the steering to 0 kph/mph.\nMDPS harness may required.\nReboot Required."),
+    },
+  };
+  add_generic_toggles(toggle_defs);
+}
+
+void DPCtrlPanel::add_car_specific_toggles() {
+  if (car_name == "toyota") {
+    add_toyota_toggles();
+  } else if (car_name == "hyundai") {
+    add_hkg_toggles();
+  }
+}
+
+DPCtrlPanel::DPCtrlPanel(QWidget *parent) : ListWidget(parent) {
   auto cp_bytes = params.get("CarParamsPersistent");
   if (!cp_bytes.empty()) {
     AlignedBuffer aligned_buf;
     capnp::FlatArrayMessageReader cmsg(aligned_buf.align(cp_bytes.data(), cp_bytes.size()));
     cereal::CarParams::Reader CP = cmsg.getRoot<cereal::CarParams>();
-
-    std::vector<std::tuple<QString, QString, QString>> toyota_toggle_defs{
-      {
-        "",
-        QString::fromUtf8("🐉 ") + tr("Toyota / Lexus") + QString::fromUtf8(" 🐉"),
-        "",
-      },
-      {
-        "dp_toyota_sng",
-        tr("Enable Stop and Go (SnG) Hack"),
-        tr("When enabled, openpilot will stop sending standstill signal when the car is fully stopped.\nONLY WORK ON SOME VEHICLES.\nReboot Required."),
-      },
-      {
-        "dp_toyota_auto_lock",
-        tr("Enable Door Auto Locking"),
-        tr("When enabled, openpilot will attempt to lock the doors when drive above 10 km/h (6.2 mph).\nReboot Required."),
-      },
-      {
-        "dp_toyota_auto_unlock",
-        tr("Enable Door Auto Unlocking"),
-        tr("When enabled, openpilot will attempt to unlock the doors when shift to gear P.\nReboot Required."),
-      },
-    };
-
-    std::vector<std::tuple<QString, QString, QString>> hyundai_toggle_defs{
-      {
-        "",
-        QString::fromUtf8("🐉 ") + tr("Hyundai / Kia / Genesis") + QString::fromUtf8(" 🐉"),
-        "",
-      },
-      {
-        "dp_hkg_min_steer_speed_bypass",
-        tr("Enable Minimum Steer Speed Bypass"),
-        tr("When enabled, openpilot will control the steering to 0 kph/mph.\nMDPS harness may required.\nReboot Required."),
-      },
-    };
-
-    std::vector<std::tuple<QString, QString, QString>> model_specific_toggle_defs;
-    auto car_name = CP.getCarName();
-    if (car_name == "toyota") {
-      model_specific_toggle_defs = toyota_toggle_defs;
-    }
-    else if (car_name == "hyundai") {
-      model_specific_toggle_defs = hyundai_toggle_defs;
-    }
-
-    for (auto& [param, title, desc] : model_specific_toggle_defs) {
-      if (param == "") {
-        auto label = new LabelControl(title, "");
-        addItem(label);
-        continue;
-      }
-      auto toggle = new ParamControl(param, title, desc, "", this);
-      bool locked = params.getBool((param + "Lock").toStdString());
-      toggle->setEnabled(!locked);
-      addItem(toggle);
-      toggles[param.toStdString()] = toggle;
-    }
+    car_name = QString::fromStdString(CP.getCarName());
+    car_has_long_ctrl = hasLongitudinalControl(CP);
+    car_is_radar_unavailable = CP.getRadarUnavailable();
   }
+  // disable for now, not used
+  add_overall_toggles();
+  add_lateral_toggles();
+  if (car_has_long_ctrl) {
+    add_longitudinal_toggles();
+  }
+  add_car_specific_toggles();
+  add_device_toggles();
+  add_misc_toggles();
+
   auto resetBtn = new ButtonControl(tr("Reset Configuration"), tr("RESET"));
   connect(resetBtn, &ButtonControl::clicked, [&]() {
     if (ConfirmationDialog::confirm(tr("Are you sure you want to reset all dp configurations?"), tr("Reset"), this)) {
@@ -238,5 +365,4 @@ void DPCtrlPanel::showEvent(QShowEvent *event) {
 void DPCtrlPanel::updateToggles() {
   auto_shutdown_timer_toggle->setVisible(params.getBool("dp_device_auto_shutdown"));
   speed_based_lane_priority_toggle->setVisible(params.getBool("dp_lat_lane_priority_mode"));
-//  toggles["SpeedLimitControl"]->setVisible(params.getBool("dp_mapd"));
 }
