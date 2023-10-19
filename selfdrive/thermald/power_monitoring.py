@@ -40,7 +40,7 @@ class PowerMonitoring:
     self.integration_lock = threading.Lock()
     self.is_oneplus = os.path.isfile('/ONEPLUS')
     self.dp_device_auto_shutdown = self.params.get_bool("dp_device_auto_shutdown")
-    self.dp_device_auto_shutdown_in = int(self.params.get("dp_device_auto_shutdown_in"))
+    self.dp_device_auto_shutdown_in = int(self.params.get("dp_device_auto_shutdown_in")) * 60
     self.dp_device_auto_shutdown_voltage_prev = 0
 
     car_battery_capacity_uWh = self.params.get("CarBatteryCapacity")
