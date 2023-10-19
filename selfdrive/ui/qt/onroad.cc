@@ -476,7 +476,10 @@ AnnotatedCameraWidget::AnnotatedCameraWidget(VisionStreamType type, QWidget* par
   horizontalLayout->addSpacing(UI_BORDER_SIZE);
 
   map_settings_btn = new MapSettingsButton(this);
-  main_layout->addWidget(map_settings_btn, 0, Qt::AlignBottom | Qt::AlignRight);
+  horizontalLayout->addWidget(map_settings_btn);
+
+  // Add the horizontal layout to the main_layout
+  main_layout->addLayout(horizontalLayout);
 
   #ifdef QCOM
   dm_img = loadPixmap("../assets/img_driver_face_qcom.png", {img_size + 5, img_size + 5});
