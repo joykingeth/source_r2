@@ -1063,13 +1063,15 @@ void AnnotatedCameraWidget::paintGL() {
     drawLaneLines(painter, s);
 
     if (s->scene.longitudinal_control) {
+      const cereal::CarState::Reader &car_state = sm["carState"].getCarState();
+      float v_ego = car_state.getVEgo();
       auto lead_one = radar_state.getLeadOne();
       auto lead_two = radar_state.getLeadTwo();
       if (lead_one.getStatus()) {
-        drawLead(painter, lead_one, s->scene.lead_vertices[0]);
+        drawLead(painter, lead_one, s->scene.lead_vertices[0], v_ego);
       }
       if (lead_two.getStatus() && (std::abs(lead_one.getDRel() - lead_two.getDRel()) > 3.0)) {
-        drawLead(painter, lead_two, s->scene.lead_vertices[1]);
+        drawLead(painter, lead_two, s->scene.lead_vertices[1], v_ego);
       }
     }
   }
