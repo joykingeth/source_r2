@@ -192,13 +192,13 @@ void DPCtrlPanel::add_device_toggles() {
 
   std::vector<QString> display_off_mode_texts{tr("Standard"), tr("On-Road"), tr("MAIN"), tr("OP"), tr("Off")};
   ButtonParamControl* display_off_mode_setting = new ButtonParamControl("dp_device_display_off_mode", tr("Display Mode"),
-                                          tr("On-Road - When driving, the display will be off (excl. warning).\nMAIN - When ACC MAIN is on, the display will be off (excl. warning).\nOP - When OP is enabled, the display will be off (excl. warning).\nOff - the display will be off completely (incl. warning).\nReboot required."),
+                                          tr("Standard - Standard behaviour.\nOn-Road - When driving, the display will be off (excl. warning).\nMAIN - When ACC MAIN is on, the display will be off (excl. warning).\nOP - When OP is enabled, the display will be off (excl. warning).\nOff - the display will be off completely (incl. warning).\nReboot required."),
                                           "",
                                           display_off_mode_texts);
 
   std::vector<QString> audible_alert_mode_texts{tr("Standard"), tr("Warning"), tr("Off")};
   ButtonParamControl* audible_alert_mode_setting = new ButtonParamControl("dp_device_audible_alert_mode", tr("Audible Alert Mode"),
-                                          tr("Warning - Only emits sound when there is a warning.\nOff - Does not emit any sound at all."),
+                                          tr("Standard - Standard behaviour.\nWarning - Only emits sound when there is a warning.\nOff - Does not emit any sound at all."),
                                           "",
                                           audible_alert_mode_texts);
 
@@ -242,7 +242,7 @@ void DPCtrlPanel::add_misc_toggles() {
     {
       "dp_fileserv",
       tr("Enable File server"),
-      tr("When enabled, you will be able to access log data using browser through port 9000.\nNeeds to be in the same network. (e.g. LAN)\nReboot required."),
+      tr("When enabled, you will be able to access log data using browser through port 9000.\nNeeds to be on the same network. (e.g. LAN)\nReboot required."),
     },
   };
   add_generic_toggles(toggle_defs);
