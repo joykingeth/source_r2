@@ -86,6 +86,8 @@ bool Sound::shouldPlaySound(const Alert &alert) {
     // Warning - Only emits sound when there is a warning.
     } else if (dp_device_audible_alert_mode == 1) {
       return (alert.sound == AudibleAlert::WARNING_IMMEDIATE || alert.sound == AudibleAlert::PROMPT_REPEAT || alert.sound == AudibleAlert::PROMPT_DISTRACTED);
+    } else {
+      return alert.sound != AudibleAlert::NONE;
     }
   } else {
     return alert.sound != AudibleAlert::NONE;
