@@ -317,11 +317,29 @@ void DPCtrlPanel::add_hkg_toggles() {
   add_generic_toggles(toggle_defs);
 }
 
+void DPCtrlPanel::add_vag_toggles() {
+  std::vector<std::tuple<QString, QString, QString>> toggle_defs{
+    {
+      "",
+      QString::fromUtf8("🐉 ") + tr("VW / Skoda / Audi") + QString::fromUtf8(" 🐉"),
+      "",
+    },
+    {
+      "dp_vag_timebomb_bypass",
+      tr("Enable Lateral Control Timebomb Bypass"),
+      tr("When enabled, openpilot temporary disable lateral control when it reaches timebomb limit.\n At 5 mins 40 secs - Warning.\n At 5 mins 45 secs - Disable lateral control.\nAt 5 mins 48 secs - Resume lateral control.\nReboot Required."),
+    },
+  };
+  add_generic_toggles(toggle_defs);
+}
+
 void DPCtrlPanel::add_car_specific_toggles() {
   if (car_name == "toyota") {
     add_toyota_toggles();
   } else if (car_name == "hyundai") {
     add_hkg_toggles();
+  } else if (car_name == "volkswagen") {
+    add_vag_toggles();
   }
 }
 

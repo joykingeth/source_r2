@@ -34,6 +34,7 @@ private:
   void add_car_specific_toggles();
   void add_toyota_toggles();
   void add_hkg_toggles();
+  void add_vag_toggles();
 
   bool car_has_long_ctrl = false;
   bool car_is_radar_unavailable = false;

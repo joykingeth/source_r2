@@ -244,6 +244,7 @@ std::unordered_map<std::string, uint32_t> keys = {
     {"dp_toyota_zss", PERSISTENT},
     {"dp_long_accel_btn", PERSISTENT},
     {"dp_long_personality_btn", PERSISTENT},
+    {"dp_vag_timebomb_bypass", PERSISTENT},
 };
 
 } // namespace

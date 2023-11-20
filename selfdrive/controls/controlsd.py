@@ -59,6 +59,9 @@ ACTUATOR_FIELDS = tuple(car.CarControl.Actuators.schema.fields.keys())
 ACTIVE_STATES = (State.enabled, State.softDisabling, State.overriding)
 ENABLED_STATES = (State.preEnabled, *ACTIVE_STATES)
 
+DP_VAG_TIMEBOMB_BYPASS_WARNING = 34000
+DP_VAG_TIMEBOMB_BYPASS_START = 345000
+DP_VAG_TIMEBOMB_BYPASS_END = 348000
 
 class Controls:
   def __init__(self, sm=None, pm=None, can_sock=None, CI=None):
@@ -94,6 +97,8 @@ class Controls:
     self._dp_alka_trigger_count = 0
     self._dp_alka_btn_block_frame = 0
     self.dp_device_disable_temp_check = self.params.get_bool("dp_device_disable_temp_check")
+    self._dp_vag_timebomb_bypass_counter = 0
+    self._dp_vag_timebomb_bypass = self.params.get_bool("dp_vag_timebomb_bypass")
     self.sm = sm
     if self.sm is None:
       ignore = ['testJoystick']
@@ -640,6 +645,26 @@ class Controls:
         pass
       else:
         CC.latActive = True
+
+    # rick - vag timebomb bypass
+    if self._dp_vag_timebomb_bypass:
+      if not CC.latActive:
+        self._dp_vag_timebomb_bypass_counter = 0
+      else:
+        self._dp_vag_timebomb_bypass_counter += 1
+
+        # start warning
+        if DP_VAG_TIMEBOMB_BYPASS_WARNING <= self._dp_vag_timebomb_bypass_counter < DP_VAG_TIMEBOMB_BYPASS_START:
+          self.events.add(EventName.steerTimeLimit)
+
+        # disable steering
+        if self._dp_vag_timebomb_bypass_counter >= DP_VAG_TIMEBOMB_BYPASS_START:
+          self.events.add(EventName.ldw)
+          CC.latActive = False
+
+        # reset counter
+        if self._dp_vag_timebomb_bypass_counter >= DP_VAG_TIMEBOMB_BYPASS_END:
+          self._dp_vag_timebomb_bypass_counter = 0
 
     actuators = CC.actuators
     actuators.longControlState = self.LoC.long_control_state

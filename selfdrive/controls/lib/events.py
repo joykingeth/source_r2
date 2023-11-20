@@ -666,6 +666,11 @@ EVENTS: Dict[int, Dict[str, Union[Alert, AlertCallbackType]]] = {
   },
 
   EventName.steerTimeLimit: {
+    ET.PERMANENT: Alert(
+        _("Vehicle Steering Time Limit"),
+        "",
+        AlertStatus.userPrompt, AlertSize.small,
+        Priority.LOW, VisualAlert.ldw, AudibleAlert.prompt, 3.),
     ET.SOFT_DISABLE: soft_disable_alert(_("Vehicle Steering Time Limit")),
     ET.NO_ENTRY: NoEntryAlert(_("Vehicle Steering Time Limit")),
   },
