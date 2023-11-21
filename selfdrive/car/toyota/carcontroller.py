@@ -99,11 +99,11 @@ class CarController:
     if not CS.out.doorOpen:
       gear = CS.out.gearShifter
       if gear == GearShifter.park and self.dp_toyota_auto_lock_gear_prev != gear:
-        if self.dp_toyota_auto_lock:
+        if self.dp_toyota_auto_unlock:
           can_sends.append(make_can_msg(0x750, UNLOCK_CMD, 0))
         self.dp_toyota_auto_lock_once = False
       elif gear == GearShifter.drive and not self.dp_toyota_auto_lock_once and CS.out.vEgo >= LOCK_AT_SPEED:
-        if self.dp_toyota_auto_unlock:
+        if self.dp_toyota_auto_lock:
           can_sends.append(make_can_msg(0x750, LOCK_CMD, 0))
         self.dp_toyota_auto_lock_once = True
       self.dp_toyota_auto_lock_gear_prev = gear
