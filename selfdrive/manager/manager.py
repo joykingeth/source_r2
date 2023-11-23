@@ -50,13 +50,16 @@ def manager_init() -> None:
     ("dp_no_gps_ctrl", "0"),
     ("dp_no_fan_ctrl", "0"),
     ("dp_logging", "0"),
+    ("dp_0813", "1"),
+
+    # dp addition
     ("dp_alka", "0"),
     ("dp_mapd", "0"),
     ("dp_lat_lane_priority_mode", "0"),
-    ("dp_0813", "0"),
     ("dp_device_auto_shutdown", "0"),
     ("dp_device_auto_shutdown_in", "30"),
     ("dp_toyota_sng", "0"),
+    ("dp_toyota_enhanced_bsm", "0"),
     ("dp_toyota_auto_lock", "0"),
     ("dp_toyota_auto_unlock", "0"),
     ("dp_device_display_off_mode", "0"),
@@ -73,6 +76,9 @@ def manager_init() -> None:
     ("dp_hkg_min_steer_speed_bypass", "0"),
     ("dp_lat_lane_priority_mode_speed_based", "0"),
     ("dp_long_use_krkeegen_tune", "0"),
+    ("dp_toyota_zss", "0"),
+    ("dp_long_accel_btn", "0"),
+    ("dp_long_personality_btn", "0"),
   ]
   if not PC:
     default_params.append(("LastUpdateTime", datetime.datetime.utcnow().isoformat().encode('utf8')))

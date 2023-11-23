@@ -93,7 +93,7 @@ void OnroadWindow::updateState(const UIState &s) {
     return;
   }
 
-  QColor bgColor = bg_colors[s.scene.alka_enabled && s.scene.alka_active && s.scene.lat_active && s.status == STATUS_DISENGAGED? STATUS_ALKA : s.status];
+  QColor bgColor = bg_colors[s.scene.lat_active && s.scene.alka_active && s.status == STATUS_DISENGAGED? STATUS_ALKA : s.status];
   Alert alert = Alert::get(*(s.sm), s.scene.started_frame);
   alerts->updateAlert(alert);
 
@@ -104,7 +104,6 @@ void OnroadWindow::updateState(const UIState &s) {
   }
 
   nvg->updateState(s);
-
 
   // dp blinker & bsm
   auto cs = (*s.sm)["carState"].getCarState();
@@ -312,6 +311,139 @@ void MapSettingsButton::paintEvent(QPaintEvent *event) {
   drawIcon(p, QPoint(btn_size / 2, btn_size / 2), settings_img, QColor(0, 0, 0, 166), isDown() ? 0.6 : 1.0);
 }
 
+static void drawOnScreenButton(QPainter &p, const QPoint &center, const QBrush &bg, float opacity, QString main, QString bottom, QString top) {
+  p.setRenderHint(QPainter::Antialiasing);
+  p.setOpacity(0.65);  // bg dictates opacity of ellipse
+  p.setPen(Qt::NoPen);
+  p.setBrush(bg);
+  p.drawEllipse(center, btn_size / 2, btn_size / 2);
+  p.setOpacity(opacity);
+
+  p.setFont(InterFont(32, QFont::DemiBold));
+  p.setPen(Qt::white);
+
+  // Calculate the bounding rectangle for the text
+  QRect textRect(center.x() - btn_size / 2, center.y() - btn_size * 0.45, btn_size, btn_size);
+
+  // Draw the main text in the center of the button
+  p.drawText(textRect, Qt::AlignCenter, main);
+
+  // Optionally, draw subtext below the main text
+  if (!bottom.isEmpty()) {
+    p.setFont(InterFont(20, QFont::DemiBold));
+    p.setPen(Qt::white);
+
+    QRect bottomTextRect(center.x() - btn_size / 2, center.y() - btn_size * 0.2, btn_size, btn_size);
+    p.drawText(bottomTextRect, Qt::AlignCenter, bottom);
+  }
+
+  if (!top.isEmpty()) {
+    p.setFont(InterFont(56, QFont::DemiBold));
+    p.setPen(Qt::white);
+
+   QRect topTextRect(center.x() - btn_size / 2, center.y() - btn_size * 0.7, btn_size, btn_size);
+    p.drawText(topTextRect, Qt::AlignCenter, top);
+  }
+
+  p.setOpacity(1.0);
+}
+
+PersonalityButton::PersonalityButton(QWidget *parent) : QPushButton(parent) {
+  setFixedSize(btn_size, btn_size);
+  setVisible(false);
+
+  val = std::atoi(Params().get("LongitudinalPersonality").c_str());
+  updateText();
+  QObject::connect(this, &QPushButton::clicked, this, &PersonalityButton::changeMode);
+}
+
+void PersonalityButton::changeMode() {
+  val += 1;
+  val = val > VAL_MAX ? VAL_MIN : val;
+  updateText();
+  Params().put("LongitudinalPersonality", std::to_string(val));
+}
+
+void PersonalityButton::updateState(const UIState &s) {
+  const auto cp = (*uiState()->sm)["carParams"].getCarParams();
+  bool available = cp.getOpenpilotLongitudinalControl() && s.scene.dp_long_personality_btn;
+  setVisible(available);
+  if (available) {
+    update();
+  }
+}
+
+void PersonalityButton::updateText() {
+  switch (val) {
+    case 0:
+      top = "A";
+      main = tr("Aggressive");
+      return;
+    case 1:
+      top = "S";
+      main = tr("Standard");
+      return;
+    case 2:
+      top = "R";
+      main = tr("Relaxed");
+      return;
+  }
+}
+
+void PersonalityButton::paintEvent(QPaintEvent *event) {
+  QPainter p(this);
+  drawOnScreenButton(p, QPoint(btn_size / 2, btn_size / 2), QColor(0, 0, 0, 166), isDown() ? 0.6 : 1.0, main, "PERSNLY", top);
+}
+
+AccelButton::AccelButton(QWidget *parent) : QPushButton(parent) {
+  setFixedSize(btn_size, btn_size);
+  setVisible(false);
+
+  val = std::atoi(Params().get("dp_long_accel_profile").c_str());
+  updateText();
+  QObject::connect(this, &QPushButton::clicked, this, &AccelButton::changeMode);
+}
+
+void AccelButton::changeMode() {
+  val += 1;
+  val = val > VAL_MAX ? VAL_MIN : val;
+  Params().put("dp_long_accel_profile", std::to_string(val));
+  updateText();
+}
+
+void AccelButton::updateState(const UIState &s) {
+  const auto cp = (*uiState()->sm)["carParams"].getCarParams();
+  bool available = cp.getOpenpilotLongitudinalControl() && s.scene.dp_long_accel_btn;
+  setVisible(available);
+  if (available) {
+    update();
+  }
+}
+
+void AccelButton::updateText() {
+  switch (val) {
+    case 0:
+      top = "O";
+      main = tr("OP");
+      return;
+    case 1:
+      top = "E";
+      main = tr("ECO");
+      return;
+    case 2:
+      top = "N";
+      main = tr("NOR");
+      return;
+    default:
+      top = "S";
+      main = tr("SPT");
+  }
+}
+
+void AccelButton::paintEvent(QPaintEvent *event) {
+  QPainter p(this);
+  drawOnScreenButton(p, QPoint(btn_size / 2, btn_size / 2), QColor(0, 0, 0, 166), isDown() ? 0.6 : 1.0, main, "ACCEL", top);
+}
 
 // Window that shows camera view and variety of info drawn on top
 AnnotatedCameraWidget::AnnotatedCameraWidget(VisionStreamType type, QWidget* parent) : fps_filter(UI_FREQ, 3, 1. / UI_FREQ), CameraWidget("camerad", type, true, parent) {
@@ -324,8 +456,30 @@ AnnotatedCameraWidget::AnnotatedCameraWidget(VisionStreamType type, QWidget* par
   experimental_btn = new ExperimentalButton(this);
   main_layout->addWidget(experimental_btn, 0, Qt::AlignTop | Qt::AlignRight);
 
+  // Create a spacer item to push the following layout to the bottom
+  QSpacerItem* vSpacer = new QSpacerItem(1, 1, QSizePolicy::Minimum, QSizePolicy::Expanding);
+  main_layout->addSpacerItem(vSpacer);
+
+  // Create a horizontal layout for map_settings_btn, accel_btn, and personality_btn
+  QHBoxLayout* horizontalLayout = new QHBoxLayout();
+
+  // Add the spacer item to push the buttons to the right
+  QSpacerItem* hSpacer = new QSpacerItem(1, 1, QSizePolicy::Expanding);
+  horizontalLayout->addItem(hSpacer);
+
+  accel_btn = new AccelButton(this);
+  horizontalLayout->addWidget(accel_btn);
+  horizontalLayout->addSpacing(UI_BORDER_SIZE);
+
+  personality_btn = new PersonalityButton(this);
+  horizontalLayout->addWidget(personality_btn);
+  horizontalLayout->addSpacing(UI_BORDER_SIZE);
+
   map_settings_btn = new MapSettingsButton(this);
-  main_layout->addWidget(map_settings_btn, 0, Qt::AlignBottom | Qt::AlignRight);
+  horizontalLayout->addWidget(map_settings_btn);
+
+  // Add the horizontal layout to the main_layout
+  main_layout->addLayout(horizontalLayout);
 
   #ifdef QCOM
   dm_img = loadPixmap("../assets/img_driver_face_qcom.png", {img_size + 5, img_size + 5});
@@ -377,6 +531,7 @@ void AnnotatedCameraWidget::updateState(const UIState &s) {
   setProperty("speed", cur_speed);
   setProperty("setSpeed", set_speed);
   setProperty("speedUnit", s.scene.is_metric ? tr("km/h") : tr("mph"));
+//  setProperty("hideBottomIcons", (cs.getAlertSize() != cereal::ControlsState::AlertSize::NONE));
   if (!dp_device_no_ir_ctrl_checked) {
     dp_device_no_ir_ctrl_checked = true;
     dp_device_no_ir_ctrl = Params().getBool("dp_device_no_ir_ctrl");
@@ -390,6 +545,8 @@ void AnnotatedCameraWidget::updateState(const UIState &s) {
 
   // update engageability/experimental mode button
   experimental_btn->updateState(s);
+  accel_btn->updateState(s);
+  personality_btn->updateState(s);
 
   #ifndef QCOM
   // update DM icon
@@ -658,8 +815,29 @@ void AnnotatedCameraWidget::drawLaneLines(QPainter &painter, const UIState *s) {
 
   painter.setBrush(bg);
   painter.drawPolygon(scene.track_vertices);
+  drawKnightScanner(painter);
 
   painter.restore();
+}
+
+void AnnotatedCameraWidget::drawKnightScanner(QPainter &painter) {
+    UIState *s = uiState();
+    int widgetHeight = rect().height();
+    float halfHeightAbs = std::abs(s->scene.dpAccel) * widgetHeight;
+    const float scannerWidth = 15;
+    QRect scannerRect;
+
+    if (s->scene.dpAccel > 0) {
+        painter.setBrush(QColor(0, 245, 0, 200));
+        // Move scanner to the left side
+        scannerRect = QRect(0, widgetHeight / 2 - halfHeightAbs / 2, scannerWidth, halfHeightAbs / 2);
+    } else {
+        painter.setBrush(QColor(245, 0, 0, 200));
+        // Move scanner to the left side
+        scannerRect = QRect(0, widgetHeight / 2, scannerWidth, halfHeightAbs / 2);
+    }
+
+    painter.drawRect(scannerRect);
 }
 
 #ifndef QCOM
@@ -704,7 +882,7 @@ void AnnotatedCameraWidget::drawDriverState(QPainter &painter, const UIState *s)
   painter.restore();
 }
 #endif
-void AnnotatedCameraWidget::drawLead(QPainter &painter, const cereal::RadarState::LeadData::Reader &lead_data, const QPointF &vd) {
+void AnnotatedCameraWidget::drawLead(QPainter &painter, const cereal::RadarState::LeadData::Reader &lead_data, const QPointF &vd, float v_ego) {
   painter.save();
 
   const float speedBuff = 10.;
@@ -736,6 +914,16 @@ void AnnotatedCameraWidget::drawLead(QPainter &painter, const cereal::RadarState
   QPointF chevron[] = {{x + (sz * 1.25), y + sz}, {x, y}, {x - (sz * 1.25), y + sz}};
   painter.setBrush(redColor(fillAlpha));
   painter.drawPolygon(chevron, std::size(chevron));
+
+  // DP: Chevron detailed info.
+  QString dist = is_metric? QString::number((v_rel + v_ego) * 3.6,'f', 0) + "kmh | " + QString::number(d_rel,'f',1) + "m" : QString::number((v_rel + v_ego) * 2.236936,'f', 0) + "mph | " + QString::number(d_rel*3.2808,'f',1) + "ft";
+  int str_w = 350;
+  painter.setFont(InterFont(42, QFont::Bold));
+  painter.setPen(QColor(0x0, 0x0, 0x0 , 200)); //Shadow
+  painter.drawText(QRect(x+4-(str_w/2), y+62, str_w, 50), Qt::AlignVCenter | Qt::AlignCenter, dist);
+  painter.setPen(QColor(0xff, 0xff, 0xff));
+  painter.drawText(QRect(x+2-(str_w/2), y+60, str_w, 50), Qt::AlignVCenter | Qt::AlignCenter, dist);
+  painter.setPen(Qt::NoPen);
 
   painter.restore();
 }
@@ -811,13 +999,15 @@ void AnnotatedCameraWidget::paintGL() {
     drawLaneLines(painter, s);
 
     if (s->scene.longitudinal_control) {
+      const cereal::CarState::Reader &car_state = sm["carState"].getCarState();
+      float v_ego = car_state.getVEgo();
       auto lead_one = radar_state.getLeadOne();
       auto lead_two = radar_state.getLeadTwo();
       if (lead_one.getStatus()) {
-        drawLead(painter, lead_one, s->scene.lead_vertices[0]);
+        drawLead(painter, lead_one, s->scene.lead_vertices[0], v_ego); //, 0, radar_state.getLeadOne().getDRel(), v_ego, radar_state.getLeadOne().getVRel(), s->scene.is_metric);
       }
       if (lead_two.getStatus() && (std::abs(lead_one.getDRel() - lead_two.getDRel()) > 3.0)) {
-        drawLead(painter, lead_two, s->scene.lead_vertices[1]);
+        drawLead(painter, lead_two, s->scene.lead_vertices[1], v_ego); //, 1, radar_state.getLeadOne().getDRel(), v_ego, radar_state.getLeadTwo().getVRel(), s->scene.is_metric);
       }
     }
   }
@@ -876,13 +1066,15 @@ void AnnotatedCameraWidget::paintGL() {
     drawLaneLines(painter, s);
 
     if (s->scene.longitudinal_control) {
+      const cereal::CarState::Reader &car_state = sm["carState"].getCarState();
+      float v_ego = car_state.getVEgo();
       auto lead_one = radar_state.getLeadOne();
       auto lead_two = radar_state.getLeadTwo();
       if (lead_one.getStatus()) {
-        drawLead(painter, lead_one, s->scene.lead_vertices[0]);
+        drawLead(painter, lead_one, s->scene.lead_vertices[0], v_ego);
       }
       if (lead_two.getStatus() && (std::abs(lead_one.getDRel() - lead_two.getDRel()) > 3.0)) {
-        drawLead(painter, lead_two, s->scene.lead_vertices[1]);
+        drawLead(painter, lead_two, s->scene.lead_vertices[1], v_ego);
       }
     }
   }

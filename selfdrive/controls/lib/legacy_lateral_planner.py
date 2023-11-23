@@ -78,8 +78,8 @@ class LateralPlanner:
       self.LP.lll_prob *= self.DH.lane_change_ll_prob
       self.LP.rll_prob *= self.DH.lane_change_ll_prob
 
-    # dp - check laneline prob when priority is on
     use_laneline = False
+    # dp - check laneline prob when priority is on
     if self._dp_lat_lane_priority_mode:
       self._update_laneless_laneline_mode()
       use_laneline = self._dp_lat_lane_priority_mode_active

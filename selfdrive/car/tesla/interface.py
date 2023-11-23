@@ -7,7 +7,6 @@ from openpilot.selfdrive.car.interfaces import CarInterfaceBase
 
 from openpilot.common.params import Params
 
-
 class CarInterface(CarInterfaceBase):
   @staticmethod
   def _get_params(ret, candidate, fingerprint, car_fw, experimental_long, docs):

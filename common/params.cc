@@ -207,6 +207,7 @@ std::unordered_map<std::string, uint32_t> keys = {
     {"VisionRadarToggle", PERSISTENT},
     {"WheeledBody", PERSISTENT},
 
+    {"dp_0813", PERSISTENT},
     {"dp_no_gps_ctrl", PERSISTENT},
     {"dp_no_fan_ctrl", PERSISTENT},
     {"dp_logging", PERSISTENT},
@@ -222,6 +223,7 @@ std::unordered_map<std::string, uint32_t> keys = {
     {"dp_device_auto_shutdown", PERSISTENT},
     {"dp_device_auto_shutdown_in", PERSISTENT},
     {"dp_toyota_sng", PERSISTENT},
+    {"dp_toyota_enhanced_bsm", PERSISTENT},
     {"dp_toyota_auto_lock", PERSISTENT},
     {"dp_toyota_auto_unlock", PERSISTENT},
     {"dp_device_display_off_mode", PERSISTENT},
@@ -239,6 +241,10 @@ std::unordered_map<std::string, uint32_t> keys = {
     {"dp_lat_lane_priority_mode_speed_based", PERSISTENT},
     {"dp_reset_conf", CLEAR_ON_MANAGER_START},
     {"dp_long_use_krkeegen_tune", PERSISTENT},
+    {"dp_toyota_zss", PERSISTENT},
+    {"dp_long_accel_btn", PERSISTENT},
+    {"dp_long_personality_btn", PERSISTENT},
+    {"dp_vag_timebomb_bypass", PERSISTENT},
 };
 
 } // namespace

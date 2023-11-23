@@ -25,7 +25,21 @@ private:
   std::map<std::string, ParamControl*> toggles;
   ParamSpinBoxControl* auto_shutdown_timer_toggle;
   ParamSpinBoxControl* speed_based_lane_priority_toggle;
-//  bool model_specific_toggles_added = false;
+
+  void add_overall_toggles();
+  void add_lateral_toggles();
+  void add_longitudinal_toggles();
+  void add_device_toggles();
+  void add_misc_toggles();
+  void add_car_specific_toggles();
+  void add_toyota_toggles();
+  void add_hkg_toggles();
+  void add_vag_toggles();
+
+  bool car_has_long_ctrl = false;
+  bool car_is_radar_unavailable = false;
+  QString car_name;
+  void add_generic_toggles(std::vector<std::tuple<QString, QString, QString>> &toggle_defs);
 
   void updateToggles();
 };

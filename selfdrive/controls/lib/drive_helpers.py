@@ -44,7 +44,6 @@ class MPC_COST_LAT:
   HEADING = 1.0
   STEER_RATE = 1.0
 
-
 class VCruiseHelper:
   def __init__(self, CP):
     self.CP = CP

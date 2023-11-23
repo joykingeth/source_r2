@@ -248,12 +248,22 @@ static void update_state(UIState *s) {
   scene.lat_active = sm["carControl"].getCarControl().getLatActive();
   scene.alka_active = sm["controlsStateExt"].getControlsStateExt().getAlkaActive();
   scene.alka_enabled = sm["controlsStateExt"].getControlsStateExt().getAlkaEnabled();
+  if (scene.started && sm.updated("carControl")) {
+    auto car_control = sm["carControl"].getCarControl();
+    if (car_control.getLongActive()) {
+      scene.dpAccel = car_control.getActuatorsOutput().getAccel();
+    } else {
+      scene.dpAccel = 0.0;
+    }
+  }
 }
 
 void ui_update_params(UIState *s) {
   auto params = Params();
   s->scene.is_metric = params.getBool("IsMetric");
   s->scene.map_on_left = params.getBool("NavSettingLeftSide");
+  s->scene.dp_long_personality_btn = params.getBool("dp_long_personality_btn");
+  s->scene.dp_long_accel_btn = params.getBool("dp_long_accel_btn");
 }
 
 void UIState::updateStatus() {
@@ -416,15 +426,32 @@ void Device::updateWakefulness(const UIState &s) {
   // rick - display mode
   // tr("Disabled"), tr("On-Road") tr("MAIN"), tr("OP"), tr("Off")}
   if (s.scene.ignition && s.dp_device_display_off_mode > 0) {
-    const SubMaster &sm = *(s.sm);
-    auto cs = sm["carState"].getCarState().getCruiseState();
-    Alert alert = Alert::get(*(s.sm), s.scene.started_frame);
-    if ((s.dp_device_display_off_mode < 4) && (alert.status == cereal::ControlsState::AlertStatus::USER_PROMPT || alert.status == cereal::ControlsState::AlertStatus::CRITICAL)) {
-      resetInteractiveTimeout();
-    } else if (s.dp_device_display_off_mode == 3 && cs.getEnabled()) {
-      resetInteractiveTimeout();
-    } else if (s.dp_device_display_off_mode == 2 && cs.getAvailable()) {
-      resetInteractiveTimeout();
+    // Off - the display will be off completely (incl. warning).
+    if (s.dp_device_display_off_mode == 4) {
+      interactive_timeout = 0;
+    } else {
+      const SubMaster &sm = *(s.sm);
+      auto cs = sm["carState"].getCarState().getCruiseState();
+      Alert alert = Alert::get(*(s.sm), s.scene.started_frame);
+      // if there is a warning, always show screen
+      if (alert.status == cereal::ControlsState::AlertStatus::USER_PROMPT || alert.status == cereal::ControlsState::AlertStatus::CRITICAL) {
+        resetInteractiveTimeout();
+      // op - When OP is enabled, the display will be off
+      } else if (s.dp_device_display_off_mode == 3) {
+        if (!cs.getEnabled()) {
+          resetInteractiveTimeout();
+        }
+      // main - When ACC MAIN is on, the display will be off
+      } else if (s.dp_device_display_off_mode == 2) {
+        if (!cs.getAvailable()) {
+          resetInteractiveTimeout();
+        }
+      // on-road - When driving, the display will be off
+      } else if (s.dp_device_display_off_mode == 1) {
+        if (!s.scene.ignition) {
+          resetInteractiveTimeout();
+        }
+      }
     }
     setAwake(interactive_timeout > 0);
   } else {

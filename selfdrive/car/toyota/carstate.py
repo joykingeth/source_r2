@@ -11,6 +11,8 @@ from openpilot.selfdrive.car.interfaces import CarStateBase
 from openpilot.selfdrive.car.toyota.values import ToyotaFlags, CAR, DBC, STEER_THRESHOLD, NO_STOP_TIMER_CAR, \
                                                   TSS2_CAR, RADAR_ACC_CAR, EPS_SCALE, UNSUPPORTED_DSU_CAR
 
+from openpilot.common.params import Params
+
 SteerControlType = car.CarParams.SteerControlType
 
 # These steering fault definitions seem to be common across LKA (torque) and LTA (angle):
@@ -24,6 +26,8 @@ TEMP_STEER_FAULTS = (0, 9, 11, 21, 25)
 # - prolonged high driver torque: 17 (permanent)
 PERM_STEER_FAULTS = (3, 17)
 
+ZSS_THRESHOLD = 4.0
+ZSS_THRESHOLD_COUNT = 10
 
 class CarState(CarStateBase):
   def __init__(self, CP):
@@ -44,6 +48,28 @@ class CarState(CarStateBase):
     self.acc_type = 1
     self.lkas_hud = {}
 
+    # zss
+    params = Params()
+    self._dp_alka = params.get_bool('dp_alka')
+    self._dp_toyota_zss = params.get_bool('dp_toyota_zss')
+    self._dp_zss_compute = False
+    self._dp_zss_cruise_active_last = False
+    self._dp_zss_angle_offset = 0.
+    self._dp_zss_threshold_count = 0
+
+    # bsm
+    self.dp_toyota_enhanced_bsm = params.get_bool('dp_toyota_enhanced_bsm')
+    self._left_blindspot = False
+    self._left_blindspot_d1 = 0
+    self._left_blindspot_d2 = 0
+    self._left_blindspot_counter = 0
+
+    self._right_blindspot = False
+    self._right_blindspot_d1 = 0
+    self._right_blindspot_d2 = 0
+    self._right_blindspot_counter = 0
+
+
   def update(self, cp, cp_cam):
     ret = car.CarState.new_message()
 
@@ -58,9 +84,7 @@ class CarState(CarStateBase):
       ret.gas = (cp.vl["GAS_SENSOR"]["INTERCEPTOR_GAS"] + cp.vl["GAS_SENSOR"]["INTERCEPTOR_GAS2"]) // 2
       ret.gasPressed = ret.gas > 805
     else:
-      # TODO: find a new, common signal
-      msg = "GAS_PEDAL_HYBRID" if (self.CP.flags & ToyotaFlags.HYBRID) else "GAS_PEDAL"
-      ret.gas = cp.vl[msg]["GAS_PEDAL"]
+      # TODO: find a common gas pedal percentage signal
       ret.gasPressed = cp.vl["PCM_CRUISE"]["GAS_RELEASED"] == 0
 
     ret.wheelSpeeds = self.get_wheel_speeds(
@@ -90,6 +114,35 @@ class CarState(CarStateBase):
       if self.angle_offset.initialized:
         ret.steeringAngleOffsetDeg = self.angle_offset.x
         ret.steeringAngleDeg = torque_sensor_angle_deg - self.angle_offset.x
+
+    # dp - toyota zss
+    # if diff between steeringAngleDeg and ZSS is too large, disable ZSS
+    if self._dp_zss_threshold_count > ZSS_THRESHOLD_COUNT:
+      self._dp_toyota_zss = False
+
+    if self._dp_toyota_zss:
+      zorro_steer = cp.vl["SECONDARY_STEER_ANGLE"]["ZORRO_STEER"]
+      # rick - when alka is on, we check main_on state
+      acc_active = (self._dp_alka and cp.vl["PCM_CRUISE_2"]["MAIN_ON"] != 0) or bool(cp.vl["PCM_CRUISE"]["CRUISE_ACTIVE"])
+      # only compute zss offset when acc is active
+      if acc_active and not self._dp_zss_cruise_active_last:
+        self._dp_zss_threshold_count = 0
+        self._dp_zss_compute = True # cruise was just activated, so allow offset to be recomputed
+      self._dp_zss_cruise_active_last = acc_active
+
+      # compute zss offset
+      if self._dp_zss_compute:
+        if abs(ret.steeringAngleDeg) > 1e-3 and abs(zorro_steer) > 1e-3:
+          self._dp_zss_compute = False
+          self._dp_zss_angle_offset = zorro_steer - ret.steeringAngleDeg
+
+      # error check
+      new_steering_angle_deg = zorro_steer - self._dp_zss_angle_offset
+      if abs(ret.steeringAngleDeg - new_steering_angle_deg) > ZSS_THRESHOLD:
+        self._dp_zss_threshold_count += 1
+      else:
+        ret.steeringAngleDeg = new_steering_angle_deg
+
 
     ret.steeringRateDeg = cp.vl["STEER_ANGLE_SENSOR"]["STEER_RATE"]
 
@@ -163,6 +216,50 @@ class CarState(CarStateBase):
     if self.CP.carFingerprint != CAR.PRIUS_V:
       self.lkas_hud = copy.copy(cp_cam.vl["LKAS_HUD"])
 
+    # Enable blindspot debug mode once (@arne182)
+    # let's keep all the commented out code for easy debug purpose for future.
+    if self.dp_toyota_enhanced_bsm and self.frame > 199: #self.CP.carFingerprint == CAR.PRIUS_TSS2: #not (self.CP.carFingerprint in TSS2_CAR or self.CP.carFingerprint == CAR.CAMRY or self.CP.carFingerprint == CAR.CAMRYH):
+      distance_1 = cp.vl["DEBUG"].get('BLINDSPOTD1')
+      distance_2 = cp.vl["DEBUG"].get('BLINDSPOTD2')
+      side = cp.vl["DEBUG"].get('BLINDSPOTSIDE')
+
+      if distance_1 is not None and distance_2 is not None and side is not None:
+        if side == 65: # Left blind spot
+          if distance_1 != self._left_blindspot_d1:
+            self._left_blindspot_d1 = distance_1
+            self._left_blindspot_counter = 100
+          if distance_2 != self._left_blindspot_d2:
+            self._left_blindspot_d2 = distance_2
+            self._left_blindspot_counter = 100
+          if self._left_blindspot_d1 > 10 or self._left_blindspot_d2 > 10:
+            self._left_blindspot = True
+        elif side == 66: # Right blind spot
+          if distance_1 != self._right_blindspot_d1:
+            self._right_blindspot_d1 = distance_1
+            self._right_blindspot_counter = 100
+          if distance_2 != self._right_blindspot_d2:
+            self._right_blindspot_d2 = distance_2
+            self._right_blindspot_counter = 100
+          if self._right_blindspot_d1 > 10 or self._right_blindspot_d2 > 10:
+            self._right_blindspot = True
+
+        if self._left_blindspot_counter > 0:
+          self._left_blindspot_counter -= 1
+        else:
+          self._left_blindspot = False
+          self._left_blindspot_d1 = 0
+          self._left_blindspot_d2 = 0
+
+        if self._right_blindspot_counter > 0:
+          self._right_blindspot_counter -= 1
+        else:
+          self._right_blindspot = False
+          self._right_blindspot_d1 = 0
+          self._right_blindspot_d2 = 0
+
+        ret.leftBlindspot = self._left_blindspot
+        ret.rightBlindspot = self._right_blindspot
+
     return ret
 
   @staticmethod
@@ -182,11 +279,6 @@ class CarState(CarStateBase):
       ("PCM_CRUISE_SM", 1),
       ("STEER_TORQUE_SENSOR", 50),
     ]
-
-    if CP.flags & ToyotaFlags.HYBRID:
-      messages.append(("GAS_PEDAL_HYBRID", 33))
-    else:
-      messages.append(("GAS_PEDAL", 33))
 
     if CP.carFingerprint in UNSUPPORTED_DSU_CAR:
       messages.append(("DSU_CRUISE", 5))
@@ -210,10 +302,17 @@ class CarState(CarStateBase):
         ("PCS_HUD", 1),
       ]
 
-    if CP.carFingerprint not in (TSS2_CAR - RADAR_ACC_CAR) and not CP.enableDsu:
+    if CP.carFingerprint not in (TSS2_CAR - RADAR_ACC_CAR) and not CP.enableDsu and not CP.flags & ToyotaFlags.DISABLE_RADAR.value:
       messages += [
         ("PRE_COLLISION", 33),
       ]
+
+    params = Params()
+    if params.get_bool('dp_toyota_zss'):
+      messages.append(("SECONDARY_STEER_ANGLE", 0))
+
+    if params.get_bool('dp_toyota_enhanced_bsm'):
+      messages.append(("DEBUG", 65))
 
     return CANParser(DBC[CP.carFingerprint]["pt"], messages, 0)
 

@@ -79,10 +79,16 @@ void Sound::setAlert(const Alert &alert) {
 
 bool Sound::shouldPlaySound(const Alert &alert) {
 //    tr("Standard"), tr("Warning/Alert"), tr("Off")
-  if (dp_device_audible_alert_mode == 1) {
-    return (alert.sound == AudibleAlert::WARNING_SOFT || alert.sound == AudibleAlert::WARNING_IMMEDIATE);
-  } else if (dp_device_audible_alert_mode == 2) {
-    return false;
+  if (dp_device_audible_alert_mode > 0) {
+    // off - Does not emit any sound at all.
+    if (dp_device_audible_alert_mode == 2) {
+      return false;
+    // Warning - Only emits sound when there is a warning.
+    } else if (dp_device_audible_alert_mode == 1) {
+      return (alert.sound == AudibleAlert::WARNING_IMMEDIATE || alert.sound == AudibleAlert::PROMPT_REPEAT || alert.sound == AudibleAlert::PROMPT_DISTRACTED);
+    } else {
+      return alert.sound != AudibleAlert::NONE;
+    }
   } else {
     return alert.sound != AudibleAlert::NONE;
   }
