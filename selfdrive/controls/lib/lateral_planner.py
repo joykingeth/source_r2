@@ -13,6 +13,7 @@ from openpilot.selfdrive.hardware import EON
 
 from openpilot.common.params import Params
 from openpilot.selfdrive.controls.lib.lane_planner import LanePlanner
+from openpilot.common.conversions import Conversions as CV
 
 TRAJECTORY_SIZE = 33
 if EON:
@@ -45,6 +46,7 @@ class LateralPlanner:
     self._d_path_w_lines_xyz = np.zeros((TRAJECTORY_SIZE, 3))
     self._dp_lat_lane_priority_mode_speed_based = int(self.params.get("dp_lat_lane_priority_mode_speed_based", encoding="utf-8")) if self._dp_lat_lane_priority_mode else 0
     self.param_read_counter = 0
+    self._dp_lat_lane_change_assist_speed = int(self.params.get("dp_lat_lane_change_assist_speed", encoding="utf-8")) * CV.MPH_TO_MS
 
     # Vehicle model parameters used to calculate lateral movement of car
     self.factor1 = CP.wheelbase - CP.centerToFront
@@ -104,7 +106,7 @@ class LateralPlanner:
     else:
       lane_change_prob = self.l_lane_change_prob + self.r_lane_change_prob
 
-    self.DH.update(sm['carState'], sm['carControl'].latActive, lane_change_prob)
+    self.DH.update(sm['carState'], sm['carControl'].latActive, lane_change_prob, self._dp_lat_lane_change_assist_speed)
 
     if self._dp_lat_lane_priority_mode:
       d_path_xyz = self._get_laneless_laneline_d_path_xyz()
