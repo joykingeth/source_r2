@@ -25,6 +25,7 @@ private:
   std::map<std::string, ParamControl*> toggles;
   ParamSpinBoxControl* auto_shutdown_timer_toggle;
   ParamSpinBoxControl* speed_based_lane_priority_toggle;
+  ParamSpinBoxControl* lane_change_assist_speed_toggle;
 
   void add_overall_toggles();
   void add_lateral_toggles();
