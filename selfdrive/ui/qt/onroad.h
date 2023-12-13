@@ -176,6 +176,7 @@ private:
   QString dp_ui_flight_panel_alt;
   QString dp_ui_flight_panel_alt_unit;
   bool dp_no_gps_ctrl = false;
+  QImage dp_ui_flight_panel_compass;
 
 
 protected:
