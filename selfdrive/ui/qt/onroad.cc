@@ -608,7 +608,7 @@ void AnnotatedCameraWidget::drawFlightPanel(QPainter &p) {
   {
     p.save();
     p.setPen(Qt::NoPen);
-    p.setBrush(blackColor(150));
+    p.setBrush(blackColor(100));
     p.translate(half_width, half_height);
     p.drawEllipse(QPoint(0, 0), half_height, half_height);
     p.restore();
@@ -1115,15 +1115,29 @@ void AnnotatedCameraWidget::drawLead(QPainter &painter, const cereal::RadarState
   painter.drawPolygon(chevron, std::size(chevron));
 
   // DP: Chevron detailed info.
-  QString dist = is_metric? QString::number((v_rel + v_ego) * 3.6,'f', 0) + "kmh | " + QString::number(d_rel,'f',1) + "m" : QString::number((v_rel + v_ego) * 2.236936,'f', 0) + "mph | " + QString::number(d_rel*3.2808,'f',1) + "ft";
-  int str_w = 350;
-  painter.setFont(InterFont(42, QFont::Bold));
-  painter.setPen(QColor(0x0, 0x0, 0x0 , 200)); //Shadow
-  painter.drawText(QRect(x+4-(str_w/2), y+62, str_w, 50), Qt::AlignVCenter | Qt::AlignCenter, dist);
-  painter.setPen(QColor(0xff, 0xff, 0xff));
-  painter.drawText(QRect(x+2-(str_w/2), y+60, str_w, 50), Qt::AlignVCenter | Qt::AlignCenter, dist);
-  painter.setPen(Qt::NoPen);
+  if (d_rel > 0) {
+    QString dist = is_metric? QString::number(d_rel,'f',1) + "m" : QString::number(d_rel*3.2808,'f',1) + "ft";
+    int str_w = 350;
+    painter.setFont(InterFont(40, QFont::Bold));
+    painter.setPen(blackColor(200)); //Shadow
+    painter.drawText(QRect(x+4-(str_w/2), y+42, str_w, 50), Qt::AlignVCenter | Qt::AlignCenter, dist);
+    painter.setPen(whiteColor());
+    painter.drawText(QRect(x+2-(str_w/2), y+40, str_w, 50), Qt::AlignVCenter | Qt::AlignCenter, dist);
+    painter.setPen(Qt::NoPen);
 
+    if (d_rel > 0 && v_ego > 0) {
+      float ttc = d_rel / v_ego;
+      if (ttc < 5) {
+        QString ttc_str = QString::number(ttc, 'f', 1) + "s";
+        painter.setFont(InterFont(56, QFont::Bold));
+        painter.setPen(blackColor(200)); //Shadow
+        painter.drawText(QRect(x+4-(str_w/2), y+87, str_w, 50), Qt::AlignVCenter | Qt::AlignCenter, ttc_str);
+        painter.setPen(whiteColor());
+        painter.drawText(QRect(x+2-(str_w/2), y+85, str_w, 50), Qt::AlignVCenter | Qt::AlignCenter, ttc_str);
+        painter.setPen(Qt::NoPen);
+      }
+    }
+  }
   painter.restore();
 }
 
