@@ -486,6 +486,7 @@ AnnotatedCameraWidget::AnnotatedCameraWidget(VisionStreamType type, QWidget* par
   #else
   dm_img = loadPixmap("../assets/img_driver_face.png", {img_size + 5, img_size + 5});
   #endif
+  dp_no_gps_ctrl = Params().getBool("dp_no_gps_ctrl");
 }
 
 void AnnotatedCameraWidget::updateState(const UIState &s) {
@@ -582,16 +583,21 @@ void AnnotatedCameraWidget::updateState(const UIState &s) {
   setProperty("use_lanelines", sm["lateralPlan"].getLateralPlan().getUseLaneLines());
 
   // for flight panel
-  if (sm.updated("liveLocationKalman")) {
-    const auto llk = sm["liveLocationKalman"].getLiveLocationKalman();
-    setProperty("dp_ui_flight_panel_pitch", (llk.getCalibratedOrientationNED().getValue()[1] * (180 / M_PI))*10);
-    setProperty("dp_ui_flight_panel_yaw", (llk.getCalibratedOrientationNED().getValue()[2] * (180 / M_PI)));
-  }
-  if (sm.updated("gpsLocationExternal")) {
-    const auto gps_location = sm["gpsLocationExternal"].getGpsLocationExternal();
-    float alt = gps_location.getAltitude();
-    setProperty("dp_ui_flight_panel_alt", is_metric? QString("%1").arg(QString::number(alt, 'f', 1)) : QString("%1").arg(QString::number(alt * METER_TO_FOOT, 'f', 1)));
-    setProperty("dp_ui_flight_panel_alt_unit", is_metric? "m" : "ft");
+  if (!dp_no_gps_ctrl) {
+    if (sm.updated("liveLocationKalman")) {
+      const auto llk = sm["liveLocationKalman"].getLiveLocationKalman();
+      setProperty("dp_ui_flight_panel_pitch", (llk.getCalibratedOrientationNED().getValue()[1] * (180 / M_PI))*10);
+      setProperty("dp_ui_flight_panel_yaw", (llk.getCalibratedOrientationNED().getValue()[2] * (180 / M_PI)));
+    }
+    if (sm.updated("gpsLocationExternal")) {
+      const auto gps_location = sm["gpsLocationExternal"].getGpsLocationExternal();
+      float alt = 0.0;
+      if (gps_location.getFlags() % 2 != 0) {
+        alt = gps_location.getAltitude();
+      }
+      setProperty("dp_ui_flight_panel_alt", is_metric? QString("%1").arg(QString::number(alt, 'f', 1)) : QString("%1").arg(QString::number(alt * METER_TO_FOOT, 'f', 1)));
+      setProperty("dp_ui_flight_panel_alt_unit", is_metric? "m" : "ft");
+    }
   }
 }
 
@@ -1255,8 +1261,9 @@ void AnnotatedCameraWidget::paintGL() {
         update_leads(s, radar_state, sm["modelV2"].getModelV2().getPosition());
       }
     }
-
-    drawFlightPanel(painter);
+    if (!dp_no_gps_ctrl) {
+      drawFlightPanel(painter);
+    }
     drawLaneLines(painter, s);
 
     if (s->scene.longitudinal_control) {

@@ -175,6 +175,7 @@ private:
   float dp_ui_flight_panel_yaw = 0.0;
   QString dp_ui_flight_panel_alt;
   QString dp_ui_flight_panel_alt_unit;
+  bool dp_no_gps_ctrl = false;
 
 
 protected:
