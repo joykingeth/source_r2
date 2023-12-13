@@ -63,11 +63,6 @@ void DPCtrlPanel::add_lateral_toggles() {
       tr("When enabled, openpilot lateral Control will be always on when ACC MAIN is ON.\nReboot required."),
     },
     {
-      "dp_lat_lane_change_assist",
-      tr("Minimum Lane Change Assist Speed"),
-      tr("When enabled, openpilot will use lane lines for lateral control, fallback to laneless mode automatically when lane lines probabilities are low."),
-    },
-    {
       "dp_lat_lane_priority_mode",
       tr("Enable Lane Priority Mode"),
       tr("When enabled, openpilot will use lane lines for lateral control, fallback to laneless mode automatically when lane lines probabilities are low."),
