@@ -661,6 +661,7 @@ class Controls:
         if self._dp_vag_timebomb_bypass_counter >= DP_VAG_TIMEBOMB_BYPASS_START:
           self.events.add(EventName.ldw)
           CC.latActive = False
+          CC.longActive = False
 
         # reset counter
         if self._dp_vag_timebomb_bypass_counter >= DP_VAG_TIMEBOMB_BYPASS_END:
