@@ -234,7 +234,7 @@ class CarInterface(CarInterfaceBase):
 
       if not use_sdsu:
         # Disabling radar is only supported on TSS2 radar-ACC cars
-        if experimental_long and candidate in RADAR_ACC_CAR and False:  # TODO: disabling radar isn't supported yet
+        if experimental_long and candidate in RADAR_ACC_CAR and Params().get_bool("dp_toyota_tss2_radar_disabled"):  # TODO: disabling radar isn't supported yet
           ret.flags |= ToyotaFlags.DISABLE_RADAR.value
       else:
         use_sdsu = use_sdsu and experimental_long
