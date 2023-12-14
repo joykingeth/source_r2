@@ -264,6 +264,7 @@ void ui_update_params(UIState *s) {
   s->scene.map_on_left = params.getBool("NavSettingLeftSide");
   s->scene.dp_long_personality_btn = params.getBool("dp_long_personality_btn");
   s->scene.dp_long_accel_btn = params.getBool("dp_long_accel_btn");
+  s->scene.dp_device_display_flight_panel = params.getBool("dp_device_display_flight_panel");
 }
 
 void UIState::updateStatus() {

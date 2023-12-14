@@ -176,6 +176,11 @@ void DPCtrlPanel::add_device_toggles() {
       "",
     },
     {
+      "dp_device_display_flight_panel",
+      tr("Display Flight Panel"),
+      tr("When enabled, openpilot will show information such as pitch angle, altitude, compass on the driving screen.\nGPS Required."),
+    },
+    {
       "dp_device_disable_temp_check",
       tr("Disable Temp Check"),
       tr("When enabled, openpilot will disable device temperature check.\n**NOTED** An overheated device may result in random shutdowns or lag.\nReboot required."),

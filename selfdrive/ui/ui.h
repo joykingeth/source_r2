@@ -169,6 +169,7 @@ typedef struct UIScene {
   float dpAccel = 0.0;
   bool dp_long_personality_btn = false;
   bool dp_long_accel_btn = false;
+  bool dp_device_display_flight_panel = false;
 } UIScene;
 
 class UIState : public QObject {
