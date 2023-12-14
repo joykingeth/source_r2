@@ -63,17 +63,12 @@ void DPCtrlPanel::add_lateral_toggles() {
       tr("When enabled, openpilot lateral Control will be always on when ACC MAIN is ON.\nReboot required."),
     },
     {
-      "dp_lat_lane_change_assist",
-      tr("Minimum Lane Change Assist Speed"),
-      tr("When enabled, openpilot will use lane lines for lateral control, fallback to laneless mode automatically when lane lines probabilities are low."),
-    },
-    {
       "dp_lat_lane_priority_mode",
       tr("Enable Lane Priority Mode"),
       tr("When enabled, openpilot will use lane lines for lateral control, fallback to laneless mode automatically when lane lines probabilities are low."),
     },
   };
-  lane_change_assist_speed_toggle = new ParamSpinBoxControl("dp_lat_lane_change_assist_speed", tr("Lane Change Assist Activate Speed"), tr("Adjust the lane change assist activate speed.\n1 mph = 1.6 kph"), "", 0, 50, 1, tr(" mph"), tr("Off"));
+  auto lane_change_assist_speed_toggle = new ParamSpinBoxControl("dp_lat_lane_change_assist_speed", tr("Lane Change Assist Activate Speed"), tr("Adjust the lane change assist activate speed.\nOff = Disable lane change assistance.\n1 mph = 1.6 kph"), "", 0, 80, 1, tr(" mph"), tr("Off"));
   speed_based_lane_priority_toggle = new ParamSpinBoxControl("dp_lat_lane_priority_mode_speed_based", tr("Only When Drive Above"),
                                                   tr("All Speed - Use Lane Line when available.\n*Number* - Use Lane Line when available and drive speed is above the *number*."),
                                                   "", 0, 120, 1, tr(" kph"), tr("All Speed"));

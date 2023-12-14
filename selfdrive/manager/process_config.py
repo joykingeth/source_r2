@@ -91,8 +91,8 @@ procs = [
   # mapd
   PythonProcess("mapd", "selfdrive.mapd.mapd"),
   # gpxd
-  PythonProcess("gpxd", "selfdrive.dragonpilot.gpxd"),
-  PythonProcess("gpx_uploader", "selfdrive.dragonpilot.gpx_uploader", offroad=True),
+  # PythonProcess("gpxd", "selfdrive.dragonpilot.gpxd"),
+  # PythonProcess("gpx_uploader", "selfdrive.dragonpilot.gpx_uploader", offroad=True),
   NativeProcess("otisserv", "selfdrive/dragonpilot", ['./otisserv'], offroad=True),
   NativeProcess("fileserv", "selfdrive/dragonpilot", ['./fileserv'], offroad=True),
 ]

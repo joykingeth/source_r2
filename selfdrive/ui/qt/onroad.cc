@@ -486,6 +486,7 @@ AnnotatedCameraWidget::AnnotatedCameraWidget(VisionStreamType type, QWidget* par
   #else
   dm_img = loadPixmap("../assets/img_driver_face.png", {img_size + 5, img_size + 5});
   #endif
+  dp_no_gps_ctrl = Params().getBool("dp_no_gps_ctrl");
 }
 
 void AnnotatedCameraWidget::updateState(const UIState &s) {
@@ -580,6 +581,225 @@ void AnnotatedCameraWidget::updateState(const UIState &s) {
   }
   // laneline mode
   setProperty("use_lanelines", sm["lateralPlan"].getLateralPlan().getUseLaneLines());
+
+  // for flight panel
+  if (!dp_no_gps_ctrl) {
+    if (sm.updated("liveLocationKalman")) {
+      const auto llk = sm["liveLocationKalman"].getLiveLocationKalman();
+      setProperty("dp_ui_flight_panel_pitch", (llk.getCalibratedOrientationNED().getValue()[1] * (180 / M_PI))*10);
+      setProperty("dp_ui_flight_panel_yaw", (llk.getCalibratedOrientationNED().getValue()[2] * (180 / M_PI)));
+    }
+    if (sm.updated("gpsLocationExternal")) {
+      const auto gps_location = sm["gpsLocationExternal"].getGpsLocationExternal();
+      float alt = 0.0;
+      if (gps_location.getFlags() % 2 != 0) {
+        alt = gps_location.getAltitude();
+      }
+      setProperty("dp_ui_flight_panel_alt", is_metric? QString("%1").arg(QString::number(alt, 'f', 1)) : QString("%1").arg(QString::number(alt * METER_TO_FOOT, 'f', 1)));
+      setProperty("dp_ui_flight_panel_alt_unit", is_metric? "m" : "ft");
+    }
+  }
+}
+
+void AnnotatedCameraWidget::drawFlightPanel(QPainter &p) {
+  int half_width = width()/2;
+  int half_height = height()/2;
+
+  // rick - flight panel - compass
+  {
+    {
+      // rick - flight panel - background
+      p.save();
+      p.setPen(Qt::NoPen);
+      p.setBrush(blackColor(100));
+      p.translate(half_width, half_height);
+      p.drawEllipse(QPoint(0, 0), half_height, half_height);
+      p.restore();
+
+      // rick - flight panel - compass background
+      QSize compass_img_size = QSize(width(), height());
+      if (dp_ui_flight_panel_compass.isNull() || dp_ui_flight_panel_compass.size() != compass_img_size) {
+        // Recreate the compass image with the current size
+        dp_ui_flight_panel_compass = QImage(compass_img_size, QImage::Format_ARGB32);
+        dp_ui_flight_panel_compass.fill(Qt::transparent); // Fill with a transparent background
+        // Create a QPainter for the image
+        QPainter imagePainter(&dp_ui_flight_panel_compass);
+        imagePainter.translate(half_width, half_height);
+
+
+        int indicator_offset = 2;
+        int indicator_size = half_height - 4*indicator_offset;
+
+        int     yaw_line_num = 36;
+        float   rotAng = 360.0 / yaw_line_num;
+        int     yaw_line_len = indicator_size/20;
+        QString s;
+
+        imagePainter.setPen(QPen(whiteColor(150)));
+        for(int i = 0; i < yaw_line_num; i++) {
+          double fx1 = 0;
+          double fy1 = -indicator_size + indicator_offset;
+          double fx2 = 0;
+          double fy2 = 0;
+
+          imagePainter.setFont(InterFont(dp_ui_flight_panel_font_size*0.5));
+          if( i % 3 == 0 ) {
+            // paint compass lines - long
+            fy2 = fy1 + yaw_line_len;
+            imagePainter.drawLine(QPointF(fx1, fy1), QPointF(fx2, fy2));
+
+            // paint compass text
+            if (i % 9 != 0) {
+              s = QString("%1").arg(i*rotAng);
+            } else {
+              imagePainter.setFont(InterFont(dp_ui_flight_panel_font_size*1.2, QFont::Bold));
+              if( i == 0 ) {
+                  s = "N";
+              } else if ( i == 9 ) {
+                  s = "E";
+              } else if ( i == 18 ) {
+                  s = "S";
+              } else if ( i == 27 ) {
+                  s = "W";
+              }
+            }
+            imagePainter.drawText(QRectF(-50, fy2+4, 100, dp_ui_flight_panel_font_size+2), Qt::AlignCenter, s);
+          } else {
+            // paint compass lines - short
+            fy2 = fy1 + yaw_line_len/2;
+            imagePainter.drawLine(QPointF(fx1, fy1), QPointF(fx2, fy2));
+          }
+          imagePainter.rotate(rotAng);
+        }
+        imagePainter.end();
+      }
+
+      // Draw the pre-rendered compass image onto the widget
+      p.save();
+      p.drawImage(0, 0, dp_ui_flight_panel_compass);
+      p.restore();
+    }
+    {
+      p.save();
+      p.translate(half_width, half_height);
+      int indicator_offset = 2;
+      int indicator_size = half_height - 4*indicator_offset;
+      int     rollMarkerSize = indicator_size/10;
+      double  fx1, fy1, fx2, fy2, fx3, fy3;
+
+      p.rotate(dp_ui_flight_panel_yaw);
+      p.setBrush(QBrush(QColor(0x00, 0xff, 0x00, 150)));
+      p.setPen(Qt::NoPen);
+
+      fx1 = 0;
+      fy1 = -indicator_size + indicator_offset;
+      fx2 = fx1 - rollMarkerSize/2;
+      fy2 = fy1 + rollMarkerSize;
+      fx3 = fx1 + rollMarkerSize/2;
+      fy3 = fy1 + rollMarkerSize;
+
+      QPointF points[3] = {
+        QPointF(fx1, fy1),
+        QPointF(fx2, fy2),
+        QPointF(fx3, fy3)
+      };
+      p.drawPolygon(points, 3);
+      p.restore();
+    }
+  }
+  // rick - flight panel - level
+  {
+    p.save();
+    const int text_width = 200;
+    int indicator_offset = 2;
+    int indicator_size = half_height - 4*indicator_offset;
+    p.translate(half_width, half_height);
+    QPen   pitchPen(whiteColor(150));
+    QPen   pitchZero(QColor(0x00, 0xff, 0x00, 150));
+
+    int x, y, x1, y1;
+    double p_val, r;
+//    int ll = indicator_size/4, l;
+
+    QString s;
+
+    pitchPen.setWidth(2);
+    pitchZero.setWidth(2);
+    p.setFont(InterFont(dp_ui_flight_panel_font_size, QFont::DemiBold));
+
+    // draw lines
+    for(int i=-60; i<=60; i++) {
+      int l = indicator_size/4;
+      p_val = i*10;
+
+//      l = i % 3 == 0? ll : ll/2;
+
+      y = indicator_size/3*p_val/45.0 - indicator_size/3*(-dp_ui_flight_panel_pitch)/45.0;
+      x = l;
+
+      r = sqrt(x*x + y*y);
+
+      if( r > indicator_size/2.5 ) continue;
+
+      p.setPen( i == 0? pitchZero : pitchPen);
+      if (i == 0) {
+        l *= 1.8;
+      } else if (i % 3 != 0) {
+        l *= 0.5;
+      }
+      p.drawLine(QPointF(-l, 1.0*y), QPointF(l, 1.0*y));
+
+      if( i % 3 == 0 && i != 0 ) {
+        x1 = -x-10-text_width;
+        y1 = y - dp_ui_flight_panel_font_size/2 - 1;
+
+        s = QString("%1").arg(-p_val*0.1);
+
+        p.setPen(pitchPen);
+        p.drawText(QRectF(x1, y1, text_width, dp_ui_flight_panel_font_size), Qt::AlignRight|Qt::AlignVCenter, s);
+      }
+    }
+
+    // draw marker
+    int     markerSize = indicator_size/10;
+    float   fx1, fy1, fx2, fy2, fx3, fy3;
+
+    p.setBrush(QBrush(QColor(0x00, 0xff, 0x00, 150)));
+    p.setPen(Qt::NoPen);
+
+    fx1 = markerSize;
+    fy1 = 0;
+    fx2 = fx1 + markerSize;
+    fy2 = -markerSize/2;
+    fx3 = fx1 + markerSize;
+    fy3 = markerSize/2;
+
+    QPointF points[3] = {
+      QPointF(fx1, fy1),
+      QPointF(fx2, fy2),
+      QPointF(fx3, fy3)
+    };
+    p.drawPolygon(points, 3);
+
+    QPointF points2[3] = {
+      QPointF(-fx1, fy1),
+      QPointF(-fx2, fy2),
+      QPointF(-fx3, fy3)
+    };
+    p.drawPolygon(points2, 3);
+    p.restore();
+  }
+  // rick - flight panel - alt
+  {
+    p.save();
+    p.translate(half_width, half_height);
+    p.setPen(QPen(whiteColor(200)));
+    p.setFont(InterFont(dp_ui_flight_panel_font_size, QFont::DemiBold));
+    p.drawText(QRectF(-100, height()*0.3, 200, 50), Qt::AlignCenter|Qt::AlignVCenter, dp_ui_flight_panel_alt);
+    p.setFont(InterFont(dp_ui_flight_panel_font_size-24));
+    p.drawText(QRectF(-100, height()*0.3+50, 200, 30), Qt::AlignCenter|Qt::AlignVCenter, dp_ui_flight_panel_alt_unit);
+    p.restore();
+  }
 }
 
 void AnnotatedCameraWidget::drawHud(QPainter &p) {
@@ -916,15 +1136,29 @@ void AnnotatedCameraWidget::drawLead(QPainter &painter, const cereal::RadarState
   painter.drawPolygon(chevron, std::size(chevron));
 
   // DP: Chevron detailed info.
-  QString dist = is_metric? QString::number((v_rel + v_ego) * 3.6,'f', 0) + "kmh | " + QString::number(d_rel,'f',1) + "m" : QString::number((v_rel + v_ego) * 2.236936,'f', 0) + "mph | " + QString::number(d_rel*3.2808,'f',1) + "ft";
-  int str_w = 350;
-  painter.setFont(InterFont(42, QFont::Bold));
-  painter.setPen(QColor(0x0, 0x0, 0x0 , 200)); //Shadow
-  painter.drawText(QRect(x+4-(str_w/2), y+62, str_w, 50), Qt::AlignVCenter | Qt::AlignCenter, dist);
-  painter.setPen(QColor(0xff, 0xff, 0xff));
-  painter.drawText(QRect(x+2-(str_w/2), y+60, str_w, 50), Qt::AlignVCenter | Qt::AlignCenter, dist);
-  painter.setPen(Qt::NoPen);
+  if (d_rel > 0) {
+    QString dist = is_metric? QString::number(d_rel,'f',1) + "m" : QString::number(d_rel*3.2808,'f',1) + "ft";
+    int str_w = 350;
+    painter.setFont(InterFont(40, QFont::Bold));
+    painter.setPen(blackColor(200)); //Shadow
+    painter.drawText(QRect(x+4-(str_w/2), y+42, str_w, 50), Qt::AlignVCenter | Qt::AlignCenter, dist);
+    painter.setPen(whiteColor());
+    painter.drawText(QRect(x+2-(str_w/2), y+40, str_w, 50), Qt::AlignVCenter | Qt::AlignCenter, dist);
+    painter.setPen(Qt::NoPen);
 
+    if (d_rel > 0 && v_ego > 0) {
+      float ttc = d_rel / v_ego;
+      if (ttc < 5) {
+        QString ttc_str = QString::number(ttc, 'f', 1) + "s";
+        painter.setFont(InterFont(56, QFont::Bold));
+        painter.setPen(blackColor(200)); //Shadow
+        painter.drawText(QRect(x+4-(str_w/2), y+87, str_w, 50), Qt::AlignVCenter | Qt::AlignCenter, ttc_str);
+        painter.setPen(whiteColor());
+        painter.drawText(QRect(x+2-(str_w/2), y+85, str_w, 50), Qt::AlignVCenter | Qt::AlignCenter, ttc_str);
+        painter.setPen(Qt::NoPen);
+      }
+    }
+  }
   painter.restore();
 }
 
@@ -1062,7 +1296,9 @@ void AnnotatedCameraWidget::paintGL() {
         update_leads(s, radar_state, sm["modelV2"].getModelV2().getPosition());
       }
     }
-
+    if (!dp_no_gps_ctrl) {
+      drawFlightPanel(painter);
+    }
     drawLaneLines(painter, s);
 
     if (s->scene.longitudinal_control) {

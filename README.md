@@ -35,6 +35,7 @@ I encourage users to consider purchasing a [comma 3](https://shop.comma.ai) for 
 
 ## Limitations
 
+* On-road tests are conducted exclusively in a 2021 Toyota C-HR; other models may not perform properly.
 * CAN-FD and BODY features are not supported due to outdated libraries in EON/C2 firmware.
 * The driving AI model remains in version 0.8.16, as porting TinyGrad/PyOpenCL requires significant effort.
 * The driver monitoring AI model remains in version 0.8.13.
@@ -49,7 +50,6 @@ I encourage users to consider purchasing a [comma 3](https://shop.comma.ai) for 
 
 ## Configuration
 
-* Considering performance issues, I have turned off all logging-related services. If anyone needs to use them, they can use `dp_logging` parameter to enable them.
 * If you are not a Comma Two device, you can use the `dp_no_fan_ctrl` parameter to disable fan-related detection and control.
 
 =======================

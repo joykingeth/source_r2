@@ -99,6 +99,8 @@ class Controls:
     self.dp_device_disable_temp_check = self.params.get_bool("dp_device_disable_temp_check")
     self._dp_vag_timebomb_bypass_counter = 0
     self._dp_vag_timebomb_bypass = self.params.get_bool("dp_vag_timebomb_bypass")
+    self._dp_lat_lane_change_assist_disabled = int(self.params.get("dp_lat_lane_change_assist_speed", encoding="utf-8")) == 0
+    self._dp_lat_lane_change_assist_disabled_active = False
     self.sm = sm
     if self.sm is None:
       ignore = ['testJoystick']
@@ -636,6 +638,7 @@ class Controls:
                    (not standstill or self.joystick_mode)
     CC.longActive = self.enabled and not self.events.contains(ET.OVERRIDE_LONGITUDINAL) and self.CP.openpilotLongitudinalControl
 
+    # rick - alka
     if (self._dp_alka and self._dp_alka_active) and not standstill and CS.cruiseState.available:
       if self.sm['liveCalibration'].calStatus != log.LiveCalibrationData.Status.calibrated:
         pass
@@ -645,6 +648,22 @@ class Controls:
         pass
       else:
         CC.latActive = True
+
+    # rick - assist-less lane change
+    if self._dp_lat_lane_change_assist_disabled:
+      # de-activate
+      if not CS.leftBlinker and not CS.rightBlinker:
+        self._dp_lat_lane_change_assist_disabled_active = False
+
+      # activate
+      if not self._dp_lat_lane_change_assist_disabled_active and CS.steeringPressed and \
+        ((CS.steeringTorque > 0 and CS.leftBlinker) or
+         (CS.steeringTorque < 0 and CS.rightBlinker)):
+        self._dp_lat_lane_change_assist_disabled_active = True
+
+      if self._dp_lat_lane_change_assist_disabled_active:
+        self.events.add(EventName.laneChange)
+        CC.latActive = False
 
     # rick - vag timebomb bypass
     if self._dp_vag_timebomb_bypass:
@@ -661,6 +680,7 @@ class Controls:
         if self._dp_vag_timebomb_bypass_counter >= DP_VAG_TIMEBOMB_BYPASS_START:
           self.events.add(EventName.ldw)
           CC.latActive = False
+          CC.longActive = False
 
         # reset counter
         if self._dp_vag_timebomb_bypass_counter >= DP_VAG_TIMEBOMB_BYPASS_END:

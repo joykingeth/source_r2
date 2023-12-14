@@ -125,6 +125,11 @@ class AnnotatedCameraWidget : public CameraWidget {
   Q_PROPERTY(bool use_lanelines MEMBER use_lanelines);
   Q_PROPERTY(bool speed_limit_valid MEMBER speed_limit_valid);
 
+  Q_PROPERTY(float dp_ui_flight_panel_pitch MEMBER dp_ui_flight_panel_pitch);
+  Q_PROPERTY(float dp_ui_flight_panel_yaw MEMBER dp_ui_flight_panel_yaw);
+  Q_PROPERTY(QString dp_ui_flight_panel_alt MEMBER dp_ui_flight_panel_alt);
+  Q_PROPERTY(QString dp_ui_flight_panel_alt_unit MEMBER dp_ui_flight_panel_alt_unit);
+
 public:
   explicit AnnotatedCameraWidget(VisionStreamType type, QWidget* parent = 0);
   void updateState(const UIState &s);
@@ -164,11 +169,22 @@ private:
   AccelButton *accel_btn;
   PersonalityButton *personality_btn;
 
+  // rick - flight panel
+  const int dp_ui_flight_panel_font_size = 56;
+  float dp_ui_flight_panel_pitch = 0.0;
+  float dp_ui_flight_panel_yaw = 0.0;
+  QString dp_ui_flight_panel_alt;
+  QString dp_ui_flight_panel_alt_unit;
+  bool dp_no_gps_ctrl = false;
+  QImage dp_ui_flight_panel_compass;
+
+
 protected:
   void paintGL() override;
   void initializeGL() override;
   void showEvent(QShowEvent *event) override;
   void updateFrameMat() override;
+  void drawFlightPanel(QPainter &p);
   void drawLaneLines(QPainter &painter, const UIState *s);
   void drawLead(QPainter &painter, const cereal::RadarState::LeadData::Reader &lead_data, const QPointF &vd, float v_ego);
   void drawHud(QPainter &p);
