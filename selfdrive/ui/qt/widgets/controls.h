@@ -255,6 +255,19 @@ public:
     }
   }
 
+  // Public method to manually refresh the control
+  void refreshControl() {
+    int value = atoi(params.get(key).c_str());
+
+    // Loop through buttons and update their checked state based on the current value
+    for (int i = 0; i < button_group->buttons().size(); i++) {
+      QPushButton *button = dynamic_cast<QPushButton*>(button_group->button(i));
+      if (button) {
+        button->setChecked(i == value);
+      }
+    }
+  }
+
 private:
   std::string key;
   Params params;

@@ -268,6 +268,7 @@ void TogglesPanel::updateToggles() {
     experimental_mode_toggle->setDescription(e2e_description);
     op_long_toggle->setVisible(false);
   }
+  long_personality_setting->refreshControl();
 }
 
 DevicePanel::DevicePanel(SettingsWindow *parent) : ListWidget(parent) {
