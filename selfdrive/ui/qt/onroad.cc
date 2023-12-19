@@ -583,7 +583,7 @@ void AnnotatedCameraWidget::updateState(const UIState &s) {
   setProperty("use_lanelines", sm["lateralPlan"].getLateralPlan().getUseLaneLines());
 
   // for flight panel
-  if (!s.scene.dp_device_display_flight_panel || !dp_no_gps_ctrl) {
+  if (!dp_no_gps_ctrl && s.scene.dp_device_display_flight_panel) {
     if (sm.updated("liveLocationKalman")) {
       const auto llk = sm["liveLocationKalman"].getLiveLocationKalman();
       setProperty("dp_ui_flight_panel_pitch", (llk.getCalibratedOrientationNED().getValue()[1] * (180 / M_PI))*10);
