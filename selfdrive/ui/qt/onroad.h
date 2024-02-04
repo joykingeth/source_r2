@@ -169,6 +169,13 @@ private:
   AccelButton *accel_btn;
   PersonalityButton *personality_btn;
 
+  // rainbow
+  // higher = smoother, but consume more memory / cpu
+  const int NUM_COLORS = 25;
+  const int ALPHA = 128; // 50% opacity
+  QList<QColor> colorList;
+  qreal rotation = 0;
+
   // rick - flight panel
   const int dp_ui_flight_panel_font_size = 56;
   float dp_ui_flight_panel_pitch = 0.0;

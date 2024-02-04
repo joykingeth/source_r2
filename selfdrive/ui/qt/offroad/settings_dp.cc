@@ -178,7 +178,12 @@ void DPCtrlPanel::add_device_toggles() {
     {
       "dp_device_display_flight_panel",
       tr("Display Flight Panel"),
-      tr("When enabled, openpilot will show information such as pitch angle, altitude, compass on the driving screen.\nGPS Required."),
+      tr("When enabled, openpilot will show information such as pitch angle, altitude, compass on the driving screen.\nGPS required."),
+    },
+    {
+      "dp_ui_rainbow",
+      tr("Display Rainbow Path like Tesla."),
+      tr("When enabled, openpilot driving path will be replaced with rainbow path and color will change based on the speed."),
     },
     {
       "dp_device_disable_temp_check",

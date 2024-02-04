@@ -979,8 +979,26 @@ void AnnotatedCameraWidget::drawLaneLines(QPainter &painter, const UIState *s) {
 
   // paint path
   #ifndef QCOM
-  QLinearGradient bg(0, height(), 0, 0);
-  if (sm["controlsState"].getControlsState().getExperimentalMode()) {
+  if (s->scene.dp_ui_rainbow) {
+    QLinearGradient bg(0, height(), 0, 0);
+    bg.setSpread(QGradient::RepeatSpread);
+    // bigger = faster, however it is still limited to the global UI_FREQ (refresh rate)
+    // only way to make it move faster is to reduce NUM_COLORS, but that will also reduce the color smoothness.
+    qreal rotationSpeed = fmax(0.01, sm["carState"].getCarState().getVEgo()) / UI_FREQ;
+    rotation -= rotationSpeed;
+    if (rotation < 0) {
+      rotation += 1;
+      colorList.push_back(colorList.takeFirst());
+    }
+    // fill color
+    for (int i = 0; i < NUM_COLORS; ++i) {
+      qreal position = i / static_cast<qreal>(NUM_COLORS - 1);
+      QColor color = colorList.at(i);
+      bg.setColorAt(position, color);
+    }
+  }
+  else if (sm["controlsState"].getControlsState().getExperimentalMode()) {
+    QLinearGradient bg(0, height(), 0, 0);
     // The first half of track_vertices are the points for the right side of the path
     // and the indices match the positions of accel from uiPlan
     const auto &acceleration = sm["uiPlan"].getUiPlan().getAccel();
@@ -1006,11 +1024,29 @@ void AnnotatedCameraWidget::drawLaneLines(QPainter &painter, const UIState *s) {
       // Skip a point, unless next is last
       i += (i + 2) < max_len ? 1 : 0;
     }
-
+  }
   #else
-  QLinearGradient bg(0, height(), 0, height() / 4);
-  float start_hue, end_hue;
-  if (sm["controlsState"].getControlsState().getExperimentalMode() && sm["longitudinalPlanExt"].getLongitudinalPlanExt().getDpE2EIsBlended()) {
+  if (s->scene.dp_ui_rainbow) {
+    QLinearGradient bg(0, height(), 0, 0);
+    bg.setSpread(QGradient::RepeatSpread);
+    // bigger = faster, however it is still limited to the global UI_FREQ (refresh rate)
+    // only way to make it move faster is to reduce NUM_COLORS, but that will also reduce the color smoothness.
+    qreal rotationSpeed = fmax(0.01, sm["carState"].getCarState().getVEgo()) / UI_FREQ;
+    rotation -= rotationSpeed;
+    if (rotation < 0) {
+      rotation += 1;
+      colorList.push_back(colorList.takeFirst());
+    }
+    // fill color
+    for (int i = 0; i < NUM_COLORS; ++i) {
+      qreal position = i / static_cast<qreal>(NUM_COLORS - 1);
+      QColor color = colorList.at(i);
+      bg.setColorAt(position, color);
+    }
+  }
+  else if (sm["controlsState"].getControlsState().getExperimentalMode() && sm["longitudinalPlanExt"].getLongitudinalPlanExt().getDpE2EIsBlended()) {
+    QLinearGradient bg(0, height(), 0, height() / 4);
+    float start_hue, end_hue;
     const auto &acceleration = sm["modelV2"].getModelV2().getAcceleration();
     float acceleration_future = 0;
     if (acceleration.getZ().size() > 16) {
@@ -1026,8 +1062,10 @@ void AnnotatedCameraWidget::drawLaneLines(QPainter &painter, const UIState *s) {
     bg.setColorAt(0.0, QColor::fromHslF(start_hue / 360., 0.97, 0.56, 0.4));
     bg.setColorAt(0.5, QColor::fromHslF(end_hue / 360., 1.0, 0.68, 0.35));
     bg.setColorAt(1.0, QColor::fromHslF(end_hue / 360., 1.0, 0.68, 0.0));
+  }
   #endif
-  } else {
+  else {
+    QLinearGradient bg(0, height(), 0, height() / 4);
     bg.setColorAt(0.0, QColor::fromHslF(148 / 360., 0.94, 0.51, 0.4));
     bg.setColorAt(0.5, QColor::fromHslF(112 / 360., 1.0, 0.68, 0.35));
     bg.setColorAt(1.0, QColor::fromHslF(112 / 360., 1.0, 0.68, 0.0));

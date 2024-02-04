@@ -83,6 +83,7 @@ def manager_init() -> None:
     ("dp_lat_lane_change_assist_speed", "20"),
     ("dp_toyota_tss2_radar_disabled", "0"),
     ("dp_device_display_flight_panel", "0"),
+    ("dp_ui_rainbow", "0"),
   ]
   if not PC:
     default_params.append(("LastUpdateTime", datetime.datetime.utcnow().isoformat().encode('utf8')))
