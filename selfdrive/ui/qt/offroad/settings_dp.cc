@@ -72,6 +72,13 @@ void DPCtrlPanel::add_lateral_toggles() {
   speed_based_lane_priority_toggle = new ParamSpinBoxControl("dp_lat_lane_priority_mode_speed_based", tr("Only When Drive Above"),
                                                   tr("All Speed - Use Lane Line when available.\n*Number* - Use Lane Line when available and drive speed is above the *number*."),
                                                   "", 0, 120, 1, tr(" kph"), tr("All Speed"));
+
+  std::vector<QString> dp_lat_controller_texts{tr("DEFAULT"), tr("INDI"), tr("LQR")};
+  ButtonParamControl* dp_lat_controller_setting = new ButtonParamControl("dp_lat_controller", tr("Lateral Controller"),
+                                          tr("Change your lateral controller.\nUSE AT YOUR OWN RISK!\nReboot required."),
+                                          "",
+                                          dp_lat_controller_texts);
+
   for (auto &[param, title, desc] : toggle_defs) {
     if (param == "") {
       auto label = new LabelControl(title, "");
@@ -85,7 +92,10 @@ void DPCtrlPanel::add_lateral_toggles() {
 
     addItem(toggle);
     toggles[param.toStdString()] = toggle;
-    if (param == "dp_lat_lane_priority_mode") {
+    if (param == "dp_alka") {
+      addItem(dp_lat_controller_setting);
+    }
+    else if (param == "dp_lat_lane_priority_mode") {
       connect(toggle, &ToggleControl::toggleFlipped, [=]() {
         updateToggles();
       });
