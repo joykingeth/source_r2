@@ -1334,7 +1334,7 @@ void AnnotatedCameraWidget::paintGL() {
         update_leads(s, radar_state, sm["modelV2"].getModelV2().getPosition());
       }
     }
-    if (!dp_no_gps_ctrl) {
+    if (!dp_no_gps_ctrl && s->scene.dp_device_display_flight_panel) {
       drawFlightPanel(painter);
     }
     drawLaneLines(painter, s);
