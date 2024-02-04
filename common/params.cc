@@ -212,6 +212,7 @@ std::unordered_map<std::string, uint32_t> keys = {
     {"dp_no_gps_ctrl", PERSISTENT},
     {"dp_no_fan_ctrl", PERSISTENT},
     {"dp_logging", PERSISTENT},
+    {"dp_lat_controller", PERSISTENT},
 
     // dp - car selector
     {"dp_car_assigned", PERSISTENT},

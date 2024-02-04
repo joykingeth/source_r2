@@ -51,6 +51,7 @@ def manager_init() -> None:
     ("dp_no_fan_ctrl", "0"),
     ("dp_logging", "1"),
     ("dp_0813", "1"),
+    ("dp_lat_controller", "0"),
 
     # dp addition
     ("dp_alka", "0"),
