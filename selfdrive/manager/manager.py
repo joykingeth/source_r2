@@ -24,6 +24,7 @@ from openpilot.system.version import is_dirty, get_commit, get_version, get_orig
                            get_normalized_origin, terms_version, training_version, \
                            is_tested_branch, is_release_branch
 import json
+from openpilot.selfdrive.car.fingerprints import all_known_cars, all_legacy_fingerprint_cars
 
 
 def manager_init() -> None:
@@ -280,27 +281,16 @@ def main() -> None:
 
 
 def get_support_car_list():
-  attrs = ['FINGERPRINTS', 'FW_VERSIONS']
   cars = dict({"cars": []})
-  models = []
-  for car_folder in [x[0] for x in os.walk('/data/openpilot/selfdrive/car')]:
-    try:
-      car_name = car_folder.split('/')[-1]
-      if car_name not in ("mock", "body", "torque_data", "tests"):
-        for attr in attrs:
-          values = __import__('selfdrive.car.%s.values' % car_name, fromlist=[attr])
-          if hasattr(values, attr):
-            attr_values = getattr(values, attr)
-          else:
-            continue
-          if isinstance(attr_values, dict):
-            for f, v in attr_values.items():
-              if f not in models:
-                models.append(f)
-    except (ImportError, IOError, ValueError):
-      pass
-  models.sort()
-  cars["cars"] = models
+  list = []
+  for car in all_known_cars():
+    list.append(str(car))
+
+  for car in all_legacy_fingerprint_cars():
+    name = str(car)
+    if name not in list:
+      list.append(name)
+  cars["cars"] = sorted(list)
   return json.dumps(cars)
 
 
