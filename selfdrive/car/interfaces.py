@@ -108,9 +108,9 @@ class CarInterfaceBase(ABC):
     # rick - override lat controller
     dp_lat_controller = int(Params().get("dp_lat_controller"))
     if dp_lat_controller == 1:  # indi
-      ret = cls.configure_indi_tune(ret.lateralTuning)
+      cls.configure_indi_tune(ret.lateralTuning)
     elif dp_lat_controller == 2:  # lqr
-      ret = cls.configure_lqr_tune(ret.lateralTuning)
+      cls.configure_lqr_tune(ret.lateralTuning)
 
     # Vehicle mass is published curb weight plus assumed payload such as a human driver; notCars have no assumed payload
     if not ret.notCar:
@@ -380,7 +380,9 @@ class CarStateBase(ABC):
 
   def update_speed_kf(self, v_ego_raw):
     if abs(v_ego_raw - self.v_ego_kf.x[0][0]) > 2.0:  # Prevent large accelerations when car starts at non zero speed
-      self.v_ego_kf.set_x([[v_ego_raw], [0.0]])
+      # rick - set_x not available in this KF1D
+      # self.v_ego_kf.set_x([[v_ego_raw], [0.0]])
+      self.v_ego_kf.x = [[v_ego_raw], [0.0]]
 
     v_ego_x = self.v_ego_kf.update(v_ego_raw)
     return float(v_ego_x[0]), float(v_ego_x[1])
