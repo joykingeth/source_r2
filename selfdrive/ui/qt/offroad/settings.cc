@@ -281,7 +281,8 @@ DevicePanel::DevicePanel(SettingsWindow *parent) : ListWidget(parent) {
       std::string result = "";
       while (!feof(pipe)) {
         if (fgets(buffer, 128, pipe) != nullptr) {
-          result += buffer;
+          // rick - reversely
+          result = std::string(buffer) + result;
         }
       }
       pclose(pipe);
