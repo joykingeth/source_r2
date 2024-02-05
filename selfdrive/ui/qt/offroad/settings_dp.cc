@@ -192,7 +192,7 @@ void DPCtrlPanel::add_device_toggles() {
     },
     {
       "dp_ui_rainbow",
-      tr("Display Rainbow Path like Tesla."),
+      tr("Display Tesla-style Rainbow Path"),
       tr("When enabled, openpilot driving path will be replaced with rainbow path and color will change based on the speed."),
     },
     {

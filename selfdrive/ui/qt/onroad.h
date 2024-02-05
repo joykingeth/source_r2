@@ -173,8 +173,9 @@ private:
   // higher = smoother, but consume more memory / cpu
   const int NUM_COLORS = 25;
   const int ALPHA = 128; // 50% opacity
-  QList<QColor> colorList;
+  QList<QColor> color_list;
   qreal rotation = 0;
+  bool color_list_init = false;
 
   // rick - flight panel
   const int dp_ui_flight_panel_font_size = 56;
