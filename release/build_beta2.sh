@@ -134,6 +134,8 @@ rm -fr third_party/snpe/x86*
 rm -fr third_party/snpe/dsp/libsnpe_dsp_v68_domains_v3_skel.so
 find . -name '*.c' -delete
 find . -name '*.cpp' -delete
+cp $SOURCE_DIR/panda/board/obj/bootstub.panda_h7.bin $BUILD_DIR/panda/board/obj/
+cp $SOURCE_DIR/panda/board/obj/panda_h7.bin.signed $BUILD_DIR/panda/board/obj/
 
 # make sure src is deleted
 rm selfdrive/dragonpilot/otisserv.py

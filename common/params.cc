@@ -212,6 +212,7 @@ std::unordered_map<std::string, uint32_t> keys = {
     {"dp_no_gps_ctrl", PERSISTENT},
     {"dp_no_fan_ctrl", PERSISTENT},
     {"dp_logging", PERSISTENT},
+    {"dp_lat_controller", PERSISTENT},
 
     // dp - car selector
     {"dp_car_assigned", PERSISTENT},
@@ -249,6 +250,7 @@ std::unordered_map<std::string, uint32_t> keys = {
     {"dp_lat_lane_change_assist_speed", PERSISTENT},
     {"dp_toyota_tss2_radar_disabled", PERSISTENT},
     {"dp_device_display_flight_panel", PERSISTENT},
+    {"dp_ui_rainbow", PERSISTENT},
 };
 
 } // namespace

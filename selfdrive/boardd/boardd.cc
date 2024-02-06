@@ -388,7 +388,8 @@ std::optional<bool> send_panda_states(PubMaster *pm, const std::vector<Panda *> 
     ps.setIgnitionLine(health.ignition_line_pkt);
     ps.setIgnitionCan(health.ignition_can_pkt);
     ps.setControlsAllowed(health.controls_allowed_pkt);
-    ps.setGasInterceptorDetected(health.gas_interceptor_detected_pkt);
+    // rick - deprecated in panda
+//    ps.setGasInterceptorDetected(health.gas_interceptor_detected_pkt);
     ps.setTxBufferOverflow(health.tx_buffer_overflow_pkt);
     ps.setRxBufferOverflow(health.rx_buffer_overflow_pkt);
     ps.setGmlanSendErrs(health.gmlan_send_errs_pkt);
@@ -590,9 +591,11 @@ void panda_state_thread(std::vector<Panda *> pandas, bool spoofing_started) {
 void peripheral_control_thread(Panda *panda, bool no_fan_control) {
   util::set_thread_name("boardd_peripheral_control");
   Params p;
-  // rick - a device with black panda = EON / LEON / clone 1.5
+  // rick - a device with black/red panda = EON / LEON / clone 1.5
   if (!p.getBool("dp_no_fan_ctrl")) {
-    no_fan_control = panda->hw_type == cereal::PandaState::PandaType::BLACK_PANDA;
+    no_fan_control = panda->hw_type == cereal::PandaState::PandaType::BLACK_PANDA ||
+        panda->hw_type == cereal::PandaState::PandaType::RED_PANDA ||
+        panda->hw_type == cereal::PandaState::PandaType::RED_PANDA_V2;
     p.putBool("dp_no_fan_ctrl", no_fan_control);
   }
   bool no_ir_ctrl = p.getBool("dp_device_no_ir_ctrl");

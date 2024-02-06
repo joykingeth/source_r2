@@ -281,7 +281,8 @@ DevicePanel::DevicePanel(SettingsWindow *parent) : ListWidget(parent) {
       std::string result = "";
       while (!feof(pipe)) {
         if (fgets(buffer, 128, pipe) != nullptr) {
-          result += buffer;
+          // rick - reversely
+          result = std::string(buffer) + result;
         }
       }
       pclose(pipe);
@@ -343,6 +344,14 @@ DevicePanel::DevicePanel(SettingsWindow *parent) : ListWidget(parent) {
     }
   });
   addItem(translateBtn);
+
+  #ifdef QCOM
+  auto sysVolBtn = new ButtonControl(tr("Adjust System Sound Settings"), tr("ADJUST"), "");
+  connect(sysVolBtn, &ButtonControl::clicked, [=]() {
+    QObject::connect(sysVolBtn, &ButtonControl::clicked, [=]() { HardwareEon::launch_vol(); });
+  });
+  addItem(sysVolBtn);
+  #endif
 
 //  QObject::connect(uiState(), &UIState::offroadTransition, [=](bool offroad) {
 //    for (auto btn : findChildren<ButtonControl *>()) {
