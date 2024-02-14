@@ -32,7 +32,7 @@ def extract_image(buf): #, w, h, stride):
   w = buf.width
   h = buf.height
   stride = buf.stride
-  img = np.hstack([buf[i * stride:i * stride + 3 * w] for i in range(h)])
+  img = np.hstack([buf.data[i * stride:i * stride + 3 * w] for i in range(h)])
   b = img[::3].reshape(h, w)
   g = img[1::3].reshape(h, w)
   r = img[2::3].reshape(h, w)
