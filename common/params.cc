@@ -248,7 +248,6 @@ std::unordered_map<std::string, uint32_t> keys = {
     {"dp_long_personality_btn", PERSISTENT},
     {"dp_vag_timebomb_bypass", PERSISTENT},
     {"dp_lat_lane_change_assist_speed", PERSISTENT},
-    {"dp_toyota_tss2_radar_disabled", PERSISTENT},
     {"dp_device_display_flight_panel", PERSISTENT},
     {"dp_ui_rainbow", PERSISTENT},
 };

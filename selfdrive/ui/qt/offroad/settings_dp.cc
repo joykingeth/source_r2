@@ -302,11 +302,6 @@ void DPCtrlPanel::add_toyota_toggles() {
       tr("Enable Zorro-Steering-Sensor (ZSS) Support"),
       tr("When enabled, openpilot will use sensor outputs from ZSS for more accurate steering control.\nDO NOT ENABLE unless you have ZSS installed.\nReboot Required."),
     },
-    {
-      "dp_toyota_tss2_radar_disabled",
-      tr("Disable TSS2 Radar for OP Long Ctrl"),
-      tr("When enabled, openpilot will disable radar in order to support longitudinal control.\nTHIS WILL DISABLE AEB!\nDO NOT ENABLE UNLESS YOU KNOW WHAT YOU ARE DOING!\nReboot Required."),
-    },
   };
   for (auto &[param, title, desc] : toggle_defs) {
     if (param == "") {

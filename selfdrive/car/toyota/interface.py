@@ -46,8 +46,6 @@ class CarInterface(CarInterfaceBase):
 
     stop_and_go = candidate in TSS2_CAR
 
-    ret.dashcamOnly = False if ret.dashcamOnly and Params().get_bool("dp_car_dashcam_mode_removal") else ret.dashcamOnly
-
     if candidate == CAR.PRIUS:
       stop_and_go = True
       ret.wheelbase = 2.70
@@ -236,8 +234,10 @@ class CarInterface(CarInterfaceBase):
 
       if not use_sdsu:
         # Disabling radar is only supported on TSS2 radar-ACC cars
-        if experimental_long and candidate in RADAR_ACC_CAR and Params().get_bool("dp_toyota_tss2_radar_disabled"):  # TODO: disabling radar isn't supported yet
+        if experimental_long and candidate in RADAR_ACC_CAR: # and False:  # TODO: disabling radar isn't supported yet
           ret.flags |= ToyotaFlags.DISABLE_RADAR.value
+          # rick - looks like this is only for doc, we still want to set this to true to prevent removing ExperimentalLongitudinalEnabled in controlsd.py
+          ret.experimentalLongitudinalAvailable = True
       else:
         use_sdsu = use_sdsu and experimental_long
 
