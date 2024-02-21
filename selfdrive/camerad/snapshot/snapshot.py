@@ -28,7 +28,7 @@ def jpeg_write(fn, dat):
   img.save(fn, "JPEG")
 
 
-def extract_image(buf): #, w, h, stride):
+def extract_image(buf):
   w = buf.width
   h = buf.height
   stride = buf.stride
