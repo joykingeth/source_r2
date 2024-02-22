@@ -8,7 +8,7 @@ BUILD_DIR=/data/openpilot
 SOURCE_DIR="$(git rev-parse --show-toplevel)"
 
 FILES_SRC="release/files_eon"
-DEVEL_BRANCH="b2"
+DEVEL_BRANCH="r2"
 TYPE="beta"
 
 # set git identity
@@ -51,6 +51,7 @@ VERSION=$(date '+%Y.%m.%d')
 echo "#define COMMA_VERSION \"$VERSION\"" > common/version.h
 
 echo "[-] committing version $VERSION T=$SECONDS"
+git config --global user.name "dragonpilot"
 git add -f .
 git commit -a -m "dragonpilot $TYPE v$VERSION EON/C2"
 git branch --set-upstream-to=origin/$DEVEL_BRANCH
