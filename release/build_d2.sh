@@ -51,7 +51,6 @@ VERSION=$(date '+%Y.%m.%d')
 echo "#define COMMA_VERSION \"$VERSION\"" > common/version.h
 
 echo "[-] committing version $VERSION T=$SECONDS"
-git config --global user.name "dragonpilot"
 git add -f .
 git commit -a -m "dragonpilot $TYPE version for EON/C2"
 git branch --set-upstream-to=origin/$DEVEL_BRANCH
