@@ -8,8 +8,8 @@ BUILD_DIR=/data/openpilot
 SOURCE_DIR="$(git rev-parse --show-toplevel)"
 
 FILES_SRC="release/files_eon"
-DEVEL_BRANCH="b2"
-TYPE="beta"
+DEVEL_BRANCH="dev2"
+TYPE="development"
 
 # set git identity
 source $DIR/identity.sh
@@ -52,7 +52,7 @@ echo "#define COMMA_VERSION \"$VERSION\"" > common/version.h
 
 echo "[-] committing version $VERSION T=$SECONDS"
 git add -f .
-git commit -a -m "dragonpilot $TYPE v$VERSION EON/C2"
+git commit -a -m "dragonpilot $TYPE version for EON/C2"
 git branch --set-upstream-to=origin/$DEVEL_BRANCH
 
 # Build panda firmware
@@ -155,7 +155,7 @@ DP_VERSION=$(cat $SOURCE_DIR/common/version.h | awk -F\" '{print $2}')
 # Add built files to git
 git add -f .
 git commit --amend -m "
-version: dragonpilot $TYPE v$DP_VERSION for EON/C2
+version: dragonpilot $TYPE version for EON/C2
 date: $DATETIME
 commit: $GIT_HASH
 "
