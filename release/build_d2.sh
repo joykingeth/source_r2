@@ -154,7 +154,7 @@ DP_VERSION=$(cat $SOURCE_DIR/common/version.h | awk -F\" '{print $2}')
 
 # Add built files to git
 git add -f .
-git commit --amend -m "
+git commit --amend --author="dragonpilot <dgnpilot@gmail.com>" -m "
 version: dragonpilot $TYPE version for EON/C2
 date: $DATETIME
 commit: $GIT_HASH
