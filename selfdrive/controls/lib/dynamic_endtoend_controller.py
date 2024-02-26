@@ -27,7 +27,7 @@ from common.numpy_fast import interp
 # d-e2e, from modeldata.h
 TRAJECTORY_SIZE = 33
 
-LEAD_WINDOW_SIZE = 5
+LEAD_WINDOW_SIZE = 3
 LEAD_PROB = 0.6
 
 SLOW_DOWN_WINDOW_SIZE = 5
