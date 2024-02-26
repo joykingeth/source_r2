@@ -21,7 +21,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 #
-# Version = 2023-12-13
+# Version = 2024-02-26
 from common.numpy_fast import interp
 
 # d-e2e, from modeldata.h
