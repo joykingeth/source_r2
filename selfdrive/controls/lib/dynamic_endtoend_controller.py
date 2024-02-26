@@ -196,7 +196,7 @@ class DynamicEndtoEndController:
     # when at highway cruise and SNG: blended
     # ensuring blended mode is used because acc is bad at catching SNG lead car
     # especially those who accel very fast and then brake very hard.
-    if self._sng_state == SNG_State.going and self._v_cruise_kph >= HIGHWAY_CRUISE_KPH:
+    if self._sng_state == SNG_State.going and self._v_cruise_kph < HIGHWAY_CRUISE_KPH:
       self._set_mode('blended')
       return
 
