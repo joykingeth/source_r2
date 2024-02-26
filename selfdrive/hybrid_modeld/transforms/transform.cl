@@ -22,19 +22,17 @@ __kernel void warpPerspective(__global const uchar * src,
         W = W != 0.0f ? INTER_TAB_SIZE / W : 0.0f;
         int X = rint(X0 * W), Y = rint(Y0 * W);
 
-        short sx = convert_short_sat(X >> INTER_BITS);
-        short sy = convert_short_sat(Y >> INTER_BITS);
+        // Clamp coordinates to stay within valid range
+        int sx = clamp(convert_int(X >> INTER_BITS), 0, src_cols - 1);
+        int sy = clamp(convert_int(Y >> INTER_BITS), 0, src_rows - 1);
+
         short ay = (short)(Y & (INTER_TAB_SIZE - 1));
         short ax = (short)(X & (INTER_TAB_SIZE - 1));
 
-        int v0 = (sx >= 0 && sx < src_cols && sy >= 0 && sy < src_rows) ?
-            convert_int(src[mad24(sy, src_step, src_offset + sx)]) : 0;
-        int v1 = (sx+1 >= 0 && sx+1 < src_cols && sy >= 0 && sy < src_rows) ?
-            convert_int(src[mad24(sy, src_step, src_offset + (sx+1))]) : 0;
-        int v2 = (sx >= 0 && sx < src_cols && sy+1 >= 0 && sy+1 < src_rows) ?
-            convert_int(src[mad24(sy+1, src_step, src_offset + sx)]) : 0;
-        int v3 = (sx+1 >= 0 && sx+1 < src_cols && sy+1 >= 0 && sy+1 < src_rows) ?
-            convert_int(src[mad24(sy+1, src_step, src_offset + (sx+1))]) : 0;
+        int v0 = convert_int(src[mad24(sy, src_step, src_offset + sx)]);
+        int v1 = convert_int(src[mad24(sy, src_step, src_offset + (sx+1))]);
+        int v2 = convert_int(src[mad24(sy+1, src_step, src_offset + sx)]);
+        int v3 = convert_int(src[mad24(sy+1, src_step, src_offset + (sx+1))]);
 
         float taby = 1.f/INTER_TAB_SIZE*ay;
         float tabx = 1.f/INTER_TAB_SIZE*ax;
