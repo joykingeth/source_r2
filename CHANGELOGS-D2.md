@@ -4,6 +4,7 @@
 * otisserv and fileserv only for offroad.
 * Enabling otisserv for offroad status and snapshot.
 * Toyota: improve longitudinal control (https://github.com/commaai/openpilot/pull/30697)
+* Updated manager/ modules
 
 2024-02-26
 ========================

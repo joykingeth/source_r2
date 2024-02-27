@@ -53,7 +53,7 @@ procs = [
   # PythonProcess("timezoned", "system.timezoned", enabled=not PC, offroad=True),
 
   DaemonProcess("manage_athenad", "selfdrive.athena.manage_athenad", "AthenadPid"),
-  NativeProcess("dmonitoringmodeld", "selfdrive/hybrid_modeld", ["./dmonitoringmodeld"], driverview, enabled=(not PC or WEBCAM)),
+  NativeProcess("dmonitoringmodeld", "selfdrive/hybrid_modeld", ["./dmonitoringmodeld"], driverview, enabled=(not PC or WEBCAM) and not NO_IR_CTRL),
   # NativeProcess("encoderd", "system/loggerd", ["./encoderd"]),
   # NativeProcess("stream_encoderd", "system/loggerd", ["./encoderd", "--stream"], onroad=False, callback=notcar),
   NativeProcess("loggerd", "selfdrive/loggerd", ["./loggerd"], logging),
@@ -69,7 +69,7 @@ procs = [
   PythonProcess("torqued", "selfdrive.locationd.torqued", only_onroad),
   PythonProcess("controlsd", "selfdrive.controls.controlsd", only_onroad),
   PythonProcess("deleter", "selfdrive.loggerd.deleter", always_run),
-  PythonProcess("dmonitoringd", "selfdrive.legacy_monitoring.dmonitoringd", driverview, enabled=(not PC or WEBCAM)),
+  PythonProcess("dmonitoringd", "selfdrive.legacy_monitoring.dmonitoringd", driverview, enabled=(not PC or WEBCAM) and not NO_IR_CTRL),
   # PythonProcess("laikad", "selfdrive.locationd.laikad"),
   # PythonProcess("rawgpsd", "system.sensord.rawgps.rawgpsd", enabled=TICI, onroad=False, callback=qcomgps),
   # PythonProcess("navd", "selfdrive.navd.navd"),
@@ -96,12 +96,12 @@ procs = [
   PythonProcess("androidd", "system.hardware.eon.androidd", always_run, enabled=EON),
 
   # mapd
-  PythonProcess("mapd", "selfdrive.mapd.mapd"),
+  PythonProcess("mapd", "selfdrive.mapd.mapd", only_onroad),
   # gpxd
   # PythonProcess("gpxd", "selfdrive.dragonpilot.gpxd"),
   # PythonProcess("gpx_uploader", "selfdrive.dragonpilot.gpx_uploader", offroad=True),
-  NativeProcess("otisserv", "selfdrive/dragonpilot", ['./otisserv'], onroad=False, offroad=True),
-  NativeProcess("fileserv", "selfdrive/dragonpilot", ['./fileserv'], onroad=False, offroad=True),
+  NativeProcess("otisserv", "selfdrive/dragonpilot", ['./otisserv'], only_offroad),
+  NativeProcess("fileserv", "selfdrive/dragonpilot", ['./fileserv'], only_offroad),
 ]
 
 managed_processes = {p.name: p for p in procs}
