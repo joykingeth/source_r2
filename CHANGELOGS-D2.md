@@ -1,3 +1,8 @@
+2024-02-27
+========================
+* Fixed door lock/unlock for Toyotas.
+* otisserv and fileserv only for offroad.
+
 2024-02-26
 ========================
 * applied transform patch. (https://github.com/commaai/openpilot/pull/31495)
