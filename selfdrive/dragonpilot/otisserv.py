@@ -15,9 +15,8 @@
 # Year: 2023
 # -----------------------------------------------------------------------------
 
-from openpilot.common.realtime import Ratekeeper, set_core_affinity, set_realtime_priority
-from openpilot.common.params import Params
-from openpilot.common.basedir import PERSIST, BASEDIR
+import time
+from openpilot.common.basedir import BASEDIR
 from datetime import datetime, timedelta
 import jwt
 import json
@@ -29,9 +28,16 @@ from urllib import request, parse, error
 import cereal.messaging as messaging
 import threading
 import io
+# import time
+if not PC:
+  from openpilot.common.realtime import Ratekeeper, set_core_affinity
+  from openpilot.common.params import Params
 
 import subprocess
 from typing import List, Optional
+
+from pathlib import Path
+from openpilot.system.hardware.hw import Paths
 
 DP_HOST = "http://127.0.0.1:5000" if PC else "https://dragonpilot.org"
 OTISSERV_API_VERSION = "v1"
@@ -137,56 +143,140 @@ def unpatch_mapbox_token():
 
 class OtisApi:
   def __init__(self):
-    self._params = Params()
+    if not PC:
+      self._params = Params()
+      self._sm = messaging.SubMaster(['peripheralState'])
+
     self._serial = HARDWARE.get_serial()
     _debug(f"[otisserv] serial identified: {self._serial}")
     self._frame = 0
 
     self._allow_sync = False
     self._device_id = None
-    self._device_name_sent = False
+
     self._username = None
     self._username_prev = None
+    self._username_update_required = True
+
     self._private_key = self._get_private_key()
+
     self._is_offroad = False
     self._is_offroad_prev = False
-    self._sm = messaging.SubMaster(['gpsLocationExternal'])
+
     self._last_updated = None
     self._last_updated_prev = None
+
     self._last_event = None
     self._last_event_prev = None
-    self._is_offline = False
+
     self._language = None
     self._language_prev = None
+    self._language_update_required = False
+
+    self._device_name = None
+    self._device_name_prev = None
+    self._device_name_update_required = False
+
+    self._gps_position = None
+    self._gps_position_prev = None
+    self._gps_position_update_required = False
+
+    self._car_voltage_instant_mV = 12e3
 
     # use threads for these process
     self._snapshot_thread = None
     self._destination_thread = None
 
+  def _read_params(self):
+    _debug(f"[otisserv] _read_params() begin")
 
-  def update(self):
-    self._set_variables()
-    self._frame += 1
-
-  def _set_variables(self):
-    if self._frame % 3 != 0:
-      self._allow_sync = False
-
-    if not PC:
-      if self._frame % 3 == 0:
+    # offroad
+    if self._frame % 5 == 0:
+      if PC:
+        pass
+      else:
         self._is_offroad = self._params.get_bool("IsOffroad")
 
-    if self._frame % 3 == 0 and self._device_id is None:
-      self._register()
+    # language
+    if self._frame % 10 == 0:
+      _debug("check: self._language")
+      if PC:
+        self._language = "zh-TW"
+      else:
+        self._language = self._params.get('LanguageSetting', encoding='utf8')
+        self._language = self._language.replace('main_', '')
+        if self._language == "zh-CHT":
+          self._language = "zh-TW"
+        elif self._language == "zh-CHS":
+          self._language = "zh-CN"
+      self._language_update_required = not self._language_update_required and self._language != self._language_prev
+      self._language_prev = self._language
 
-    if self._frame % 3 == 0 and self._username is None:
-      self._set_username()
+    # device / car name
+    if self._frame % 10 == 0 and self._device_name is None:
+      _debug("check: self._device_name")
+      if PC:
+        self._device_name = "MOCK"
+      try:
+        cp = car.CarParams.from_bytes(self._params.get("CarParamsPersistent"))
+        self._device_name = cp.carFingerprint
+      except Exception:
+        self._device_name = None
+      self._device_name_update_required = not self._device_name_update_required and self._device_name != self._device_name_prev
+      self._device_name_prev = self._device_name
 
-    if self._frame % 3 == 0 and self._language is None:
-      self._set_language()
+    # github username
+    if self._frame % 10 == 0:
+      _debug("check: self._username")
+      if PC:
+        self._username = "efinilan"
+      try:
+        self._username = self._params.get("GithubUsername", encoding='utf-8')
+        if self._username == "openpilot":
+          self._username = None
+      except Exception:
+        self._username = None
+      self._username_update_required = self._username != self._username_prev
+      self._username_prev = self._username
 
-    if self._frame % 3 == 0 and self._device_id is not None and self._username is not None:
-      self._allow_sync = True
+    # position
+    if self._frame % 30 == 0:
+      _debug("check: self._gps_position")
+      if PC:
+        self._gps_position = {"latitude": "25.2985131", "longitude": "121.4954853"}
+      try:
+        last_gps = json.loads(self._params.get('LastGPSPosition', encoding='utf8'))
+        self._gps_position = last_gps
+      except Exception:
+        self._gps_position = None
+      self._gps_position_update_required = not self._gps_position_update_required and self._gps_position != self._gps_position_prev
+      self._gps_position_prev = self._gps_position
+
+    # voltage
+    if self._frame % 10 == 0:
+      _debug("check: self._car_voltage_instant_mV")
+      if PC:
+        pass
+      else:
+        self._sm.update()
+        if self._sm.updated["peripheralState"]:
+          self._car_voltage_instant_mV = self._sm["peripheralState"].voltage
+
+    _debug(f"[otisserv] _read_params() end")
+
+  def update(self):
+    _debug(f"frame: {self._frame}")
+    if self._frame % 5 == 0:
+      if self._device_id is None:
+        self._register()
+
+    if self._frame >= 10:
+      self._allow_sync = False
+      self._read_params()
+      if self._frame % 5 == 0 and self._device_id is not None:
+        self._allow_sync = True
+
+    self._frame += 1
 
   def _get_mapbox_token(self):
     if os.path.isfile(f"/data/media/0/{MAPBOX_TOKEN_PARAM}"):
@@ -194,61 +284,31 @@ class OtisApi:
         return f.read().strip()
 
   def _set_device_id(self):
-    with open(f"{PERSIST}/{DP_DEVICE_ID}") as f:
+    with open(Path(Paths.persist_root()+f"/{DP_DEVICE_ID}")) as f:
       self._device_id = f.read()
     _debug(f"[otisserv] device_id identified: {self._device_id}")
 
   def _has_device_id(self):
-    return os.path.isfile(f"{PERSIST}/{DP_DEVICE_ID}")
-
-  def _set_language(self):
-    self._language = self._params.get('LanguageSetting', encoding='utf8')
-    self._language = self._language.replace('main_', '')
-    if self._language == "zh-CHT":
-      self._language = "zh-TW"
-    elif self._language == "zh-CHS":
-      self._language = "zh-CN"
-
-  def _get_device_name(self):
-    if PC:
-      return "MOCK"
-    try:
-      cp = car.CarParams.from_bytes(self._params.get("CarParamsPersistent"))
-      device_name = cp.carFingerprint
-    except Exception:
-      device_name = None
-
-    return device_name
+    return os.path.isfile(Path(Paths.persist_root()+f"/{DP_DEVICE_ID}"))
 
   def _get_public_key(self):
-    if os.path.isfile(f"{PERSIST}/comma/id_rsa.pub"):
-      with open(f"{PERSIST}/comma/id_rsa.pub") as f:
+    if os.path.isfile(Path(Paths.persist_root()+f"/comma/id_rsa.pub")):
+      with open(Path(Paths.persist_root()+f"/comma/id_rsa.pub")) as f:
         return f.read()
     return ""
 
   def _get_private_key(self):
-    if os.path.isfile(f"{PERSIST}/comma/id_rsa"):
-      with open(f"{PERSIST}/comma/id_rsa") as f:
+    if os.path.isfile(Path(Paths.persist_root()+f"/comma/id_rsa")):
+      with open(Path(Paths.persist_root()+f"/comma/id_rsa")) as f:
         return f.read()
     return None
 
-  def _set_username(self):
-    try:
-      if PC:
-        self._username = "efinilan"
-        return
-      self._username = self._params.get("GithubUsername", encoding='utf-8')
-      if self._username == "openpilot":
-        self._username = None
-    except Exception:
-      self._username = None
-
   def _write_device_id(self, device_id):
     if TICI:
-      os.system(f"sudo su -c 'sudo mount -o rw,remount /persist'")
-    os.system(f'printf "%s" {device_id} > {PERSIST}/{DP_DEVICE_ID}')
+      os.system(f"sudo su -c 'sudo mount -o rw,remount " + Path(Paths.persist_root()) + "'")
+    os.system(f'printf "%s" {device_id} > ' + Path(Paths.persist_root()+f"/{DP_DEVICE_ID}"))
     if TICI:
-      os.system(f"sudo su -c 'sudo mount -o ro,remount /persist'")
+      os.system(f"sudo su -c 'sudo mount -o ro,remount " + Path(Paths.persist_root()) + "'")
 
   def _get_register_token(self):
     return jwt.encode({'register': True, 'exp': datetime.utcnow() + timedelta(hours=1)}, self._private_key, algorithm='RS256')
@@ -265,13 +325,6 @@ class OtisApi:
       token = token.decode('utf8')
 
     return token
-
-  def _device_get_onroad_position(self):
-    self._sm.update(0)
-    if self._sm.updated['gpsLocationExternal']:
-      gps = self._sm['gpsLocationExternal']
-      return gps.latitude, gps.longitude
-    return None, None
 
   def _register(self):
     if self._has_device_id():
@@ -363,51 +416,46 @@ class OtisApi:
       resp = request.urlopen(req, timeout=timeout)
       response = resp.read().decode('utf-8')
       json_object = json.loads('{}') if response == '' else json.loads(response)
-      self._is_offline = False
       return resp.status, json_object
     except error.HTTPError as e:
       if e.code == 500:
         self._allow_sync = False
-        self._is_offline = True
       # _debug(f"[otisserv] error.HTTPError: {e.code}: {e.reason}")
       return e.code, json.loads('{ "message": "error.HTTPError" }')
-    except Exception as e:
+    except Exception:
       # OSError: [Errno 101] Network is unreachable
       # urllib.error.URLError: <urlopen error [Errno 101] Network is unreachable>
       # socket.gaierror: [Errno 7] No address associated with hostname
       self._allow_sync = False
-      self._is_offline = True
       return 500, json.loads('{ "message": "Exception" }')
 
   def _get_status_params(self):
     token_payloads = {}
 
+    if not PC:
+      token_payloads["car_voltage"] = round(self._car_voltage_instant_mV / 1e3, 2)
+
     # only update position when onroad
     # gpsLocationExternal is gone when offroad
-    if not self._is_offroad:
-      latitude, longitude = self._device_get_onroad_position()
-      if latitude and longitude:
-        token_payloads["latitude"] = latitude
-        token_payloads["longitude"] = longitude
-
-    # update offroad/onroad status
-    token_payloads["is_offroad"] = self._is_offroad
+    if self._gps_position_update_required:
+      token_payloads["gps_position"] = self._gps_position
+      self._gps_position_update_required = False
 
     # only update username when there is a change
-    if self._username != self._username_prev:
+    if self._username_update_required:
       token_payloads["username"] = self._username
-    self._username_prev = self._username
+      self._username_update_required = False
 
-    if self._language != self._language_prev:
+    if self._language_update_required:
       token_payloads["language"] = self._language
-    self._language_prev = self._language
+      self._language_update_required = False
 
     # only update name + device_type + origin if it's not been sent once
-    if not self._device_name_sent and (device_name := self._get_device_name()) is not None:
-      token_payloads["name"] = device_name
+    if self._device_name_update_required:
+      token_payloads["name"] = self._device_name
       token_payloads["device_type"] = HARDWARE.get_device_type()
       token_payloads["origin"] = get_origin()
-      self._device_name_sent = True
+      self._device_name_update_required = False
 
     params = {
       "dt": self._get_access_token(token_payloads),
@@ -428,7 +476,12 @@ class OtisApi:
       _debug(f"[otisserv] _process_destination_non_blocking() begin")
       code, json_obj = self._send_request(main_id=self._device_id, sub_route="destinations")
       if code < 300 and len(json_obj):
+        _debug(json_obj)
+        if "history" in json_obj[0]:
+          self._params.put("NavPastDestinations", json.dumps(json_obj[0]["history"]))
+          json_obj[0].pop("history")
         self._params.put("NavDestination", json.dumps(json_obj[0]))
+
       _debug(f"[otisserv] _process_destination_non_blocking() result: {code}")
 
     # Ignore if we have a query thread already running.
@@ -439,38 +492,42 @@ class OtisApi:
     self._destination_thread.start()
 
   def sync(self):
-    if not self._allow_sync:
-      return
-    _debug(f"[otisserv] sync() begin")
-    code, json_obj = self._send_request(self._get_status_params(), main_id=self._device_id, method='PATCH')
-    if code < 300 and len(json_obj):
-      if 'last_updated' in json_obj:
-        self._last_updated = json_obj.get("last_updated")
-      if 'last_event' in json_obj:
-        self._last_event = json_obj.get("last_event")
-
-    if self._last_updated_prev is None or self._last_updated != self._last_updated_prev:
-      code, json_obj = self._send_request(main_id=self._device_id)
+    if self._allow_sync:
+      _debug(f"[otisserv] sync() begin")
+      code, json_obj = self._send_request(self._get_status_params(), main_id=self._device_id, method='PATCH')
       if code < 300 and len(json_obj):
-        self._process_updates(json_obj)
-    self._last_updated_prev = self._last_updated
+        if 'last_updated' in json_obj:
+          self._last_updated = json_obj.get("last_updated")
+        if 'last_event' in json_obj:
+          self._last_event = json_obj.get("last_event")
 
-    if self._last_event_prev is None or self._last_event != self._last_event_prev:
-      self._process_destination_non_blocking()
-      self._process_snapshots_non_blocking()
-    self._last_event_prev = self._last_event
+      if self._last_updated_prev is None or self._last_updated != self._last_updated_prev:
+        code, json_obj = self._send_request(main_id=self._device_id)
+        if code < 300 and len(json_obj):
+          self._process_updates(json_obj)
+      self._last_updated_prev = self._last_updated
 
-    _debug(f"[otisserv] sync() end: {code}")
+      if self._last_event_prev is None or self._last_event != self._last_event_prev:
+        self._process_destination_non_blocking()
+        self._process_snapshots_non_blocking()
+
+      self._last_event_prev = self._last_event
+
+      _debug(f"[otisserv] sync() end: {code}")
 
 def otisserv_thread():
-  set_core_affinity([1,])
-  set_realtime_priority(1)
+  if not PC:
+    set_core_affinity([1,])
+    rk = Ratekeeper(1., print_delay_threshold=None)  # Keeps rate at 1Hz
   otis = OtisApi()
-  rk = Ratekeeper(1., print_delay_threshold=None)  # Keeps rate at 1Hz
   while True:
     otis.update()
     otis.sync()
-    rk.keep_time()
+    if PC:
+      time.sleep(1000)
+    else:
+      rk.keep_time()
+    # time.sleep(1.)
 
 def main():
   if TICI:

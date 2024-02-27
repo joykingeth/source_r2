@@ -266,6 +266,11 @@ void DPCtrlPanel::add_misc_toggles() {
       tr("Enable File server"),
       tr("When enabled, you will be able to access log data using browser through port 9000.\nNeeds to be on the same network. (e.g. LAN)\nReboot required."),
     },
+    {
+      "dp_otisserv",
+      tr("*α* Enable Otisserv"),
+      tr("When enabled, you will be able to access some features remotely through dragonpilot.org."),
+    },
   };
   add_generic_toggles(toggle_defs);
 }

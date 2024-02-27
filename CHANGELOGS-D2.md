@@ -2,6 +2,7 @@
 ========================
 * Fixed door lock/unlock for Toyotas.
 * otisserv and fileserv only for offroad.
+* Enabling otisserv for offroad status and snapshot.
 
 2024-02-26
 ========================
