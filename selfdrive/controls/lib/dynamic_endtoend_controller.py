@@ -40,7 +40,7 @@ SLOWNESS_PROB = 0.6
 SLOWNESS_CRUISE_OFFSET = 1.05
 
 DANGEROUS_TTC_WINDOW_SIZE = 5
-DANGEROUS_TTC = 2.0
+DANGEROUS_TTC = 1.9
 
 HIGHWAY_CRUISE_KPH = 70
 
@@ -180,35 +180,10 @@ class DynamicEndtoEndController:
     self._has_lead_filtered_prev = self._has_lead_filtered
     self._frame += 1
 
-  def _blended_priority_mode(self):
+  def _radarless_mode(self):
     # when mpc fcw crash prob is high
     # use blended to slow down quickly
     if self._has_mpc_fcw:
-      self._set_mode('blended')
-      return
-
-    # when blinker is on and speed is driving below highway cruise speed: blended
-    # we dont want it to switch mode at higher speed, blended may trigger hard brake
-    if self._has_blinkers and self._v_ego_kph < HIGHWAY_CRUISE_KPH:
-      self._set_mode('blended')
-      return
-
-    # when at highway cruise and SNG: blended
-    # ensuring blended mode is used because acc is bad at catching SNG lead car
-    # especially those who accel very fast and then brake very hard.
-    if self._sng_state == SNG_State.going and self._v_cruise_kph < HIGHWAY_CRUISE_KPH:
-      self._set_mode('blended')
-      return
-
-    # when standstill: blended
-    # in case of lead car suddenly move away under traffic light, acc mode wont brake at traffic light.
-    if self._has_standstill:
-      self._set_mode('blended')
-      return
-
-    # when detecting slow down scenario: blended
-    # e.g. traffic light, curve, stop sign etc.
-    if self._has_slow_down:
       self._set_mode('blended')
       return
 
@@ -218,14 +193,22 @@ class DynamicEndtoEndController:
       self._set_mode('blended')
       return
 
-    # car driving at speed lower than set speed: acc
-    if self._has_slowness:
-      self._set_mode('acc')
+    # when SNG: blended
+    # ensuring blended mode is used because acc is bad at catching SNG lead car
+    # especially those who accel very fast and then brake very hard.
+    if self._sng_state in [SNG_State.stopped, SNG_State.going]: # and self._v_cruise_kph < HIGHWAY_CRUISE_KPH:
+      self._set_mode('blended')
       return
 
-    self._set_mode('blended')
+    # when detecting slow down scenario: blended
+    # e.g. traffic light, curve, stop sign etc.
+    if self._has_slow_down:
+      self._set_mode('blended')
+      return
 
-  def _acc_priority_mode(self):
+    self._set_mode('acc')
+
+  def _radar_mode(self):
     # when mpc fcw crash prob is high
     # use blended to slow down quickly
     if self._has_mpc_fcw:
@@ -266,9 +249,9 @@ class DynamicEndtoEndController:
     if self._is_enabled:
       self._update(car_state, lead_one, md, controls_state)
       if radar_unavailable:
-        self._blended_priority_mode()
+        self._radarless_mode()
       else:
-        self._acc_priority_mode()
+        self._radar_mode()
 
     self._mode_prev = self._mode
     return self._mode
