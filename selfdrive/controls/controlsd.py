@@ -72,7 +72,7 @@ class Controls:
     self.dp_gps_ok_once = False
 
     # Ensure the current branch is cached, otherwise the first iteration of controlsd lags
-    self.branch = get_short_branch("")
+    self.branch = get_short_branch()
 
     # Setup sockets
     self.pm = pm
