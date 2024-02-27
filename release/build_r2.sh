@@ -45,6 +45,9 @@ cd $BUILD_DIR
 rm -fr body
 rm -fr selfdrive/body
 
+# clean caches
+rm -fr /tmp/scons*
+
 rm -f panda/board/obj/*
 
 VERSION=$(date '+%Y.%m.%d')
