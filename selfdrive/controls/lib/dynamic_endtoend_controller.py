@@ -21,26 +21,26 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 #
-# Version = 2024-02-26
+# Version = 2024-02-28
 from common.numpy_fast import interp
 
 # d-e2e, from modeldata.h
 TRAJECTORY_SIZE = 33
 
 LEAD_WINDOW_SIZE = 3
-LEAD_PROB = 0.6
+LEAD_PROB = 0.5
 
-SLOW_DOWN_WINDOW_SIZE = 5
-SLOW_DOWN_PROB = 0.6
+SLOW_DOWN_WINDOW_SIZE = 3
+SLOW_DOWN_PROB = 0.5
 SLOW_DOWN_BP = [0., 10., 20., 30., 40., 50., 55.]
 SLOW_DOWN_DIST = [10, 30., 50., 70., 80., 90., 120.]
 
-SLOWNESS_WINDOW_SIZE = 20
-SLOWNESS_PROB = 0.6
+SLOWNESS_WINDOW_SIZE = 10
+SLOWNESS_PROB = 0.5
 SLOWNESS_CRUISE_OFFSET = 1.05
 
-DANGEROUS_TTC_WINDOW_SIZE = 5
-DANGEROUS_TTC = 1.9
+DANGEROUS_TTC_WINDOW_SIZE = 3
+DANGEROUS_TTC = 2.0
 
 HIGHWAY_CRUISE_KPH = 70
 
@@ -49,7 +49,7 @@ STOP_AND_GO_FRAME = 60
 SET_MODE_TIMEOUT = 10
 
 MPC_FCW_WINDOW_SIZE = 10
-MPC_FCW_PROB = 0.6
+MPC_FCW_PROB = 0.5
 
 class SNG_State:
   off = 0
@@ -129,18 +129,18 @@ class DynamicEndtoEndController:
 
     # fcw detection
     self._mpc_fcw_gmac.add_data(self._mpc_fcw_crash_cnt > 0)
-    self._has_mpc_fcw = self._mpc_fcw_gmac.get_moving_average() >= MPC_FCW_PROB
+    self._has_mpc_fcw = self._mpc_fcw_gmac.get_moving_average() > MPC_FCW_PROB
 
     # nav enable detection
     self._has_nav_enabled = md.navEnabled
 
     # lead detection
     self._lead_gmac.add_data(lead_one.status)
-    self._has_lead_filtered = self._lead_gmac.get_moving_average() >= LEAD_PROB
+    self._has_lead_filtered = self._lead_gmac.get_moving_average() > LEAD_PROB
 
     # slow down detection
     self._slow_down_gmac.add_data(len(md.orientation.x) == len(md.position.x) == TRAJECTORY_SIZE and md.position.x[TRAJECTORY_SIZE - 1] < interp(self._v_ego_kph, SLOW_DOWN_BP, SLOW_DOWN_DIST))
-    self._has_slow_down = self._slow_down_gmac.get_moving_average() >= SLOW_DOWN_PROB
+    self._has_slow_down = self._slow_down_gmac.get_moving_average() > SLOW_DOWN_PROB
 
     # blinker detection
     self._has_blinkers = car_state.leftBlinker or car_state.rightBlinker
@@ -162,7 +162,7 @@ class DynamicEndtoEndController:
     # slowness detection
     if not self._has_standstill:
       self._slowness_gmac.add_data(self._v_ego_kph <= (self._v_cruise_kph*SLOWNESS_CRUISE_OFFSET))
-      self._has_slowness = self._slowness_gmac.get_moving_average() >= SLOWNESS_PROB
+      self._has_slowness = self._slowness_gmac.get_moving_average() > SLOWNESS_PROB
 
     # dangerous TTC detection
     if not self._has_lead_filtered and self._has_lead_filtered_prev:
@@ -187,16 +187,22 @@ class DynamicEndtoEndController:
       self._set_mode('blended')
       return
 
-    # when detecting lead slow down: blended
-    # use blended for higher braking capability
-    if self._has_dangerous_ttc:
+    # # when blinker is on and speed is driving below highway cruise speed: blended
+    # # we dont want it to switch mode at higher speed, blended may trigger hard brake
+    # if self._has_blinkers and self._v_ego_kph < HIGHWAY_CRUISE_KPH:
+    #   self._set_mode('blended')
+    #   return
+
+    # when at highway cruise and SNG: blended
+    # ensuring blended mode is used because acc is bad at catching SNG lead car
+    # especially those who accel very fast and then brake very hard.
+    if self._sng_state == SNG_State.going and self._v_cruise_kph >= HIGHWAY_CRUISE_KPH:
       self._set_mode('blended')
       return
 
-    # when SNG: blended
-    # ensuring blended mode is used because acc is bad at catching SNG lead car
-    # especially those who accel very fast and then brake very hard.
-    if self._sng_state in [SNG_State.stopped, SNG_State.going]: # and self._v_cruise_kph < HIGHWAY_CRUISE_KPH:
+    # when standstill: blended
+    # in case of lead car suddenly move away under traffic light, acc mode wont brake at traffic light.
+    if self._has_standstill:
       self._set_mode('blended')
       return
 
@@ -206,7 +212,18 @@ class DynamicEndtoEndController:
       self._set_mode('blended')
       return
 
-    self._set_mode('acc')
+    # when detecting lead slow down: blended
+    # use blended for higher braking capability
+    if self._has_dangerous_ttc:
+      self._set_mode('blended')
+      return
+
+    # car driving at speed lower than set speed: acc
+    if self._has_slowness:
+      self._set_mode('acc')
+      return
+
+    self._set_mode('blended')
 
   def _radar_mode(self):
     # when mpc fcw crash prob is high
