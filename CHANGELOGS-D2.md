@@ -4,6 +4,7 @@
 * Added Disable Auto Updates toggle
 * Reverted panda back to last working version for honda with minimal changes from op master. (breaks red panda support for now)
 * Added EON Installer (https://raw.githubusercontent.com/dragonpilot-community/dragonpilot/d2/scripts/eon_installer.sh)
+* Conditionally include red panda firmware.
 
 2024-02-27
 ========================

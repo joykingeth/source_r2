@@ -138,13 +138,24 @@ rm -fr third_party/snpe/x86*
 rm -fr third_party/snpe/dsp/libsnpe_dsp_v68_domains_v3_skel.so
 find . -name '*.c' -delete
 find . -name '*.cpp' -delete
-cp $SOURCE_DIR/panda/board/obj/bootstub.panda_h7.bin $BUILD_DIR/panda/board/obj/
-cp $SOURCE_DIR/panda/board/obj/panda_h7.bin.signed $BUILD_DIR/panda/board/obj/
+
+# copy red panda firmware only when exists
+PANDA_DEST="$BUILD_DIR/panda/board/obj/"
+BOOTSTUB_H7="$SOURCE_DIR/panda/board/obj/bootstub.panda_h7.bin"
+PANDA_H7="$SOURCE_DIR/panda/board/obj/panda_h7.bin.signed"
+if [ -f "$BOOTSTUB_H7" ]; then
+  cp "$BOOTSTUB_H7" "$PANDA_DEST"
+fi
+
+if [ -f "$PANDA_H7" ]; then
+  cp "$PANDA_H7" "$PANDA_DEST"
+fi
 
 # make sure src is deleted
 rm selfdrive/dragonpilot/otisserv.py
 rm selfdrive/dragonpilot/fileserv.py
 
+# since we can't run the latest modeld, delete it
 rm -fr selfdrive/modeld/
 
 # Mark as prebuilt release
