@@ -1,6 +1,7 @@
 2024-02-29
 ========================
 * Added Lead Vehicle Warning
+* Added Disable Auto Updates toggle
 
 2024-02-27
 ========================

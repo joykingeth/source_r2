@@ -211,6 +211,11 @@ void DPCtrlPanel::add_device_toggles() {
       tr("When enabled, openpilot will disable IR completely.\nReboot required."),
     },
     {
+      "DisableUpdates",
+      tr("Disable Auto Updates"),
+      tr("When enabled, openpilot will stop auto updating.\nReboot required."),
+    },
+    {
       "dp_device_auto_shutdown",
       tr("Enable Auto Shutdown"),
       tr("When enabled, openpilot will shutdown the device automatically.\nReboot required."),
