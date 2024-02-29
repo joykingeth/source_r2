@@ -6,6 +6,7 @@
 * Added EON Installer (https://raw.githubusercontent.com/dragonpilot-community/dragonpilot/d2/scripts/eon_installer.sh)
 * Conditionally include red panda firmware.
 * Enabled branch selector.
+* Reverted transform patch.
 
 2024-02-27
 ========================
