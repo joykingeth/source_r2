@@ -49,13 +49,12 @@ SoftwarePanel::SoftwarePanel(QWidget* parent) : ListWidget(parent) {
   });
   addItem(installBtn);
 
-  #ifndef QCOM
   // branch selecting
   targetBranchBtn = new ButtonControl(tr("Target Branch"), tr("SELECT"));
   connect(targetBranchBtn, &ButtonControl::clicked, [=]() {
     auto current = params.get("GitBranch");
     QStringList branches = QString::fromStdString(params.get("UpdaterAvailableBranches")).split(",");
-    for (QString b : {current.c_str(), "devel-staging", "devel", "nightly", "master-ci", "master"}) {
+    for (QString b : {current.c_str(), "r2", "d2", "deprecated-beta2", "deprecated-release2_e2e", "deprecated-release2"}) {
       auto i = branches.indexOf(b);
       if (i >= 0) {
         branches.removeAt(i);
@@ -74,7 +73,6 @@ SoftwarePanel::SoftwarePanel(QWidget* parent) : ListWidget(parent) {
   if (!params.getBool("IsTestedBranch")) {
     addItem(targetBranchBtn);
   }
-  #endif
 
   // uninstall button
   auto uninstallBtn = new ButtonControl(tr("Uninstall %1").arg(getBrand()), tr("UNINSTALL"));
