@@ -51,6 +51,8 @@ SET_MODE_TIMEOUT = 10
 MPC_FCW_WINDOW_SIZE = 10
 MPC_FCW_PROB = 0.5
 
+V_ACC_MIN = 9.72
+
 class SNG_State:
   off = 0
   stopped = 1
@@ -187,11 +189,11 @@ class DynamicEndtoEndController:
       self._set_mode('blended')
       return
 
-    # # when blinker is on and speed is driving below highway cruise speed: blended
-    # # we dont want it to switch mode at higher speed, blended may trigger hard brake
-    # if self._has_blinkers and self._v_ego_kph < HIGHWAY_CRUISE_KPH:
-    #   self._set_mode('blended')
-    #   return
+    # when blinker is on and speed is driving below V_ACC_MIN: blended
+    # we dont want it to switch mode at higher speed, blended may trigger hard brake
+    if self._has_blinkers and self._v_ego_kph < V_ACC_MIN:
+      self._set_mode('blended')
+      return
 
     # when at highway cruise and SNG: blended
     # ensuring blended mode is used because acc is bad at catching SNG lead car
