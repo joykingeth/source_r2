@@ -225,7 +225,7 @@ class DynamicEndtoEndController:
       self._set_mode('acc')
       return
 
-    self._set_mode('blended')
+    self._set_mode('acc')
 
   def _radar_mode(self):
     # when mpc fcw crash prob is high
