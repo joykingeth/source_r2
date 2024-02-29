@@ -1,3 +1,7 @@
+2024-02-29
+========================
+* Added Lead Vehicle Warning
+
 2024-02-27
 ========================
 * Fixed door lock/unlock for Toyotas.

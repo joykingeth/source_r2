@@ -152,7 +152,12 @@ void DPCtrlPanel::add_longitudinal_toggles() {
       tr("On-Screen Accel Button"),
       tr("When enabled, openpilot will display an on-screen accel profile button."),
     },
-  };
+    {
+      "dp_long_missing_lead_warning",
+      tr("*α* Lead Vehicle Warning"),
+      tr("When enabled, openpilot will warn driver when a lead vehicle gone missing over 2 secs while driving above 70 km/h."),
+    },
+   };
   std::vector<QString> dp_long_accel_profile_texts{tr("OP"), tr("ECO"), tr("NOR"), tr("SPT")};
   ButtonParamControl* dp_long_accel_profile_setting = new ButtonParamControl("dp_long_accel_profile", tr("Acceleration Profile"),
                                           tr("OP - Stock tune.\nECO - Eco tune.\nNOR - Normal tune.\nSPT - Sport tune."),

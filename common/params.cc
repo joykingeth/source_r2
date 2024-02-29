@@ -251,6 +251,7 @@ std::unordered_map<std::string, uint32_t> keys = {
     {"dp_lat_lane_change_assist_speed", PERSISTENT},
     {"dp_device_display_flight_panel", PERSISTENT},
     {"dp_ui_rainbow", PERSISTENT},
+    {"dp_long_missing_lead_warning", PERSISTENT},
 };
 
 } // namespace
