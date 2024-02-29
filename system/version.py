@@ -57,7 +57,8 @@ def get_origin() -> str:
     return run_cmd(["git", "config", "remote." + tracking_remote + ".url"])
   except subprocess.CalledProcessError:  # Not on a branch, fallback
     return run_cmd_default(["git", "config", "--get", "remote.origin.url"])
-
+  except TypeError:
+    return ""
 
 @cache
 def get_normalized_origin() -> str:
