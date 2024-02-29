@@ -2,6 +2,7 @@
 ========================
 * Added Lead Vehicle Warning
 * Added Disable Auto Updates toggle
+* Toyota: match stock standstill entrance behavior (https://github.com/commaai/openpilot/pull/31325)
 
 2024-02-27
 ========================

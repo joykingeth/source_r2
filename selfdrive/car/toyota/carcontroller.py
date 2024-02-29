@@ -1,5 +1,6 @@
 from cereal import car
 from openpilot.common.numpy_fast import clip, interp
+from openpilot.common.realtime import DT_CTRL
 from openpilot.selfdrive.car import apply_meas_steer_torque_limits, apply_std_steer_angle_limits, common_fault_avoidance, \
                           create_gas_interceptor_command, make_can_msg
 from openpilot.selfdrive.car.toyota import toyotacan
@@ -26,6 +27,9 @@ MAX_USER_TORQUE = 500
 # EPS ignores commands above this angle and causes PCS to fault
 MAX_LTA_ANGLE = 94.9461  # deg
 MAX_LTA_DRIVER_TORQUE_ALLOWANCE = 150  # slightly above steering pressed allows some resistance when changing lanes
+
+# Time values for hysteresis
+RESUME_HYSTERESIS_TIME = 3.  # seconds
 
 # PCM compensatory force calculation threshold
 # a variation in accel command is more pronounced at higher speeds, let compensatory forces ramp to zero before
@@ -71,6 +75,9 @@ class CarController:
     self.packer = CANPacker(dbc_name)
     self.gas = 0
     self.accel = 0
+
+    self.standstill_req = False
+    self.resume_off_frames = 0.
 
     self.dp_toyota_auto_lock_gear_prev = GearShifter.park
     self.dp_toyota_auto_lock_once = False
@@ -248,16 +255,23 @@ class CarController:
     if not CC.enabled and CS.pcm_acc_status:
       pcm_cancel_cmd = 1
 
-    # on entering standstill, send standstill request
-    if CS.out.standstill and not self.last_standstill and (self.CP.carFingerprint not in NO_STOP_TIMER_CAR or self.CP.enableGasInterceptor):
-      self.standstill_req = True
-    if CS.pcm_acc_status != 8:
-      # pcm entered standstill or it's disabled
+    # *** standstill entrance logic ***
+    # mimic stock behaviour, set standstill_req to False only when openpilot wants to resume
+    if not CC.cruiseControl.resume:
+      self.resume_off_frames += 1  # frame counter for hysteresis
+      # add a 3 second hysteresis to when CC.cruiseControl.resume turns off in order to prevent
+      # vehicle's dash from blinking
+      if self.resume_off_frames >= RESUME_HYSTERESIS_TIME / DT_CTRL:
+        self.standstill_req = True
+    else:
+      self.resume_off_frames = 0
       self.standstill_req = False
+    # rick: when sng toggle is on, we do not set standstill_req to true anymore
     if self.dp_toyota_sng:
       self.standstill_req = False
 
-    self.last_standstill = CS.out.standstill
+    # ignore standstill on NO_STOP_TIMER_CAR, and never ignore if self.CP.enableGasInterceptor
+    standstill = self.standstill_req and (self.CP.carFingerprint not in NO_STOP_TIMER_CAR or self.CP.enableGasInterceptor)
 
     # handle UI messages
     fcw_alert = hud_control.visualAlert == VisualAlert.fcw
@@ -277,7 +291,7 @@ class CarController:
                                                         self.standstill_req, lead, CS.acc_type, fcw_alert))
         self.accel = pcm_accel_cmd
       else:
-        can_sends.append(toyotacan.create_accel_command(self.packer, 0, 0, pcm_cancel_cmd, False, lead, CS.acc_type, False))
+        can_sends.append(toyotacan.create_accel_command(self.packer, 0, 0, pcm_cancel_cmd, standstill, lead, CS.acc_type, False))
 
     if self.frame % 2 == 0 and self.CP.enableGasInterceptor and self.CP.openpilotLongitudinalControl:
       # send exactly zero if gas cmd is zero. Interceptor will send the max between read value and gas cmd.
