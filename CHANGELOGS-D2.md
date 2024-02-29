@@ -3,6 +3,7 @@
 * Added Lead Vehicle Warning
 * Added Disable Auto Updates toggle
 * Toyota: match stock standstill entrance behavior (https://github.com/commaai/openpilot/pull/31325)
+* Reverted panda back to last working version for honda with minimal changes from op master. (breaks red panda support for now)
 
 2024-02-27
 ========================
