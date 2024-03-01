@@ -51,14 +51,16 @@ def get_branch() -> str:
 
 @cache
 def get_origin() -> str:
+  origin = ""
   try:
     local_branch = run_cmd(["git", "name-rev", "--name-only", "HEAD"])
     tracking_remote = run_cmd(["git", "config", "branch." + local_branch + ".remote"])
-    return run_cmd(["git", "config", "remote." + tracking_remote + ".url"])
+    origin = run_cmd(["git", "config", "remote." + tracking_remote + ".url"])
   except subprocess.CalledProcessError:  # Not on a branch, fallback
-    return run_cmd_default(["git", "config", "--get", "remote.origin.url"])
+    origin = run_cmd_default(["git", "config", "--get", "remote.origin.url"])
   except TypeError:
-    return ""
+    pass
+  return "" if origin is None else origin
 
 @cache
 def get_normalized_origin() -> str:
