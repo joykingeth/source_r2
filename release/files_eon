@@ -29,6 +29,7 @@ selfdrive/camerad/**
 selfdrive/ui/translations/*.qm
 
 scripts/oneplus_update_neos.sh
+scripts/eon_installer.sh
 
 
 selfdrive/hybrid_modeld/**
