@@ -161,6 +161,9 @@ rm -fr selfdrive/modeld/
 # Mark as prebuilt release
 touch prebuilt
 
+# Mark as d2
+touch d2
+
 # include source commit hash and build date in commit
 GIT_HASH=$(git --git-dir=$SOURCE_DIR/.git rev-parse HEAD)
 DATETIME=$(date '+%Y-%m-%dT%H:%M:%S')

@@ -89,7 +89,7 @@ def set_consistent_flag(consistent: bool) -> None:
 
 def parse_release_notes(basedir: str) -> bytes:
   try:
-    version_type = "R2" if os.path.isfile(os.path.join(basedir, "prebuilt")) else "D2"
+    version_type = "D2" if os.path.isfile(os.path.join(basedir, "d2")) else "R2"
     with open(os.path.join(basedir, f"CHANGELOGS-{version_type}.md"), "rb") as f:
       r = f.read().split(b'\n\n', 1)[0]  # Slice latest release notes
     try:
